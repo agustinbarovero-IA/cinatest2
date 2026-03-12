@@ -369,7 +369,74 @@ function titleClass(title) {
 }
 
 function openModule(url) {
+  // Si es URL del sistema interno CINA, embeber en iframe
+  if (url && url.includes('sistema.cinafrio.com')) {
+    renderIframe(url);
+    return;
+  }
   window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+/* ── IFRAME EMBEBIDO ─────────────────────────────────────────
+   Carga páginas internas del sistema dentro del workspace,
+   ocultando el sidebar y el botón de toggle de AdminLTE.
+   ──────────────────────────────────────────────────────────── */
+function renderIframe(url) {
+  showMetaPanel(true);
+  setExpandedMode(false);
+
+  workspace.innerHTML = `
+    <div class="iframe-wrap">
+      <div class="iframe-toolbar">
+        <span class="iframe-url-label">🌐 sistema.cinafrio.com</span>
+        <a class="iframe-open-btn" href="${url}" target="_blank" title="Abrir en pestaña nueva">
+          ↗ Nueva pestaña
+        </a>
+      </div>
+      <iframe
+        id="cinaFrame"
+        src="${url}"
+        class="cina-iframe"
+        frameborder="0"
+      ></iframe>
+    </div>
+  `;
+
+  // Inyectar CSS en el iframe para ocultar sidebar AdminLTE
+  const frame = document.getElementById('cinaFrame');
+  if (frame) {
+    frame.addEventListener('load', () => {
+      try {
+        const doc = frame.contentDocument || frame.contentWindow.document;
+        const style = doc.createElement('style');
+        style.textContent = `
+          .main-sidebar { display: none !important; }
+          .sidebar-toggle { display: none !important; }
+          .content-wrapper { margin-left: 0 !important; }
+          .main-header .logo { display: none !important; }
+          .main-header .navbar { margin-left: 0 !important; }
+          body { overflow-y: auto !important; }
+          .main-footer { display: none !important; }
+        `;
+        doc.head.appendChild(style);
+        // También ocultar via DOM directo
+        ['aside.main-sidebar', '.sidebar-toggle', '.logo'].forEach(sel => {
+          const el = doc.querySelector(sel);
+          if (el) el.style.cssText += 'display:none!important';
+        });
+        const cw = doc.querySelector('.content-wrapper');
+        if (cw) cw.style.marginLeft = '0';
+        const nav = doc.querySelector('.navbar');
+        if (nav) nav.style.marginLeft = '0';
+      } catch(e) {
+        // Cross-origin: no se puede modificar — igualmente el iframe carga
+        console.warn('iframe cross-origin, no se pudo inyectar CSS:', e);
+      }
+    });
+  }
+
+  historyStack.push({ title: 'INICIO', children: menuTree });
+  syncBackBtn();
 }
 
 function darkenColor(hex, amount) {
