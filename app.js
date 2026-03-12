@@ -129,6 +129,7 @@ const menuTree = {
     {
       title: 'INDICADORES',
       children: [
+        { title: 'CARGAS I-2' },
         { title: 'MOVIMIENTOS' },
         { title: 'ESTADISTICAS DE PERSONAL' },
         { title: 'ALMACENAMIENTO DE POSICIONES' },
@@ -245,13 +246,13 @@ const dashboardEquipamientoData = [
   { tipo:'Autoelevador',       icono:'img/autoelevadores.png', denominacion:'AE-06', estado:'Cargando',  planta:'Otros',          horas:'02:10hs', usuario:'mbazan',     isImage:true },
   { tipo:'Autoelevador',       icono:'img/autoelevadores.png', denominacion:'AE-07', estado:'En marcha', planta:'Deposito Fiscal',horas:'00:55hs', usuario:'fvera',      isImage:true },
   { tipo:'Autoelevador',       icono:'img/autoelevadores.png', denominacion:'AE-08', estado:'Falla',     planta:'Mantenimiento',  horas:'04:25hs', usuario:'acastro',    isImage:true },
-  { tipo:'Zorra electrica',    icono:'img/apilador.png', denominacion:'ZE-01', estado:'En marcha', planta:'Nacional',       horas:'00:32hs', usuario:'jmartin' },
-  { tipo:'Zorra electrica',    icono:'img/apilador.png', denominacion:'ZE-02', estado:'Cargando',  planta:'Nacional',       horas:'01:05hs', usuario:'rsosa' },
-  { tipo:'Zorra electrica',    icono:'img/apilador.png', denominacion:'ZE-03', estado:'En marcha', planta:'Deposito Fiscal',horas:'00:11hs', usuario:'pdominguez' },
-  { tipo:'Zorra electrica',    icono:'img/apilador.png', denominacion:'ZE-04', estado:'Falla',     planta:'Mantenimiento',  horas:'05:50hs', usuario:'cmedina' },
-  { tipo:'Zorra electrica',    icono:'img/apilador.png', denominacion:'ZE-05', estado:'En marcha', planta:'Otros',          horas:'00:48hs', usuario:'sgimenez' },
-  { tipo:'Autoelevador diesel', icono:'img/autoelevadores.png', denominacion:'AD-01', estado:'En marcha', planta:'Deposito Fiscal',horas:'02:30hs', usuario:'rbenitez' },
-  { tipo:'Limpiador',           icono:'img/robotlimpieza.png', denominacion:'RL-01', estado:'Cargando',  planta:'Mantenimiento',  horas:'00:25hs', usuario:'lortiz' },
+  { tipo:'Zorra electrica',    icono:'🟦',                   denominacion:'ZE-01', estado:'En marcha', planta:'Nacional',       horas:'00:32hs', usuario:'jmartin' },
+  { tipo:'Zorra electrica',    icono:'🟦',                   denominacion:'ZE-02', estado:'Cargando',  planta:'Nacional',       horas:'01:05hs', usuario:'rsosa' },
+  { tipo:'Zorra electrica',    icono:'🟦',                   denominacion:'ZE-03', estado:'En marcha', planta:'Deposito Fiscal',horas:'00:11hs', usuario:'pdominguez' },
+  { tipo:'Zorra electrica',    icono:'🟦',                   denominacion:'ZE-04', estado:'Falla',     planta:'Mantenimiento',  horas:'05:50hs', usuario:'cmedina' },
+  { tipo:'Zorra electrica',    icono:'🟦',                   denominacion:'ZE-05', estado:'En marcha', planta:'Otros',          horas:'00:48hs', usuario:'sgimenez' },
+  { tipo:'Autoelevador diesel', icono:'⛽',                  denominacion:'AD-01', estado:'En marcha', planta:'Deposito Fiscal',horas:'02:30hs', usuario:'rbenitez' },
+  { tipo:'Limpiador',           icono:'🤖',                  denominacion:'RL-01', estado:'Cargando',  planta:'Mantenimiento',  horas:'00:25hs', usuario:'lortiz' },
   { tipo:'Camion',              icono:'🚚',                  denominacion:'CM-01', estado:'En marcha', planta:'Nacional',       horas:'06:10hs', usuario:'druiz' }
 ];
 
@@ -716,6 +717,346 @@ function renderDashboardEquipamiento() {
   syncBackBtn();
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   INDICADOR: CARGAS I-2
+   ═══════════════════════════════════════════════════════════════ */
+
+// Datos base del indicador
+const cargasI2Data = {
+  planificadas: 10,
+  cumplidas: 7,
+  pendientes: 12,
+  postergadas: 2,
+  enEjecucion: 2,
+};
+
+// Datos históricos mensuales (últimos 12 meses) — cumplidas / total
+const cargasI2Mensual = [
+  { mes: 'Abr 24', cumplidas: 42, total: 58 },
+  { mes: 'May 24', cumplidas: 55, total: 70 },
+  { mes: 'Jun 24', cumplidas: 38, total: 52 },
+  { mes: 'Jul 24', cumplidas: 61, total: 74 },
+  { mes: 'Ago 24', cumplidas: 49, total: 63 },
+  { mes: 'Sep 24', cumplidas: 53, total: 68 },
+  { mes: 'Oct 24', cumplidas: 47, total: 60 },
+  { mes: 'Nov 24', cumplidas: 66, total: 79 },
+  { mes: 'Dic 24', cumplidas: 44, total: 58 },
+  { mes: 'Ene 25', cumplidas: 58, total: 71 },
+  { mes: 'Feb 25', cumplidas: 51, total: 65 },
+  { mes: 'Mar 25', cumplidas: 7,  total: 33 },
+];
+
+function renderIndicadorCargasI2() {
+  setHeader('INDICADORES');
+  setExpandedMode(false);
+  showMetaPanel(true);
+  menuGrid.className = '';
+  menuGrid.innerHTML = '';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'indicador-wrap';
+
+  // ── CARD PRINCIPAL ──────────────────────────────────────────
+  const card = document.createElement('button');
+  card.type = 'button';
+  card.className = 'indicador-card';
+  card.title = 'Ver detalle por período';
+
+  const total = cargasI2Data.planificadas + cargasI2Data.cumplidas +
+                cargasI2Data.pendientes  + cargasI2Data.postergadas +
+                cargasI2Data.enEjecucion;
+  const pct = Math.round((cargasI2Data.cumplidas / (cargasI2Data.planificadas || 1)) * 100);
+
+  card.innerHTML = `
+    <div class="indicador-card-header">
+      <div class="indicador-card-title">
+        <span class="indicador-badge">I-2</span>
+        CARGAS
+      </div>
+      <span class="indicador-hint">Toca para ver detalle por período →</span>
+    </div>
+    <div class="indicador-card-body">
+      <canvas id="cargasPieChart" width="220" height="220"></canvas>
+      <div class="indicador-legend">
+        <div class="ind-leg-item"><span class="ind-leg-dot" style="background:#36B0C9"></span>Planificadas<strong>${cargasI2Data.planificadas}</strong></div>
+        <div class="ind-leg-item"><span class="ind-leg-dot" style="background:#00A887"></span>Cumplidas<strong>${cargasI2Data.cumplidas}</strong></div>
+        <div class="ind-leg-item"><span class="ind-leg-dot" style="background:#F97316"></span>Pendientes<strong>${cargasI2Data.pendientes}</strong></div>
+        <div class="ind-leg-item"><span class="ind-leg-dot" style="background:#DC2626"></span>Postergadas<strong>${cargasI2Data.postergadas}</strong></div>
+        <div class="ind-leg-item"><span class="ind-leg-dot" style="background:#FACC15"></span>En ejecución<strong>${cargasI2Data.enEjecucion}</strong></div>
+        <div class="ind-leg-sep"></div>
+        <div class="ind-leg-item ind-leg-pct"><span>Cumpl. / Planif.</span><strong>${pct}%</strong></div>
+      </div>
+    </div>
+  `;
+
+  card.addEventListener('click', () => openCargasI2Modal());
+  wrap.appendChild(card);
+
+  // ── TABLA MENSUAL ────────────────────────────────────────────
+  const mensualSection = document.createElement('div');
+  mensualSection.className = 'indicador-mensual';
+  mensualSection.innerHTML = `
+    <div class="indicador-mensual-title">📅 Promedio mensual — Cumplidas / Total (últimos 12 meses)</div>
+    <div class="indicador-mensual-grid">
+      ${cargasI2Mensual.map(m => {
+        const p = Math.round((m.cumplidas / m.total) * 100);
+        const color = p >= 80 ? '#00A887' : p >= 60 ? '#F97316' : '#DC2626';
+        return `
+          <div class="ind-mes-card">
+            <div class="ind-mes-label">${m.mes}</div>
+            <div class="ind-mes-pct" style="color:${color}">${p}%</div>
+            <div class="ind-mes-bar-wrap">
+              <div class="ind-mes-bar-fill" style="width:${p}%;background:${color}"></div>
+            </div>
+            <div class="ind-mes-detail">${m.cumplidas}/${m.total}</div>
+          </div>`;
+      }).join('')}
+    </div>
+  `;
+  wrap.appendChild(mensualSection);
+  menuGrid.appendChild(wrap);
+  syncBackBtn();
+
+  // Dibujar donut con canvas nativo
+  requestAnimationFrame(() => drawCargasPie());
+}
+
+function drawCargasPie() {
+  const canvas = document.getElementById('cargasPieChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2;
+  const outerR = Math.min(W, H) / 2 - 6;
+  const innerR = outerR * 0.55;
+
+  const slices = [
+    { value: cargasI2Data.planificadas, color: '#36B0C9' },
+    { value: cargasI2Data.cumplidas,    color: '#00A887' },
+    { value: cargasI2Data.pendientes,   color: '#F97316' },
+    { value: cargasI2Data.postergadas,  color: '#DC2626' },
+    { value: cargasI2Data.enEjecucion,  color: '#FACC15' },
+  ];
+  const total = slices.reduce((s, x) => s + x.value, 0);
+
+  ctx.clearRect(0, 0, W, H);
+  let startAngle = -Math.PI / 2;
+  slices.forEach(slice => {
+    const angle = (slice.value / total) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, outerR, startAngle, startAngle + angle);
+    ctx.closePath();
+    ctx.fillStyle = slice.color;
+    ctx.fill();
+    startAngle += angle;
+  });
+  // Donut hole
+  ctx.beginPath();
+  ctx.arc(cx, cy, innerR, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0,20,60,0.92)';
+  ctx.fill();
+  // Centro: total
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 28px Segoe UI, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(total, cx, cy - 10);
+  ctx.font = '11px Segoe UI, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.6)';
+  ctx.fillText('TOTAL', cx, cy + 14);
+}
+
+/* ── MODAL DETALLE POR PERÍODO ─────────────────────────────── */
+function openCargasI2Modal() {
+  // Datos simulados por día (se reemplazarán al filtrar)
+  const today = new Date();
+  const defEnd = today.toISOString().split('T')[0];
+  const defStart = new Date(today - 30 * 864e5).toISOString().split('T')[0];
+
+  const overlay = document.createElement('div');
+  overlay.className = 'equip-modal-overlay';
+  overlay.id = 'cargasI2Overlay';
+  document.body.appendChild(overlay);
+
+  overlay.innerHTML = `
+    <div class="equip-modal cargas-modal">
+      <div class="equip-modal-header">
+        <div class="equip-modal-title">
+          <span class="equip-modal-denom">CARGAS I-2</span>
+          <span class="equip-modal-type">Detalle por período</span>
+        </div>
+        <button class="equip-modal-close" id="cargasModalClose">✕</button>
+      </div>
+      <div class="equip-modal-body cargas-modal-body">
+        <div class="cargas-filtros">
+          <div class="equip-modal-field">
+            <label class="equip-modal-label">Fecha inicio</label>
+            <input type="date" class="equip-modal-input" id="cargasFechaInicio" value="${defStart}">
+          </div>
+          <div class="equip-modal-field">
+            <label class="equip-modal-label">Fecha fin</label>
+            <input type="date" class="equip-modal-input" id="cargasFechaFin" value="${defEnd}">
+          </div>
+          <button class="equip-modal-btn save cargas-apply-btn" id="cargasApplyBtn">Ver gráfico</button>
+        </div>
+        <div class="cargas-chart-wrap">
+          <canvas id="cargasLineChart"></canvas>
+        </div>
+        <div class="cargas-chart-legend">
+          <span><span class="ind-leg-dot" style="background:#36B0C9;display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:4px"></span>Planificadas</span>
+          <span><span class="ind-leg-dot" style="background:#00A887;display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:4px"></span>Cumplidas</span>
+          <span><span class="ind-leg-dot" style="background:#F97316;display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:4px"></span>Pendientes</span>
+          <span><span class="ind-leg-dot" style="background:#DC2626;display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:4px"></span>Postergadas</span>
+          <span><span class="ind-leg-dot" style="background:#FACC15;display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:4px"></span>En ejecución</span>
+        </div>
+      </div>
+    </div>
+  `;
+
+  requestAnimationFrame(() => overlay.classList.add('visible'));
+
+  document.getElementById('cargasModalClose').addEventListener('click', () => {
+    overlay.classList.remove('visible');
+    setTimeout(() => overlay.remove(), 250);
+  });
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) {
+      overlay.classList.remove('visible');
+      setTimeout(() => overlay.remove(), 250);
+    }
+  });
+
+  // Dibujar al abrir
+  drawCargasLine(defStart, defEnd);
+
+  document.getElementById('cargasApplyBtn').addEventListener('click', () => {
+    const fi = document.getElementById('cargasFechaInicio').value;
+    const ff = document.getElementById('cargasFechaFin').value;
+    if (fi && ff && fi <= ff) drawCargasLine(fi, ff);
+  });
+}
+
+function generateDayData(startStr, endStr) {
+  // Genera datos simulados día a día entre las fechas
+  const start = new Date(startStr);
+  const end   = new Date(endStr);
+  const days  = [];
+  const rng   = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+  let seed    = start.getTime(); // pseudo-seed para consistencia
+  const rand  = () => { seed = (seed * 1664525 + 1013904223) & 0xffffffff; return Math.abs(seed) / 0xffffffff; };
+
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const plan = Math.floor(rand() * 8) + 3;
+    const cum  = Math.floor(rand() * plan);
+    const pend = Math.floor(rand() * 6) + 1;
+    const post = Math.floor(rand() * 3);
+    const ejec = Math.floor(rand() * 3);
+    days.push({
+      label: d.toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit' }),
+      planificadas: plan, cumplidas: cum,
+      pendientes: pend, postergadas: post, enEjecucion: ejec
+    });
+  }
+  return days;
+}
+
+function drawCargasLine(startStr, endStr) {
+  const canvas = document.getElementById('cargasLineChart');
+  if (!canvas) return;
+
+  const days = generateDayData(startStr, endStr);
+  const ctx  = canvas.getContext('2d');
+
+  // Ajustar tamaño al contenedor
+  const wrap = canvas.parentElement;
+  canvas.width  = wrap.clientWidth  || 600;
+  canvas.height = wrap.clientHeight || 280;
+  const W = canvas.width, H = canvas.height;
+  const PAD = { top: 20, right: 20, bottom: 42, left: 36 };
+  const chartW = W - PAD.left - PAD.right;
+  const chartH = H - PAD.top  - PAD.bottom;
+
+  const series = [
+    { key: 'planificadas', color: '#36B0C9' },
+    { key: 'cumplidas',    color: '#00A887' },
+    { key: 'pendientes',   color: '#F97316' },
+    { key: 'postergadas',  color: '#DC2626' },
+    { key: 'enEjecucion',  color: '#FACC15' },
+  ];
+
+  // Max value for scale
+  const maxVal = Math.max(...days.flatMap(d => series.map(s => d[s.key]))) + 2;
+  const xStep = chartW / Math.max(days.length - 1, 1);
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,.08)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = PAD.top + chartH - (i / 4) * chartH;
+    ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left + chartW, y); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.45)';
+    ctx.font = '10px Segoe UI';
+    ctx.textAlign = 'right';
+    ctx.fillText(Math.round((i / 4) * maxVal), PAD.left - 4, y + 4);
+  }
+
+  // X axis labels (show every N days to avoid crowding)
+  const step = Math.max(1, Math.ceil(days.length / 12));
+  ctx.fillStyle = 'rgba(255,255,255,.55)';
+  ctx.font = '10px Segoe UI';
+  ctx.textAlign = 'center';
+  days.forEach((d, i) => {
+    if (i % step === 0 || i === days.length - 1) {
+      const x = PAD.left + i * xStep;
+      ctx.fillText(d.label, x, H - PAD.bottom + 14);
+    }
+  });
+
+  // Draw lines + fill areas
+  series.forEach(s => {
+    // Fill area
+    ctx.beginPath();
+    days.forEach((d, i) => {
+      const x = PAD.left + i * xStep;
+      const y = PAD.top + chartH - (d[s.key] / maxVal) * chartH;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.lineTo(PAD.left + (days.length - 1) * xStep, PAD.top + chartH);
+    ctx.lineTo(PAD.left, PAD.top + chartH);
+    ctx.closePath();
+    ctx.fillStyle = s.color + '22';
+    ctx.fill();
+
+    // Line
+    ctx.beginPath();
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    days.forEach((d, i) => {
+      const x = PAD.left + i * xStep;
+      const y = PAD.top + chartH - (d[s.key] / maxVal) * chartH;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Dots (only if few days)
+    if (days.length <= 20) {
+      days.forEach((d, i) => {
+        const x = PAD.left + i * xStep;
+        const y = PAD.top + chartH - (d[s.key] / maxVal) * chartH;
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = s.color;
+        ctx.fill();
+      });
+    }
+  });
+}
+
 function renderMapaBoxes() {
   setHeader('MAPA DE BOXES');
   setExpandedMode(true);
@@ -1084,6 +1425,7 @@ function renderNode(node) {
         if (item.title === 'MAPA DE BOXES')                  { historyStack.push(node); renderMapaBoxes();                    return; }
         if (item.title === 'DASHBOARD LOGISTICA NACIONAL')   { historyStack.push(node); renderDashboardLogisticaNacional();   return; }
         if (item.title === 'DASHBOARD EQUIPAMIENTO')         { historyStack.push(node); renderDashboardEquipamiento();        return; }
+        if (item.title === 'CARGAS I-2')                     { historyStack.push(node); renderIndicadorCargasI2();            return; }
         if (item.children)                                   { historyStack.push(node); renderNode(item);                    return; }
         if (item.url)                                        { openModule(item.url);                                         return; }
         historyStack.push(node);
