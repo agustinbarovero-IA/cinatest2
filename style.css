@@ -1,0 +1,1969 @@
+:root{
+  --bg-main:#001F60;
+  --bg-deep:#00174a;
+  --bg-dark:#000f30;
+  --text:#ffffff;
+  --text-soft:rgba(255,255,255,.82);
+  --shadow-main:0 14px 28px rgba(0,0,0,.24);
+  --radius-lg:20px;
+  --gap:14px;
+  --grid-max:1500px;
+}
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  min-height:100vh;
+  font-family:"Segoe UI",Inter,Tahoma,Verdana,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at top left,rgba(54,176,201,.22),transparent 26%),
+    radial-gradient(circle at bottom right,rgba(0,168,135,.18),transparent 24%),
+    linear-gradient(135deg,var(--bg-main),var(--bg-deep) 55%,var(--bg-dark));
+  overflow:hidden;
+}
+
+body{min-height:100vh;}
+
+.app-shell{
+  display:grid;
+  grid-template-rows:auto auto 1fr auto;
+  gap:8px;
+  padding:10px;
+  min-height:100vh;
+}
+
+.topbar{
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:center;
+  gap:14px;
+  padding:10px 16px;
+  border-radius:22px;
+  background:rgba(255,255,255,.08);
+  box-shadow:var(--shadow-main);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  min-width:0;
+}
+
+.brand img{
+  height:54px;
+  width:auto;
+  object-fit:contain;
+}
+
+.brand-copy{min-width:0;}
+
+.brand h1{
+  margin:0;
+  font-size:1.3rem;
+  font-weight:700;
+}
+
+.brand p{
+  margin:4px 0 0;
+  color:var(--text-soft);
+  font-size:.85rem;
+}
+
+.toolbar{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.toolbar button{
+  background:rgba(255,255,255,.1);
+  border:0;
+  color:white;
+  padding:10px 14px;
+  border-radius:12px;
+  font-weight:600;
+  cursor:pointer;
+  transition:background .18s ease, transform .18s ease;
+  font-size:.9rem;
+}
+
+.toolbar button:hover:not(:disabled){
+  background:rgba(255,255,255,.18);
+  transform:translateY(-1px);
+}
+
+.toolbar button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.toolbar .btn-user{
+  background:linear-gradient(135deg,#36B0C9,#00A887);
+}
+
+.meta-panel{display:block}
+
+.data-strip{
+  display:grid;
+  grid-template-columns:repeat(8,minmax(0,1fr));
+  gap:7px;
+}
+
+.data-box{
+  min-height:52px;
+  border-radius:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:7px 9px;
+  font-size:.74rem;
+  font-weight:700;
+  color:#fff;
+  box-shadow:var(--shadow-main);
+  line-height:1.08;
+}
+
+.data-box.green{background:linear-gradient(135deg,#047857,#059669)}
+.data-box.red{background:linear-gradient(135deg,#b91c1c,#dc2626)}
+.data-box.orange{background:linear-gradient(135deg,#ea580c,#f97316)}
+.data-box.qr{
+  background:linear-gradient(135deg,#001F60,#36B0C9);
+  cursor:pointer;
+  transition:transform .18s ease,filter .18s ease;
+}
+.data-box.qr:hover{
+  transform:translateY(-2px);
+  filter:brightness(1.05);
+}
+
+.data-content{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  width:100%;
+}
+
+.data-stack{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+  gap:3px;
+}
+
+.data-number{
+  font-size:1.45rem;
+  font-weight:800;
+}
+
+.data-icon-round{
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  border:2px solid currentColor;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:.82rem;
+  font-weight:900;
+  flex-shrink:0;
+}
+
+.data-label{
+  font-size:.54rem;
+  font-weight:700;
+  letter-spacing:.2px;
+  text-transform:uppercase;
+  opacity:.95;
+}
+
+.data-qr-icon{
+  width:22px;
+  height:22px;
+  border:2px solid #fff;
+  position:relative;
+  flex-shrink:0;
+}
+
+.data-qr-icon::before,
+.data-qr-icon::after{
+  content:"";
+  position:absolute;
+  background:#fff;
+}
+
+.data-qr-icon::before{
+  left:4px;
+  top:4px;
+  width:5px;
+  height:5px;
+  box-shadow:8px 0 #fff,0 8px #fff,8px 8px #fff;
+}
+
+.data-qr-icon::after{
+  right:4px;
+  bottom:4px;
+  width:7px;
+  height:7px;
+  box-shadow:-8px 0 #fff,0 -8px #fff;
+}
+
+.workspace{
+  min-height:0;
+  overflow:auto;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+}
+
+.menu-wrap{
+  width:100%;
+  max-width:var(--grid-max);
+  min-height:0;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+}
+
+.menu-grid{
+  display:grid;
+  gap:var(--gap);
+  justify-content:center;
+  align-content:start;
+  width:100%;
+}
+
+.menu-grid.layout-4x4{
+  grid-template-columns:repeat(4,minmax(150px,1fr));
+  max-width:900px;
+}
+
+.menu-grid.layout-8x2{
+  grid-template-columns:repeat(8,minmax(120px,1fr));
+  max-width:1320px;
+}
+
+.tile{
+  min-height:140px;
+  aspect-ratio:1/1;
+  border:none;
+  border-radius:var(--radius-lg);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  gap:14px;
+  padding:16px 10px;
+  color:white;
+  font-weight:700;
+  font-size:.95rem;
+  text-transform:uppercase;
+  box-shadow:var(--shadow-main);
+  cursor:pointer;
+  transition:transform .18s ease,filter .18s ease, box-shadow .18s ease;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.18);
+}
+
+.tile:hover{
+  transform:translateY(-4px);
+  filter:brightness(1.06);
+  box-shadow:0 20px 40px rgba(0,0,0,.32);
+}
+
+.tile-icon{
+  width:62px;
+  height:62px;
+  border-radius:18px;
+  background:rgba(255,255,255,.18);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.8rem;
+  flex-shrink:0;
+  overflow:hidden;
+}
+
+.tile-icon img{
+  display:block;
+  max-width:48px;
+  max-height:48px;
+  object-fit:contain;
+}
+
+.tile-title{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  line-height:1.1;
+  min-height:2.6em;
+  max-width:94%;
+  word-break:normal;
+  overflow-wrap:anywhere;
+  hyphens:none;
+}
+
+.tile-title.two-lines{white-space:normal}
+.tile-title.one-line{white-space:nowrap}
+
+.dashboard-grid{
+  width:100%;
+  max-width:1500px;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(280px,1fr));
+  gap:10px;
+  align-content:start;
+}
+
+.dashboard-card{
+  min-height:96px;
+  height:96px;
+  border-radius:18px;
+  padding:8px 10px;
+  background:linear-gradient(135deg,#163A7A,#0C2554);
+  box-shadow:var(--shadow-main);
+  border:1px solid rgba(255,255,255,.18);
+  display:grid;
+  grid-template-columns:60px 1fr 68px;
+  gap:8px;
+  align-items:center;
+  color:#fff;
+  cursor:pointer;
+}
+
+.dashboard-left{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  height:100%;
+}
+
+.dashboard-temp,
+.dashboard-alert{
+  border-radius:13px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:#fff;
+}
+
+.dashboard-temp{
+  min-height:46px;
+  padding:5px 4px;
+  flex:1;
+}
+
+.dashboard-alert{
+  min-height:28px;
+  padding:2px 4px;
+  background:linear-gradient(135deg,#f59e0b,#ea580c);
+}
+
+.dashboard-temp-label{
+  font-size:.45rem;
+  font-weight:700;
+  letter-spacing:.35px;
+  text-transform:uppercase;
+  opacity:.95;
+}
+
+.dashboard-temp-value{
+  margin-top:2px;
+  font-size:.88rem;
+  font-weight:800;
+  line-height:1;
+}
+
+.dashboard-alert-value{
+  font-size:.88rem;
+  font-weight:900;
+  line-height:1;
+}
+
+.dashboard-main{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  min-width:0;
+}
+
+.dashboard-title{
+  font-size:.72rem;
+  font-weight:800;
+  text-transform:uppercase;
+  line-height:1.02;
+  margin-bottom:4px;
+  letter-spacing:.25px;
+}
+
+.dashboard-number{
+  font-size:1.5rem;
+  font-weight:900;
+  line-height:1;
+}
+
+.dashboard-sub{
+  margin-top:3px;
+  font-size:.52rem;
+  font-weight:700;
+  letter-spacing:.45px;
+  text-transform:uppercase;
+  opacity:.85;
+}
+
+.dashboard-status-row{
+  margin-top:3px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+}
+
+.status-box{
+  width:16px;
+  height:16px;
+  border-radius:4px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:.52rem;
+  line-height:1;
+  font-weight:700;
+  color:#fff;
+  border:1px solid rgba(255,255,255,.18);
+}
+
+.status-box.true-state{
+  background:linear-gradient(135deg,#dc2626,#b91c1c);
+}
+
+.status-box.false-state{
+  background:linear-gradient(135deg,#16a34a,#15803d);
+}
+
+.dashboard-clients{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:5px;
+  align-content:center;
+  justify-items:center;
+}
+
+.client-badge{
+  width:24px;
+  height:24px;
+  border-radius:7px;
+  background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.18);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:.58rem;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.client-badge.empty{
+  opacity:.18;
+}
+
+.equipment-grid{
+  width:100%;
+  max-width:1500px;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(260px,1fr));
+  gap:10px;
+  align-content:start;
+}
+
+.equipment-card{
+  min-height:142px;
+  height:142px;
+  border-radius:16px;
+  padding:10px 11px;
+  box-shadow:var(--shadow-main);
+  border:1px solid rgba(255,255,255,.16);
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  color:#fff;
+  overflow:hidden;
+}
+
+.equipment-card.state-running-card{
+  background:linear-gradient(135deg,#166534,#15803d);
+}
+
+.equipment-card.state-charging-card{
+  background:linear-gradient(135deg,#b45309,#ea580c);
+}
+
+.equipment-card.state-failure-card{
+  background:linear-gradient(135deg,#991b1b,#dc2626);
+}
+
+.equipment-header{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.equipment-icon{
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  background:rgba(255,255,255,.14);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.05rem;
+  flex-shrink:0;
+  overflow:hidden;
+}
+
+.equipment-icon img{
+  width:24px;
+  height:24px;
+  object-fit:contain;
+}
+
+.equipment-title-wrap{
+  min-width:0;
+}
+
+.equipment-type{
+  font-size:.74rem;
+  font-weight:800;
+  text-transform:uppercase;
+  line-height:1.02;
+}
+
+.equipment-name{
+  font-size:.64rem;
+  color:rgba(255,255,255,.88);
+  margin-top:2px;
+  line-height:1.02;
+}
+
+.equipment-row{
+  display:grid;
+  grid-template-columns:74px 1fr;
+  gap:6px;
+  align-items:start;
+  font-size:.64rem;
+}
+
+.equipment-label{
+  color:rgba(255,255,255,.78);
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.15px;
+}
+
+.equipment-value{
+  font-weight:700;
+  line-height:1.08;
+}
+
+.state-badge,
+.plant-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:4px 8px;
+  border-radius:9px;
+  background:rgba(255,255,255,.16);
+  font-size:.62rem;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.boxes-wrap{
+  width:100%;
+  max-width:1200px;
+  display:grid;
+  gap:14px;
+}
+
+.boxes-header{
+  background:linear-gradient(135deg,#163A7A,#0C2554);
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:20px;
+  box-shadow:var(--shadow-main);
+  padding:18px;
+}
+
+.boxes-header h2{
+  margin:0;
+  font-size:1.25rem;
+  font-weight:800;
+}
+
+.boxes-header p{
+  margin:6px 0 0;
+  font-size:.88rem;
+  color:var(--text-soft);
+}
+
+.boxes-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(180px,1fr));
+  gap:14px;
+}
+
+.box-card{
+  min-height:150px;
+  border:none;
+  border-radius:18px;
+  background:linear-gradient(135deg,#163A7A,#0C2554);
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:var(--shadow-main);
+  color:#fff;
+  padding:14px;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  text-align:left;
+}
+
+.box-card-number{
+  font-size:2rem;
+  font-weight:900;
+  line-height:1;
+}
+
+.box-card-title{
+  font-size:.95rem;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.box-card-meta{
+  font-size:.76rem;
+  color:var(--text-soft);
+  line-height:1.2;
+}
+
+.estiba-detail-wrap{
+  width:100%;
+  max-width:980px;
+  margin:0 auto;
+  display:grid;
+  gap:10px;
+}
+
+.estiba-header-card,
+.estiba-info-card,
+.estiba-actions-card,
+.estiba-detail-card,
+.intervencion-card,
+.temperaturas-card{
+  background:linear-gradient(135deg,#163A7A,#0C2554);
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:18px;
+  box-shadow:var(--shadow-main);
+  padding:14px;
+}
+
+.estiba-header-card{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:12px;
+  align-items:center;
+}
+
+.estiba-title,
+.intervencion-title,
+.temperaturas-title{
+  margin:0;
+  font-size:1.35rem;
+  font-weight:800;
+  line-height:1.05;
+}
+
+.estiba-subtitle,
+.intervencion-subtitle,
+.temperaturas-subtitle{
+  margin:5px 0 0;
+  font-size:.82rem;
+  color:var(--text-soft);
+  font-weight:600;
+}
+
+.estiba-module-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  justify-content:flex-end;
+}
+
+.estiba-module-btn{
+  border:none;
+  border-radius:10px;
+  padding:9px 12px;
+  color:#fff;
+  font-weight:800;
+  cursor:pointer;
+  font-size:.82rem;
+}
+
+.estiba-module-btn.logistica{background:linear-gradient(135deg,#36B0C9,#0891b2)}
+.estiba-module-btn.calidad{background:linear-gradient(135deg,#E36B2C,#c2410c)}
+.estiba-module-btn.salir{background:linear-gradient(135deg,#475569,#334155)}
+
+.estiba-info-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+.estiba-info-box{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;
+  padding:12px;
+}
+
+.estiba-info-label,
+.intervencion-label,
+.temperaturas-label{
+  font-size:.78rem;
+  font-weight:800;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.8);
+  letter-spacing:.3px;
+}
+
+.estiba-info-value{
+  margin-top:5px;
+  font-size:.96rem;
+  font-weight:800;
+}
+
+.estiba-ocupacion{
+  display:grid;
+  gap:8px;
+}
+
+.estiba-ocupacion-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+
+.estiba-progress{
+  width:100%;
+  height:16px;
+  border-radius:999px;
+  background:rgba(255,255,255,.12);
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.10);
+}
+
+.estiba-progress-bar{
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+}
+
+.estiba-actions-card{
+  display:flex;
+  justify-content:center;
+}
+
+.estiba-actions-grid{
+  width:100%;
+  max-width:980px;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+
+.estiba-action-btn{
+  border:none;
+  border-radius:14px;
+  min-height:68px;
+  padding:12px;
+  color:#fff;
+  font-weight:800;
+  font-size:.88rem;
+  cursor:pointer;
+  box-shadow:var(--shadow-main);
+}
+
+.estiba-action-btn.intervenir{background:linear-gradient(135deg,#E36B2C,#c2410c)}
+.estiba-action-btn.liberar{background:linear-gradient(135deg,#475569,#334155)}
+.estiba-action-btn.fotos{background:linear-gradient(135deg,#36B0C9,#0284c7)}
+.estiba-action-btn.temperaturas{background:linear-gradient(135deg,#00A887,#047857)}
+
+.estiba-detail-title,
+.intervencion-section-title,
+.temperaturas-section-title{
+  margin:0 0 12px 0;
+  font-size:1rem;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.estiba-detail-table,
+.intervencion-options,
+.temperaturas-list{
+  display:grid;
+  gap:10px;
+}
+
+.estiba-detail-row{
+  display:grid;
+  grid-template-columns:1.6fr .7fr;
+  gap:12px;
+  align-items:center;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:14px;
+  padding:14px 16px;
+}
+
+.estiba-detail-product{
+  font-weight:800;
+  font-size:1rem;
+  line-height:1.2;
+}
+
+.estiba-detail-date{
+  justify-self:end;
+  font-weight:800;
+  color:#fef08a;
+  font-size:.9rem;
+}
+
+.intervencion-wrap,
+.temperaturas-wrap{
+  width:100%;
+  max-width:920px;
+  margin:0 auto;
+  display:grid;
+  gap:12px;
+}
+
+.intervencion-option-row{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:12px;
+  align-items:center;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;
+  padding:12px 14px;
+}
+
+.intervencion-option-row input[type="radio"]{
+  transform:scale(1.15);
+  accent-color:#36B0C9;
+  cursor:pointer;
+}
+
+.intervencion-option-label{
+  font-weight:700;
+  font-size:.95rem;
+}
+
+.intervencion-partial-qty,
+.intervencion-select,
+.intervencion-textarea,
+.temperaturas-select,
+.temperaturas-input{
+  width:100%;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.1);
+  color:#fff;
+  padding:12px 14px;
+  font-size:.95rem;
+  outline:none;
+}
+
+.intervencion-partial-qty{
+  width:110px;
+}
+
+.intervencion-select option,
+.temperaturas-select option{
+  color:#111;
+}
+
+.intervencion-textarea{
+  min-height:130px;
+  resize:vertical;
+  font-family:inherit;
+}
+
+.intervencion-field,
+.temperaturas-field{
+  display:grid;
+  gap:8px;
+}
+
+.intervencion-actions,
+.temperaturas-actions{
+  display:flex;
+  justify-content:flex-end;
+}
+
+.intervencion-submit,
+.temperaturas-submit{
+  border:none;
+  border-radius:14px;
+  min-width:180px;
+  min-height:52px;
+  padding:12px 18px;
+  color:#fff;
+  font-weight:800;
+  font-size:.95rem;
+  cursor:pointer;
+  background:linear-gradient(135deg,#E36B2C,#c2410c);
+  box-shadow:var(--shadow-main);
+}
+
+.temperaturas-row{
+  display:grid;
+  grid-template-columns:1.2fr .8fr .8fr;
+  gap:10px;
+  align-items:end;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:14px;
+  padding:12px;
+}
+
+.temperaturas-row-title{
+  grid-column:1 / -1;
+  font-size:.82rem;
+  font-weight:800;
+  color:rgba(255,255,255,.85);
+  text-transform:uppercase;
+  letter-spacing:.3px;
+}
+
+.footer-bar{
+  text-align:center;
+  font-size:.74rem;
+  opacity:.7;
+}
+
+@media(max-width:1200px){
+  .menu-grid.layout-8x2{
+    grid-template-columns:repeat(4,minmax(140px,1fr));
+    max-width:900px;
+  }
+  .data-strip{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+  .dashboard-grid,
+  .equipment-grid{
+    grid-template-columns:repeat(3,minmax(240px,1fr));
+  }
+  .boxes-grid{
+    grid-template-columns:repeat(3,minmax(160px,1fr));
+  }
+}
+
+@media(max-width:900px){
+  .dashboard-grid,
+  .equipment-grid{
+    grid-template-columns:repeat(2,minmax(240px,1fr));
+  }
+  .boxes-grid{
+    grid-template-columns:repeat(2,minmax(160px,1fr));
+  }
+  .estiba-header-card{
+    grid-template-columns:1fr;
+  }
+  .estiba-module-actions{
+    justify-content:flex-start;
+  }
+  .estiba-info-grid{
+    grid-template-columns:1fr;
+  }
+  .estiba-actions-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .estiba-detail-row,
+  .temperaturas-row{
+    grid-template-columns:1fr;
+  }
+  .estiba-detail-date{
+    justify-self:start;
+  }
+  .intervencion-option-row{
+    grid-template-columns:auto 1fr;
+  }
+  .intervencion-partial-qty{
+    grid-column:2;
+    width:100%;
+  }
+  .intervencion-submit,
+  .temperaturas-submit{
+    width:100%;
+  }
+}
+
+@media(max-width:780px){
+  html,body{overflow:auto}
+  .topbar{grid-template-columns:1fr}
+  .menu-grid.layout-4x4,
+  .menu-grid.layout-8x2{
+    grid-template-columns:repeat(2,minmax(130px,1fr));
+    max-width:100%;
+  }
+  .data-strip{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .dashboard-grid,
+  .equipment-grid,
+  .boxes-grid{
+    grid-template-columns:1fr;
+  }
+  .estiba-actions-grid{
+    grid-template-columns:1fr;
+  }
+  #fullscreenBtn{
+    display:none;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand">
+      <img src="img/cina_logo_principal.png" alt="CINA">
+      <div class="brand-copy">
+        <h1 id="screenTitle">BIENVENIDOS AL SISTEMA DE GRUPO CINA</h1>
+        <p id="screenSubtitle">agustin.barovero</p>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button id="backBtn">← Volver</button>
+      <button id="homeBtn">Inicio</button>
+      <button id="fullscreenBtn">Pantalla completa</button>
+      <button id="userBtn" class="btn-user">Administrar usuario</button>
+    </div>
+  </header>
+
+  <section class="meta-panel">
+    <div class="data-strip">
+      <div class="data-box green"><div class="data-stack"><span class="data-label">TUNEL 2</span><span class="data-number">35</span><span class="data-label">09/03/2026 01:00</span></div></div>
+      <div class="data-box green"><div class="data-stack"><span class="data-label">TUNEL 9</span><span class="data-number">45</span><span class="data-label">07/03/2026 02:00</span></div></div>
+      <div class="data-box green"><div class="data-stack"><span class="data-label">TUNEL 10</span><span class="data-number">40</span><span class="data-label">06/03/2026 21:00</span></div></div>
+      <div class="data-box green"><div class="data-stack"><span class="data-number">20</span><span class="data-label">VEHICULOS</span></div></div>
+      <div class="data-box green"><div class="data-stack"><span class="data-number">6500</span><span class="data-label">ESTIBAS EN PLANTA</span></div></div>
+      <div class="data-box qr" id="qrBox"><div class="data-content"><span class="data-qr-icon"></span><span>SCAN QR</span></div></div>
+      <div class="data-box orange" id="sinUbicacionBox" style="cursor:pointer"><div class="data-content"><span class="data-icon-round">!</span><div class="data-stack"><span class="data-number">1050</span><span class="data-label">SIN UBICACION</span></div></div></div>
+      <div class="data-box red" id="vencidasBox" style="cursor:pointer"><div class="data-content"><span class="data-icon-round">!</span><div class="data-stack"><span class="data-number">189</span><span class="data-label">VENCIDAS</span></div></div></div>
+    </div>
+  </section>
+
+  <main class="workspace">
+    <div class="menu-wrap">
+      <div class="menu-grid" id="menuGrid"></div>
+    </div>
+  </main>
+
+  <footer class="footer-bar">Sistema interno Grupo CINA</footer>
+</div>
+
+<script>
+const USER_NAME = 'agustin.barovero';
+
+const menuTree = {
+  title: 'INICIO',
+  children: [
+    { title: 'LOGISTICA NACIONAL', children: [
+      { title: 'CARGAS', url: 'https://sistema.cinafrio.com/intranet/index.php/transporte_carga/index/fiscal/0' },
+      { title: 'PRE ENTRADAS', url: 'https://sistema.cinafrio.com/intranet/index.php/entradacarga/list/clasificada/0/fiscal/0' },
+      { title: 'ENTRADAS', url: 'https://sistema.cinafrio.com/intranet/index.php/entradacarga/list/clasificada/1/fiscal/0' },
+      { title: 'PRE SALIDAS', url: 'https://sistema.cinafrio.com/intranet/index.php/presalidas/list/salida/0/fiscal/0' },
+      { title: 'SALIDAS', url: 'https://sistema.cinafrio.com/intranet/index.php/presalidas/list/salida/1/fiscal/0' }
+    ]},
+    { title: 'LOGISTICA FISCAL', children: [
+      { title: 'CARGAS', url: 'https://sistema.cinafrio.com/intranet/index.php/transporte_carga/index/fiscal/1' },
+      { title: 'PRE ENTRADAS', url: 'https://sistema.cinafrio.com/intranet/index.php/entradacarga/list/clasificada/0/fiscal/1' },
+      { title: 'ENTRADAS', url: 'https://sistema.cinafrio.com/intranet/index.php/entradacarga/list/clasificada/1/fiscal/1' },
+      { title: 'PRE SALIDAS', url: 'https://sistema.cinafrio.com/intranet/index.php/presalidas/list/salida/0/fiscal/1' },
+      { title: 'SALIDAS', url: 'https://sistema.cinafrio.com/intranet/index.php/presalidas/list/salida/1/fiscal/1' },
+      { title: 'REPORTE DEPOSITO FISCAL AFIP', url: 'https://sistema.cinafrio.com/intranet2/app.php/reportestockafip/' }
+    ]},
+    { title: 'CALIDAD', children: [
+      { title: 'CONTROL DE ENTRADAS', url: 'https://sistema.cinafrio.com/intranet/index.php/carga/list/type/E' },
+      { title: 'CONTROL DE SALIDAS', url: 'https://sistema.cinafrio.com/intranet/index.php/carga/list/type/S' },
+      { title: 'CONTROL DE INTERVENCIONES', url: 'https://sistema.cinafrio.com/intranet/index.php/carga/listIntervenciones' },
+      { title: 'VENCIMIENTO DE PRODUCTOS', url: 'https://sistema.cinafrio.com/intranet/index.php/infostock/vencimientos' },
+      { title: 'ESTADISTICAS DE INTERVENCIONES', url: 'https://sistema.cinafrio.com/intranet/index.php/carga/estadisticas' }
+    ]},
+    { title: 'PORTERIA', children: [
+      { title: 'INGRESOS EGRESOS', url: 'https://sistema.cinafrio.com/intranet/index.php/ingreso/index' }
+    ]},
+    { title: 'TRANSPORTE', children: [
+      { title: 'DATOS DE VEHICULOS', children: [
+        { title: 'ASEGURADORAS', url: 'https://sistema.cinafrio.com/intranet/index.php/transporte_aseguradora' },
+        { title: 'EMPRESAS', url: 'https://sistema.cinafrio.com/intranet/index.php/transporte_empresa' },
+        { title: 'CONDUCTORES', url: 'https://sistema.cinafrio.com/intranet/index.php/transporte_conductor' },
+        { title: 'VEHICULOS', url: 'https://sistema.cinafrio.com/intranet/index.php/transporte_vehiculo' },
+        { title: 'ACOPLADOS', url: 'https://sistema.cinafrio.com/intranet/index.php/transporte_acoplado' }
+      ]},
+      { title: 'DATOS DE LA PLAYA DE MANIOBRA', children: [
+        { title: 'BOXES', url: 'https://sistema.cinafrio.com/intranet/index.php/box' },
+        { title: 'TRONERAS', url: 'https://sistema.cinafrio.com/intranet/index.php/tronera' }
+      ]}
+    ]},
+    { title: 'ADMINISTRACION', children: [
+      { title: 'FACTURACION', url: 'https://sistema.cinafrio.com/intranet/index.php/facturacion' },
+      { title: 'REMITOS', url: 'https://sistema.cinafrio.com/intranet/index.php/facturacion/remitos' },
+      { title: 'COMPRAS', url: 'https://sistema.cinafrio.com/intranet/index.php/pim/index/estadoPIM/1' }
+    ]},
+    { title: 'RRHH', children: [
+      { title: 'PERSONAL', url: 'https://sistema.cinafrio.com/intranet2/app.php/persona/' },
+      { title: 'AUSENTISMO', url: 'https://sistema.cinafrio.com/intranet2/app.php/ausentismo/dashboard' },
+      { title: 'VACUNACIONES', url: 'https://sistema.cinafrio.com/intranet2/app.php/vacunacion/' }
+    ]},
+    { title: 'MANTENIMIENTO', children: [
+      { title: 'MANTENIMIENTO GENERAL', url: 'https://sistema.cinafrio.com/intranet2/app.php/mantenimiento/' },
+      { title: 'PR 80 PARADA DE CAMARAS', url: 'https://sistema.cinafrio.com/intranet2/app.php/sdmcamara/' }
+    ]},
+    { title: 'PRODUCTOS', children: [
+      { title: 'CREAR NUEVOS PRODUCTOS', url: 'https://sistema.cinafrio.com/intranet/index.php/producto' }
+    ]},
+    { title: 'DASHBOARD', children: [
+      { title: 'MAPA DE BOXES' },
+      { title: 'DASHBOARD LOGISTICA NACIONAL' },
+      { title: 'DASHBOARD EQUIPAMIENTO' }
+    ]},
+    { title: 'REPORTES', children: [
+      { title: 'STOCK', url: 'https://sistema.cinafrio.com/intranet/index.php/infostock/stockDetallado' },
+      { title: 'DEVOLUCIONES', url: 'https://sistema.cinafrio.com/intranet/index.php/infostock/devoluciones' }
+    ]},
+    { title: 'INDICADORES', children: [
+      { title: 'MOVIMIENTOS' },
+      { title: 'CLIENTES QUE OPERARON' }
+    ]},
+    { title: 'SISTEMA DE GESTION', children: [
+      { title: 'INFORMACION DOCUMENTADA', url: 'https://manualcinafrio.com.ar/documentos/' },
+      { title: 'INDICADORES', url: 'https://manualcinafrio.com.ar/indicadores/' },
+      { title: 'FORMACION', url: 'https://manualcinafrio.com.ar/formacion/' }
+    ]},
+    { title: 'SENASA', children: [
+      { title: 'CERTIFICADOS', url: 'https://sistema.cinafrio.com/intranet/index.php/certificados/list' },
+      { title: 'CERTIFICADOS INTERNOS', url: 'https://sistema.cinafrio.com/intranet/index.php/certificado_interno' }
+    ]},
+    { title: 'CONFIGURACION', children: [
+      { title: 'VETERINARIOS', url: 'https://sistema.cinafrio.com/intranet/index.php/veterinario/index' },
+      { title: 'LOGISTICA', children: [
+        { title: 'CAMARAS', url: 'https://sistema.cinafrio.com/intranet/index.php/camaras' },
+        { title: 'TIPO DE ESTIBA', url: 'https://sistema.cinafrio.com/intranet/index.php/tiposestiba' }
+      ]}
+    ]},
+    { title: 'OTROS SISTEMAS', children: [
+      { title: 'INFORMACION DOCUMENTADA', url: 'https://manualcinafrio.com.ar/documentos/' },
+      { title: 'FORMACION', url: 'https://manualcinafrio.com.ar/formacion/' }
+    ]}
+  ]
+};
+
+const mainColorMap = {
+  'LOGISTICA NACIONAL':'#36B0C9',
+  'LOGISTICA FISCAL':'#00BBB4',
+  'CALIDAD':'#E36B2C',
+  'PORTERIA':'#00A887',
+  'TRANSPORTE':'#00A887',
+  'ADMINISTRACION':'#001F60',
+  'RRHH':'#001F60',
+  'MANTENIMIENTO':'#001F60',
+  'PRODUCTOS':'#36B0C9',
+  'DASHBOARD':'#FFCC33',
+  'REPORTES':'#FFCC33',
+  'INDICADORES':'#FFCC33',
+  'SISTEMA DE GESTION':'#001F60',
+  'SENASA':'#23BAC4',
+  'CONFIGURACION':'#001F60',
+  'OTROS SISTEMAS':'#001F60'
+};
+
+const dashboardLogisticaNacionalData = [
+  { tipo:'CAMARA', nombre:'1', estibas:150, temperatura:-18, clientes:['MB','ME'], extra:25, puerta:true, ventilador:true },
+  { tipo:'CAMARA', nombre:'3', estibas:200, temperatura:-18, clientes:['MB','ME'], extra:25, puerta:true, ventilador:true },
+  { tipo:'CAMARA', nombre:'7', estibas:120, temperatura:2, clientes:['MI'], extra:25, puerta:true, ventilador:true },
+  { tipo:'CAMARA', nombre:'8', estibas:850, temperatura:-21, clientes:['MB','ME'], extra:25, puerta:true, ventilador:true },
+  { tipo:'TUNEL', nombre:'2', estibas:35, temperatura:-27, clientes:['MD'], extra:25, puerta:true, ventilador:true },
+  { tipo:'TUNEL', nombre:'9', estibas:45, temperatura:-27, clientes:['MD'], extra:25, puerta:true, ventilador:true },
+  { tipo:'TUNEL', nombre:'10', estibas:40, temperatura:-27, clientes:['MD'], extra:25, puerta:true, ventilador:true }
+];
+
+const dashboardEquipamientoData = [
+  { tipo:'Autoelevador', icono:'img/autoelevador.png', denominacion:'AE-01', estado:'En marcha', planta:'Nacional', horas:'00:45hs', usuario:'jlopez', isImage:true },
+  { tipo:'Autoelevador', icono:'img/autoelevador.png', denominacion:'AE-02', estado:'Cargando', planta:'Nacional', horas:'01:20hs', usuario:'mrojas', isImage:true },
+  { tipo:'Autoelevador', icono:'img/autoelevador.png', denominacion:'AE-03', estado:'En marcha', planta:'Deposito Fiscal', horas:'00:15hs', usuario:'agarcia', isImage:true },
+  { tipo:'Autoelevador', icono:'img/autoelevador.png', denominacion:'AE-04', estado:'Falla', planta:'Mantenimiento', horas:'03:40hs', usuario:'lperez', isImage:true },
+  { tipo:'Zorra electrica', icono:'🟦', denominacion:'ZE-01', estado:'En marcha', planta:'Nacional', horas:'00:32hs', usuario:'jmartin' },
+  { tipo:'Camion', icono:'🚚', denominacion:'CM-01', estado:'En marcha', planta:'Nacional', horas:'06:10hs', usuario:'druiz' }
+];
+
+const boxesData = Array.from({length:16}, (_,i) => ({
+  numero:i+1,
+  titulo:`Contenedor ${i+1}`,
+  ubicacion:`16-5-${Math.floor(i/4)+1}-${(i%4)+1}`,
+  tipo:i+1 === 6 ? 'Pallet especial' : 'Pallet',
+  ocupacion: i+1 === 6 ? 78 : (35 + (i*4)),
+  estiba: i+1 === 6 ? '65984-3' : `6598${i+1}-1`
+}));
+
+const detailProducts = [
+  { producto:'Bondiola de cerdo congelada', fecha:'15/05/2026' },
+  { producto:'Pechito de cerdo congelado', fecha:'22/05/2026' },
+  { producto:'Pulpa de cerdo exportación', fecha:'03/06/2026' }
+];
+
+const historyStack = [];
+const menuGrid = document.getElementById('menuGrid');
+const screenTitle = document.getElementById('screenTitle');
+const screenSubtitle = document.getElementById('screenSubtitle');
+const backBtn = document.getElementById('backBtn');
+const homeBtn = document.getElementById('homeBtn');
+const fullscreenBtn = document.getElementById('fullscreenBtn');
+const userBtn = document.getElementById('userBtn');
+const qrBox = document.getElementById('qrBox');
+const sinUbicacionBox = document.getElementById('sinUbicacionBox');
+const vencidasBox = document.getElementById('vencidasBox');
+
+function setHeader(title){
+  screenTitle.textContent = title;
+  screenSubtitle.textContent = USER_NAME;
+}
+
+function getTextInitials(text){
+  return text.split(/\s+/).filter(Boolean).slice(0,2).map(word => word[0]).join('').toUpperCase();
+}
+
+function getIconMarkup(title){
+  const imageMap = {
+    'SISTEMA DE GESTION': 'img/iso_logo.png',
+    'SENASA': 'img/senasa_logo.png'
+  };
+
+  if(imageMap[title]){
+    return `<img src="${imageMap[title]}" alt="${title}" onerror="this.style.display='none'; this.parentElement.textContent='${getTextInitials(title)}';">`;
+  }
+
+  const symbolMap = {
+    'LOGISTICA NACIONAL':'🚛',
+    'LOGISTICA FISCAL':'📦',
+    'CALIDAD':'🌡',
+    'PORTERIA':'🚪',
+    'TRANSPORTE':'🚚',
+    'INDICADORES':'📊',
+    'REPORTES':'📑',
+    'DASHBOARD':'🖥',
+    'ADMINISTRACION':'🗂',
+    'RRHH':'👥',
+    'MANTENIMIENTO':'🔧',
+    'CONFIGURACION':'⚙',
+    'PRODUCTOS':'📦',
+    'OTROS SISTEMAS':'🧩',
+    'INFORMACION DOCUMENTADA':'📚',
+    'REGISTRO PR 44':'🗂',
+    'FORMACION':'👨‍🏫',
+    'MAPA DE BOXES':'🗺'
+  };
+
+  return symbolMap[title] || getTextInitials(title);
+}
+
+function getEquipmentIconMarkup(item){
+  if(item.isImage){
+    return `<img src="${item.icono}" alt="${item.tipo}" onerror="this.style.display='none'; this.parentElement.textContent='🛗';">`;
+  }
+  return item.icono;
+}
+
+function getGridLayout(count){
+  return count > 8 ? 'layout-8x2' : 'layout-4x4';
+}
+
+function formatTitle(title){
+  const words = title.trim().split(/\s+/);
+  if(words.length <= 1) return title;
+  if(words.length === 2) return words[0] + '<br>' + words[1];
+  const mid = Math.ceil(words.length / 2);
+  return words.slice(0, mid).join(' ') + '<br>' + words.slice(mid).join(' ');
+}
+
+function titleClass(title){
+  const words = title.trim().split(/\s+/).length;
+  return words >= 2 ? 'two-lines' : 'one-line';
+}
+
+function openModule(url){
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+function darkenColor(hex, amount){
+  let color = hex.replace('#', '');
+  if(color.length === 3) color = color.split('').map(c => c + c).join('');
+  let r = parseInt(color.substring(0,2),16);
+  let g = parseInt(color.substring(2,4),16);
+  let b = parseInt(color.substring(4,6),16);
+  r = Math.max(0, Math.min(255, r + amount));
+  g = Math.max(0, Math.min(255, g + amount));
+  b = Math.max(0, Math.min(255, b + amount));
+  return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
+}
+
+function getTileColors(item, level){
+  const base = level === 0 ? (mainColorMap[item.title] || '#001F60') : '#163A7A';
+  const end = darkenColor(base, -28);
+  return { start: base, end };
+}
+
+function buildClientSlots(clientes){
+  const totalSlots = 6;
+  const filled = clientes.slice(0, totalSlots);
+  const emptyCount = totalSlots - filled.length;
+  const slots = [];
+
+  filled.forEach(cliente => {
+    slots.push(`<div class="client-badge" title="${cliente}">${cliente}</div>`);
+  });
+
+  for(let i = 0; i < emptyCount; i++){
+    slots.push(`<div class="client-badge empty"></div>`);
+  }
+
+  return slots.join('');
+}
+
+function getTemperatureStyle(temp){
+  if(temp >= 0) return 'linear-gradient(135deg,#16a34a,#22c55e)';
+  if(temp > -10) return 'linear-gradient(135deg,#0891b2,#06b6d4)';
+  if(temp > -20) return 'linear-gradient(135deg,#2563eb,#3b82f6)';
+  if(temp > -25) return 'linear-gradient(135deg,#4338ca,#6366f1)';
+  return 'linear-gradient(135deg,#7e22ce,#a855f7)';
+}
+
+function formatTemperature(temp){
+  return `${temp}°C`;
+}
+
+function buildStatusRow(item){
+  const puertaClass = item.puerta ? 'true-state' : 'false-state';
+  const ventiladorClass = item.ventilador ? 'true-state' : 'false-state';
+
+  return `
+    <div class="dashboard-status-row">
+      <div class="status-box ${puertaClass}" title="Puerta">🚪</div>
+      <div class="status-box ${ventiladorClass}" title="Ventilador">🌀</div>
+    </div>
+  `;
+}
+
+function renderDashboardLogisticaNacional(){
+  setHeader('DASHBOARD LOGISTICA NACIONAL');
+  menuGrid.className = '';
+  menuGrid.innerHTML = '';
+
+  const dashboardGrid = document.createElement('div');
+  dashboardGrid.className = 'dashboard-grid';
+
+  dashboardLogisticaNacionalData.forEach(item => {
+    const card = document.createElement('button');
+    card.className = 'dashboard-card';
+    card.type = 'button';
+
+    card.innerHTML = `
+      <div class="dashboard-left">
+        <div class="dashboard-temp" style="background:${getTemperatureStyle(item.temperatura)}">
+          <div class="dashboard-temp-label">Temp.</div>
+          <div class="dashboard-temp-value">${formatTemperature(item.temperatura)}</div>
+        </div>
+        <div class="dashboard-alert">
+          <div class="dashboard-alert-value">${item.extra}</div>
+        </div>
+      </div>
+
+      <div class="dashboard-main">
+        <div class="dashboard-title">${item.tipo} ${item.nombre}</div>
+        <div class="dashboard-number">${item.estibas}</div>
+        <div class="dashboard-sub">ESTIBAS</div>
+        ${buildStatusRow(item)}
+      </div>
+
+      <div class="dashboard-clients">
+        ${buildClientSlots(item.clientes)}
+      </div>
+    `;
+
+    dashboardGrid.appendChild(card);
+  });
+
+  menuGrid.appendChild(dashboardGrid);
+  backBtn.disabled = historyStack.length === 0;
+}
+
+function getEquipmentCardClass(estado){
+  if(estado === 'En marcha') return 'state-running-card';
+  if(estado === 'Cargando') return 'state-charging-card';
+  return 'state-failure-card';
+}
+
+function renderDashboardEquipamiento(){
+  setHeader('DASHBOARD EQUIPAMIENTO');
+  menuGrid.className = '';
+  menuGrid.innerHTML = '';
+
+  const equipmentGrid = document.createElement('div');
+  equipmentGrid.className = 'equipment-grid';
+
+  dashboardEquipamientoData.forEach(item => {
+    const card = document.createElement('div');
+    card.className = `equipment-card ${getEquipmentCardClass(item.estado)}`;
+
+    card.innerHTML = `
+      <div class="equipment-header">
+        <div class="equipment-icon">${getEquipmentIconMarkup(item)}</div>
+        <div class="equipment-title-wrap">
+          <div class="equipment-type">${item.tipo}</div>
+          <div class="equipment-name">${item.denominacion}</div>
+        </div>
+      </div>
+
+      <div class="equipment-row">
+        <div class="equipment-label">Estado</div>
+        <div class="equipment-value"><span class="state-badge">${item.estado}</span></div>
+      </div>
+
+      <div class="equipment-row">
+        <div class="equipment-label">Planta</div>
+        <div class="equipment-value"><span class="plant-badge">${item.planta}</span></div>
+      </div>
+
+      <div class="equipment-row">
+        <div class="equipment-label">Hs. estado</div>
+        <div class="equipment-value">${item.horas}</div>
+      </div>
+
+      <div class="equipment-row">
+        <div class="equipment-label">Usuario</div>
+        <div class="equipment-value">${item.usuario}</div>
+      </div>
+    `;
+
+    equipmentGrid.appendChild(card);
+  });
+
+  menuGrid.appendChild(equipmentGrid);
+  backBtn.disabled = historyStack.length === 0;
+}
+
+function renderMapaBoxes(){
+  setHeader('MAPA DE BOXES');
+  menuGrid.className = '';
+  menuGrid.innerHTML = '';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'boxes-wrap';
+  wrap.innerHTML = `
+    <div class="boxes-header">
+      <h2>Mapa interno de contenedores</h2>
+      <p>Presione el contenedor que desea consultar. El contenedor 6 abre el detalle solicitado.</p>
+    </div>
+    <div class="boxes-grid" id="boxesGrid"></div>
+  `;
+
+  const boxesGrid = wrap.querySelector('#boxesGrid');
+
+  boxesData.forEach(box => {
+    const btn = document.createElement('button');
+    btn.className = 'box-card';
+    btn.type = 'button';
+    btn.innerHTML = `
+      <div class="box-card-number">${box.numero}</div>
+      <div class="box-card-title">${box.titulo}</div>
+      <div class="box-card-meta">
+        Estiba: ${box.estiba}<br>
+        Ubicación: ${box.ubicacion}
+      </div>
+    `;
+
+    btn.addEventListener('click', () => {
+      historyStack.push({ title:'MAPA DE BOXES', custom:'mapa_boxes' });
+      if(box.numero === 6){
+        renderContenedor6Detail();
+      }else{
+        alert(`Contenedor ${box.numero} seleccionado`);
+      }
+    });
+
+    boxesGrid.appendChild(btn);
+  });
+
+  menuGrid.appendChild(wrap);
+  backBtn.disabled = historyStack.length === 0;
+}
+
+function renderContenedor6Detail(){
+  setHeader('ESTIBA 65984-3');
+  menuGrid.className = '';
+  menuGrid.innerHTML = `
+    <div class="estiba-detail-wrap">
+      <section class="estiba-header-card">
+        <div>
+          <h2 class="estiba-title">ESTIBA 65984-3</h2>
+          <p class="estiba-subtitle">Contenedor 6 · Información operativa y de calidad</p>
+        </div>
+
+        <div class="estiba-module-actions">
+          <button class="estiba-module-btn logistica" id="btnModuloLogistica">Logística</button>
+          <button class="estiba-module-btn calidad" id="btnModuloCalidad">Calidad</button>
+          <button class="estiba-module-btn salir" id="btnSalirMenuPrincipal">Salir al menú principal</button>
+        </div>
+      </section>
+
+      <section class="estiba-info-card">
+        <div class="estiba-info-grid">
+          <div class="estiba-info-box">
+            <div class="estiba-info-label">Ubicación</div>
+            <div class="estiba-info-value">16-5-4-2</div>
+          </div>
+
+          <div class="estiba-info-box">
+            <div class="estiba-info-label">Tipo</div>
+            <div class="estiba-info-value">Pallet</div>
+          </div>
+
+          <div class="estiba-info-box" style="grid-column:1 / -1;">
+            <div class="estiba-ocupacion">
+              <div class="estiba-ocupacion-top">
+                <div class="estiba-info-label">Ocupación</div>
+                <div class="estiba-info-value" style="margin-top:0;">78%</div>
+              </div>
+              <div class="estiba-progress">
+                <div class="estiba-progress-bar" style="width:78%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="estiba-actions-card">
+        <div class="estiba-actions-grid">
+          <button class="estiba-action-btn intervenir" id="btnAbrirIntervencion">Intervenir</button>
+          <button class="estiba-action-btn liberar" id="btnAbrirLiberacion">Liberar</button>
+          <button class="estiba-action-btn fotos" id="btnAbrirFotos">Cargar fotos</button>
+          <button class="estiba-action-btn temperaturas" id="btnAbrirTemperaturas">Cargar temperaturas</button>
+        </div>
+      </section>
+
+      <section class="estiba-detail-card">
+        <h3 class="estiba-detail-title">Detalle</h3>
+        <div class="estiba-detail-table">
+          ${detailProducts.map(item => `
+            <div class="estiba-detail-row">
+              <div class="estiba-detail-product">${item.producto}</div>
+              <div class="estiba-detail-date">${item.fecha}</div>
+            </div>
+          `).join('')}
+        </div>
+      </section>
+    </div>
+  `;
+
+  document.getElementById('btnAbrirIntervencion')?.addEventListener('click', () => {
+    historyStack.push({ title:'ESTIBA 65984-3', custom:'detalle_estiba_6' });
+    renderAccionEstibaForm('intervenir');
+  });
+
+  document.getElementById('btnAbrirLiberacion')?.addEventListener('click', () => {
+    historyStack.push({ title:'ESTIBA 65984-3', custom:'detalle_estiba_6' });
+    renderAccionEstibaForm('liberar');
+  });
+
+  document.getElementById('btnAbrirTemperaturas')?.addEventListener('click', () => {
+    historyStack.push({ title:'ESTIBA 65984-3', custom:'detalle_estiba_6' });
+    renderTemperaturasForm();
+  });
+
+  document.getElementById('btnAbrirFotos')?.addEventListener('click', () => {
+    alert('Abrir carga de fotos');
+  });
+
+  document.getElementById('btnModuloLogistica')?.addEventListener('click', () => {
+    alert('Abrir módulo Logística');
+  });
+
+  document.getElementById('btnModuloCalidad')?.addEventListener('click', () => {
+    alert('Abrir módulo Calidad');
+  });
+
+  document.getElementById('btnSalirMenuPrincipal')?.addEventListener('click', () => {
+    historyStack.length = 0;
+    renderNode(menuTree);
+  });
+
+  backBtn.disabled = historyStack.length === 0;
+}
+
+function renderAccionEstibaForm(tipoAccion){
+  const esLiberacion = tipoAccion === 'liberar';
+  const tituloAccion = esLiberacion ? 'LIBERACION DE ESTIBA' : 'INTERVENCION DE ESTIBA';
+  const verboAccion = esLiberacion ? 'Liberar' : 'Intervenir';
+  const descripcionAccion = esLiberacion
+    ? 'Complete la información para registrar la liberación.'
+    : 'Complete la información para registrar la intervención.';
+
+  setHeader(tituloAccion);
+  menuGrid.className = '';
+  menuGrid.innerHTML = `
+    <div class="intervencion-wrap">
+      <section class="intervencion-card">
+        <h2 class="intervencion-title">${verboAccion} estiba 65984-3</h2>
+        <p class="intervencion-subtitle">${descripcionAccion}</p>
+      </section>
+
+      <section class="intervencion-card">
+        <h3 class="intervencion-section-title">Tipo de ${esLiberacion ? 'liberación' : 'intervención'}</h3>
+
+        <div class="intervencion-options">
+          <label class="intervencion-option-row">
+            <input type="radio" name="tipoAccionEstiba" value="estiba_completa" checked>
+            <span class="intervencion-option-label">${verboAccion} estiba completa</span>
+          </label>
+
+          <label class="intervencion-option-row">
+            <input type="radio" name="tipoAccionEstiba" value="estiba_parcial">
+            <span class="intervencion-option-label">${verboAccion} estiba parcial</span>
+            <input
+              type="number"
+              id="cantidadParcial"
+              class="intervencion-partial-qty"
+              min="1"
+              placeholder="Cantidad"
+              disabled
+            >
+          </label>
+
+          <label class="intervencion-option-row">
+            <input type="radio" name="tipoAccionEstiba" value="entrada_entera">
+            <span class="intervencion-option-label">${verboAccion} entrada entera</span>
+          </label>
+        </div>
+      </section>
+
+      <section class="intervencion-card">
+        <div class="intervencion-field">
+          <label class="intervencion-label" for="motivoAccionEstiba">Motivo</label>
+          <select id="motivoAccionEstiba" class="intervencion-select">
+            <option value="">Seleccione una opción</option>
+            <option>A pedido del cliente</option>
+            <option>Calidad</option>
+            <option>Documentación</option>
+            <option>Envases rotos y/o con faltante</option>
+            <option>Mercadería vencida o pronta a vencer</option>
+            <option>Senasa</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="intervencion-card">
+        <div class="intervencion-field">
+          <label class="intervencion-label" for="observacionesAccionEstiba">Observaciones</label>
+          <textarea
+            id="observacionesAccionEstiba"
+            class="intervencion-textarea"
+            placeholder="Escriba aquí las observaciones..."
+          ></textarea>
+        </div>
+      </section>
+
+      <section class="intervencion-card">
+        <div class="intervencion-actions">
+          <button id="btnConfirmarAccionEstiba" class="intervencion-submit">${verboAccion}</button>
+        </div>
+      </section>
+    </div>
+  `;
+
+  const radios = document.querySelectorAll('input[name="tipoAccionEstiba"]');
+  const cantidadParcial = document.getElementById('cantidadParcial');
+  const btnConfirmar = document.getElementById('btnConfirmarAccionEstiba');
+
+  function updateCantidadParcial(){
+    const selected = document.querySelector('input[name="tipoAccionEstiba"]:checked')?.value;
+    const isParcial = selected === 'estiba_parcial';
+    cantidadParcial.disabled = !isParcial;
+    if(isParcial){
+      cantidadParcial.focus();
+    }else{
+      cantidadParcial.value = '';
+    }
+  }
+
+  radios.forEach(radio => {
+    radio.addEventListener('change', updateCantidadParcial);
+  });
+
+  updateCantidadParcial();
+
+  btnConfirmar.addEventListener('click', () => {
+    const tipo = document.querySelector('input[name="tipoAccionEstiba"]:checked')?.value || '';
+    const motivo = document.getElementById('motivoAccionEstiba')?.value || '';
+
+    if(!motivo){
+      alert(`Seleccione un motivo para ${esLiberacion ? 'la liberación' : 'la intervención'}.`);
+      return;
+    }
+
+    if(tipo === 'estiba_parcial'){
+      const cantidad = Number(cantidadParcial.value);
+      if(!cantidad || cantidad <= 0){
+        alert(`Ingrese la cantidad para ${esLiberacion ? 'la liberación' : 'la intervención'} parcial.`);
+        return;
+      }
+    }
+
+    historyStack.length = 0;
+    renderNode(menuTree);
+  });
+
+  backBtn.disabled = historyStack.length === 0;
+}
+
+function renderTemperaturasForm(){
+  setHeader('CARGA DE TEMPERATURAS');
+  menuGrid.className = '';
+  menuGrid.innerHTML = `
+    <div class="temperaturas-wrap">
+      <section class="temperaturas-card">
+        <h2 class="temperaturas-title">Cargar temperaturas de estiba 65984-3</h2>
+        <p class="temperaturas-subtitle">Seleccione hasta 10 productos y cargue 2 temperaturas por cada uno.</p>
+      </section>
+
+      <section class="temperaturas-card">
+        <h3 class="temperaturas-section-title">Temperaturas</h3>
+        <div class="temperaturas-list">
+          ${Array.from({length:10}, (_,i) => `
+            <div class="temperaturas-row">
+              <div class="temperaturas-row-title">Registro ${i+1}</div>
+
+              <div class="temperaturas-field">
+                <label class="temperaturas-label" for="producto_${i}">Producto</label>
+                <select id="producto_${i}" class="temperaturas-select">
+                  <option value="">Seleccione un producto</option>
+                  ${detailProducts.map(p => `<option value="${p.producto}">${p.producto}</option>`).join('')}
+                </select>
+              </div>
+
+              <div class="temperaturas-field">
+                <label class="temperaturas-label" for="temp1_${i}">Temperatura 1</label>
+                <input id="temp1_${i}" class="temperaturas-input" type="number" step="0.1" placeholder="Ej: -18.5">
+              </div>
+
+              <div class="temperaturas-field">
+                <label class="temperaturas-label" for="temp2_${i}">Temperatura 2</label>
+                <input id="temp2_${i}" class="temperaturas-input" type="number" step="0.1" placeholder="Ej: -17.9">
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </section>
+
+      <section class="temperaturas-card">
+        <div class="temperaturas-actions">
+          <button id="btnCargarTemperaturas" class="temperaturas-submit">Cargar datos</button>
+        </div>
+      </section>
+    </div>
+  `;
+
+  document.getElementById('btnCargarTemperaturas')?.addEventListener('click', () => {
+    let registrosValidos = 0;
+
+    for(let i = 0; i < 10; i++){
+      const producto = document.getElementById(`producto_${i}`)?.value || '';
+      const t1 = document.getElementById(`temp1_${i}`)?.value || '';
+      const t2 = document.getElementById(`temp2_${i}`)?.value || '';
+      const tieneAlgo = producto || t1 || t2;
+
+      if(tieneAlgo){
+        if(!producto){
+          alert(`Seleccione el producto en el registro ${i+1}.`);
+          return;
+        }
+        if(t1 === '' || t2 === ''){
+          alert(`Complete las 2 temperaturas del registro ${i+1}.`);
+          return;
+        }
+        registrosValidos++;
+      }
+    }
+
+    if(registrosValidos === 0){
+      alert('Cargue al menos un registro de temperatura.');
+      return;
+    }
+
+    historyStack.length = 0;
+    renderNode(menuTree);
+  });
+
+  backBtn.disabled = historyStack.length === 0;
+}
+
+function renderNode(node){
+  if(node.custom === 'mapa_boxes'){
+    renderMapaBoxes();
+    return;
+  }
+
+  if(node.custom === 'detalle_estiba_6'){
+    renderContenedor6Detail();
+    return;
+  }
+
+  const items = node.children || [];
+  const level = historyStack.length;
+
+  setHeader(level ? node.title : 'BIENVENIDOS AL SISTEMA DE GRUPO CINA');
+
+  menuGrid.className = `menu-grid ${getGridLayout(items.length || 1)}`;
+  menuGrid.innerHTML = '';
+
+  if(!items.length){
+    const tile = document.createElement('button');
+    tile.className = 'tile';
+    tile.type = 'button';
+    tile.style.background = 'linear-gradient(135deg,#163A7A,#0C2554)';
+    tile.innerHTML = `
+      <div class="tile-icon">${getIconMarkup(node.title)}</div>
+      <div class="tile-title ${titleClass(node.title)}">${formatTitle(node.title)}</div>
+    `;
+    if(node.url) tile.addEventListener('click', () => openModule(node.url));
+    menuGrid.appendChild(tile);
+  } else {
+    items.forEach(item => {
+      const colors = getTileColors(item, level);
+      const tile = document.createElement('button');
+      tile.className = 'tile';
+      tile.type = 'button';
+      tile.style.background = `linear-gradient(135deg,${colors.start},${colors.end})`;
+      tile.innerHTML = `
+        <div class="tile-icon">${getIconMarkup(item.title)}</div>
+        <div class="tile-title ${titleClass(item.title)}">${formatTitle(item.title)}</div>
+      `;
+
+      tile.addEventListener('click', () => {
+        if(item.title === 'MAPA DE BOXES'){
+          historyStack.push(node);
+          renderMapaBoxes();
+          return;
+        }
+
+        if(item.title === 'DASHBOARD LOGISTICA NACIONAL'){
+          historyStack.push(node);
+          renderDashboardLogisticaNacional();
+          return;
+        }
+
+        if(item.title === 'DASHBOARD EQUIPAMIENTO'){
+          historyStack.push(node);
+          renderDashboardEquipamiento();
+          return;
+        }
+
+        if(item.children){
+          historyStack.push(node);
+          renderNode(item);
+          return;
+        }
+
+        if(item.url){
+          openModule(item.url);
+          return;
+        }
+
+        historyStack.push(node);
+        renderNode({ title: item.title, url: item.url, children: [] });
+      });
+
+      menuGrid.appendChild(tile);
+    });
+  }
+
+  backBtn.disabled = historyStack.length === 0;
+}
+
+function updateAdaptiveLayout(){
+  const isFullscreen = !!document.fullscreenElement;
+  const isSmallWindow = window.innerHeight < 920 || window.innerWidth < 1500;
+
+  if(!isFullscreen || isSmallWindow){
+    document.body.classList.add('compact-mode');
+  } else {
+    document.body.classList.remove('compact-mode');
+  }
+}
+
+backBtn.addEventListener('click', () => {
+  if(!historyStack.length) return;
+  const previous = historyStack.pop();
+  renderNode(previous);
+});
+
+homeBtn.addEventListener('click', () => {
+  historyStack.length = 0;
+  renderNode(menuTree);
+});
+
+fullscreenBtn.addEventListener('click', async () => {
+  try{
+    if(!document.fullscreenElement){
+      await document.documentElement.requestFullscreen();
+    }else{
+      await document.exitFullscreen();
+    }
+  }catch(e){
+    console.error('No se pudo cambiar el modo de pantalla completa', e);
+  }finally{
+    updateAdaptiveLayout();
+  }
+});
+
+userBtn.addEventListener('click', () => openModule('https://sistema.cinafrio.com/intranet2/app.php/persona/306/show'));
+
+qrBox.addEventListener('click', () => {
+  historyStack.push(menuTree);
+  renderContenedor6Detail();
+});
+
+sinUbicacionBox.addEventListener('click', () => openModule('https://sistema.cinafrio.com/intranet/index.php/estiba/sinPosicion'));
+vencidasBox.addEventListener('click', () => openModule('https://sistema.cinafrio.com/intranet/index.php/infostock/vencimientos'));
+
+document.addEventListener('fullscreenchange', updateAdaptiveLayout);
+window.addEventListener('resize', updateAdaptiveLayout);
+
+updateAdaptiveLayout();
+renderNode(menuTree);
+</script>
+</body>
+</html>
