@@ -1741,3 +1741,77 @@ body{
     grid-template-columns: 1fr;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   INDICADOR — ANILLO SVG (reemplaza donut canvas)
+   ═══════════════════════════════════════════════════════════════ */
+
+.indicador-big-pct {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  flex-shrink: 0;
+}
+.indicador-ring-svg {
+  width: 180px;
+  height: 180px;
+  display: block;
+}
+.indicador-ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.indicador-ring-val {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+}
+.indicador-ring-sym {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: rgba(255,255,255,.7);
+}
+.indicador-ring-label {
+  font-size: .62rem;
+  font-weight: 800;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.5);
+}
+
+/* Card no-interactiva (posiciones) */
+.indicador-card-static {
+  cursor: default;
+  pointer-events: none;
+}
+.indicador-card-static:hover {
+  transform: none;
+  filter: none;
+  box-shadow: 0 16px 36px rgba(0,0,0,.32);
+}
+
+/* ── Posiciones chart ── */
+.posiciones-chart-wrap {
+  width: 100%;
+  height: 220px;
+}
+.posiciones-chart-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* ── Mes actual destacado ── */
+.ind-mes-actual {
+  border-color: rgba(54,176,201,.5) !important;
+  background: rgba(54,176,201,.12) !important;
+}
+.ind-mes-actual .ind-mes-label {
+  color: rgba(54,176,201,.9) !important;
+}

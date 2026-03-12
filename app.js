@@ -132,7 +132,7 @@ const menuTree = {
         { title: 'CARGAS I-2' },
         { title: 'MOVIMIENTOS' },
         { title: 'ESTADISTICAS DE PERSONAL' },
-        { title: 'ALMACENAMIENTO DE POSICIONES' },
+        { title: 'ALMACENAMIENTO DE POSICIONES' },  // I-36
         { title: 'ESTIBAS CREADAS ELIMINADAS' },
         { title: 'AJUSTES DE STOCK', url: 'https://sistema.cinafrio.com/intranet/index.php/infostock/ajusteManual' },
         { title: 'CLIENTES QUE OPERARON' }
@@ -246,13 +246,13 @@ const dashboardEquipamientoData = [
   { tipo:'Autoelevador',       icono:'img/autoelevadores.png', denominacion:'AE-06', estado:'Cargando',  planta:'Otros',          horas:'02:10hs', usuario:'mbazan',     isImage:true },
   { tipo:'Autoelevador',       icono:'img/autoelevadores.png', denominacion:'AE-07', estado:'En marcha', planta:'Deposito Fiscal',horas:'00:55hs', usuario:'fvera',      isImage:true },
   { tipo:'Autoelevador',       icono:'img/autoelevadores.png', denominacion:'AE-08', estado:'Falla',     planta:'Mantenimiento',  horas:'04:25hs', usuario:'acastro',    isImage:true },
-  { tipo:'Zorra electrica',    icono:'🟦',                   denominacion:'ZE-01', estado:'En marcha', planta:'Nacional',       horas:'00:32hs', usuario:'jmartin' },
-  { tipo:'Zorra electrica',    icono:'🟦',                   denominacion:'ZE-02', estado:'Cargando',  planta:'Nacional',       horas:'01:05hs', usuario:'rsosa' },
-  { tipo:'Zorra electrica',    icono:'🟦',                   denominacion:'ZE-03', estado:'En marcha', planta:'Deposito Fiscal',horas:'00:11hs', usuario:'pdominguez' },
-  { tipo:'Zorra electrica',    icono:'🟦',                   denominacion:'ZE-04', estado:'Falla',     planta:'Mantenimiento',  horas:'05:50hs', usuario:'cmedina' },
-  { tipo:'Zorra electrica',    icono:'🟦',                   denominacion:'ZE-05', estado:'En marcha', planta:'Otros',          horas:'00:48hs', usuario:'sgimenez' },
+  { tipo:'Zorra electrica',    icono:'img/apilador.png', isImage:true,                   denominacion:'ZE-01', estado:'En marcha', planta:'Nacional',       horas:'00:32hs', usuario:'jmartin' },
+  { tipo:'Zorra electrica',    icono:'img/apilador.png', isImage:true,                   denominacion:'ZE-02', estado:'Cargando',  planta:'Nacional',       horas:'01:05hs', usuario:'rsosa' },
+  { tipo:'Zorra electrica',    icono:'img/apilador.png', isImage:true,                   denominacion:'ZE-03', estado:'En marcha', planta:'Deposito Fiscal',horas:'00:11hs', usuario:'pdominguez' },
+  { tipo:'Zorra electrica',    icono:'img/apilador.png', isImage:true,                   denominacion:'ZE-04', estado:'Falla',     planta:'Mantenimiento',  horas:'05:50hs', usuario:'cmedina' },
+  { tipo:'Zorra electrica',    icono:'img/apilador.png', isImage:true,                   denominacion:'ZE-05', estado:'En marcha', planta:'Otros',          horas:'00:48hs', usuario:'sgimenez' },
   { tipo:'Autoelevador diesel', icono:'⛽',                  denominacion:'AD-01', estado:'En marcha', planta:'Deposito Fiscal',horas:'02:30hs', usuario:'rbenitez' },
-  { tipo:'Limpiador',           icono:'🤖',                  denominacion:'RL-01', estado:'Cargando',  planta:'Mantenimiento',  horas:'00:25hs', usuario:'lortiz' },
+  { tipo:'Limpiador',           icono:'img/robotlimpieza.png', isImage:true,                  denominacion:'RL-01', estado:'Cargando',  planta:'Mantenimiento',  horas:'00:25hs', usuario:'lortiz' },
   { tipo:'Camion',              icono:'🚚',                  denominacion:'CM-01', estado:'En marcha', planta:'Nacional',       horas:'06:10hs', usuario:'druiz' }
 ];
 
@@ -818,8 +818,7 @@ function renderIndicadorCargasI2() {
   menuGrid.appendChild(wrap);
   syncBackBtn();
 
-  // Dibujar donut con canvas nativo
-  requestAnimationFrame(() => drawCargasPie());
+  syncBackBtn();
 }
 
 function drawCargasPie() {
@@ -1054,6 +1053,195 @@ function drawCargasLine(startStr, endStr) {
         ctx.fill();
       });
     }
+  });
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   INDICADOR: POSICIONES ALMACENADAS I-36
+   ═══════════════════════════════════════════════════════════════ */
+
+const posicionesI36Mensual = [
+  { mes: 'Abr 24', valor: 5820 },
+  { mes: 'May 24', valor: 6100 },
+  { mes: 'Jun 24', valor: 5430 },
+  { mes: 'Jul 24', valor: 6350 },
+  { mes: 'Ago 24', valor: 5980 },
+  { mes: 'Sep 24', valor: 6220 },
+  { mes: 'Oct 24', valor: 5760 },
+  { mes: 'Nov 24', valor: 6480 },
+  { mes: 'Dic 24', valor: 5510 },
+  { mes: 'Ene 25', valor: 6040 },
+  { mes: 'Feb 25', valor: 5890 },
+  { mes: 'Mar 25', valor: 6500 },
+];
+
+function renderIndicadorPosiciones() {
+  setHeader('INDICADORES');
+  setExpandedMode(false);
+  showMetaPanel(true);
+  menuGrid.className = '';
+  menuGrid.innerHTML = '';
+
+  // Leer el valor actual del contenedor 5 (ESTIBAS EN PLANTA)
+  const estEl  = document.getElementById('estibas-en-planta');
+  const actual = estEl ? parseInt(estEl.textContent.replace(/\D/g,'')) || 6500 : 6500;
+
+  // Calcular promedio de los 12 meses
+  const promedio = Math.round(posicionesI36Mensual.reduce((s,m) => s + m.valor, 0) / posicionesI36Mensual.length);
+  const minVal   = 5000;
+  const maxVal   = 6500;
+  const pct      = Math.round(((actual - minVal) / (maxVal - minVal)) * 100);
+  const color    = actual >= 6200 ? '#00A887' : actual >= 5500 ? '#36B0C9' : '#F97316';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'indicador-wrap';
+
+  // ── Card principal ──────────────────────────────────────────
+  const card = document.createElement('div');
+  card.className = 'indicador-card indicador-card-static';
+  card.innerHTML = `
+    <div class="indicador-card-header">
+      <div class="indicador-card-title">
+        <span class="indicador-badge">I-36</span>
+        POSICIONES ALMACENADAS
+      </div>
+      <span class="indicador-hint">Promedio 12 meses: ${promedio.toLocaleString('es-AR')}</span>
+    </div>
+    <div class="indicador-card-body">
+      <div class="indicador-big-pct">
+        <svg viewBox="0 0 120 120" class="indicador-ring-svg">
+          <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="10"/>
+          <circle cx="60" cy="60" r="52" fill="none" stroke="${color}"
+            stroke-width="10" stroke-linecap="round"
+            stroke-dasharray="${Math.round(Math.min(pct,100) * 3.267)} 326.7"
+            transform="rotate(-90 60 60)"/>
+        </svg>
+        <div class="indicador-ring-center">
+          <span class="indicador-ring-val" style="font-size:1.6rem">${actual.toLocaleString('es-AR')}</span>
+          <span class="indicador-ring-label">POSICIONES</span>
+        </div>
+      </div>
+      <div class="indicador-legend">
+        <div class="ind-leg-item"><span class="ind-leg-dot" style="background:${color}"></span>Actuales<strong>${actual.toLocaleString('es-AR')}</strong></div>
+        <div class="ind-leg-item"><span class="ind-leg-dot" style="background:#36B0C9"></span>Promedio 12m<strong>${promedio.toLocaleString('es-AR')}</strong></div>
+        <div class="ind-leg-sep"></div>
+        <div class="ind-leg-item"><span style="color:rgba(255,255,255,.5);font-size:.75rem">Mín referencia</span><strong style="color:rgba(255,255,255,.5)">${minVal.toLocaleString('es-AR')}</strong></div>
+        <div class="ind-leg-item"><span style="color:rgba(255,255,255,.5);font-size:.75rem">Máx referencia</span><strong style="color:rgba(255,255,255,.5)">${maxVal.toLocaleString('es-AR')}</strong></div>
+      </div>
+    </div>
+  `;
+  wrap.appendChild(card);
+
+  // ── Gráfico de barras mensual ───────────────────────────────
+  const chartSection = document.createElement('div');
+  chartSection.className = 'indicador-mensual';
+  chartSection.innerHTML = `
+    <div class="indicador-mensual-title">📦 Posiciones promedio por mes — últimos 12 meses</div>
+    <div class="posiciones-chart-wrap">
+      <canvas id="posicionesBarChart"></canvas>
+    </div>
+  `;
+  wrap.appendChild(chartSection);
+
+  // ── Mini-cards mensuales ────────────────────────────────────
+  const gridSection = document.createElement('div');
+  gridSection.className = 'indicador-mensual';
+  gridSection.innerHTML = `
+    <div class="indicador-mensual-title">📊 Detalle mensual</div>
+    <div class="indicador-mensual-grid">
+      ${posicionesI36Mensual.map(m => {
+        const p   = Math.round(((m.valor - minVal) / (maxVal - minVal)) * 100);
+        const col = m.valor >= 6200 ? '#00A887' : m.valor >= 5500 ? '#36B0C9' : '#F97316';
+        const isActual = m.mes === posicionesI36Mensual[posicionesI36Mensual.length-1].mes;
+        return `
+          <div class="ind-mes-card${isActual ? ' ind-mes-actual' : ''}">
+            <div class="ind-mes-label">${m.mes}</div>
+            <div class="ind-mes-pct" style="color:${col}">${m.valor.toLocaleString('es-AR')}</div>
+            <div class="ind-mes-bar-wrap">
+              <div class="ind-mes-bar-fill" style="width:${p}%;background:${col}"></div>
+            </div>
+            <div class="ind-mes-detail">${isActual ? '← actual' : ''}</div>
+          </div>`;
+      }).join('')}
+    </div>
+  `;
+  wrap.appendChild(gridSection);
+  menuGrid.appendChild(wrap);
+  syncBackBtn();
+
+  // Dibujar gráfico de barras
+  requestAnimationFrame(() => drawPosicionesBar(minVal, maxVal));
+}
+
+function drawPosicionesBar(minRef, maxRef) {
+  const canvas = document.getElementById('posicionesBarChart');
+  if (!canvas) return;
+  const wrap = canvas.parentElement;
+  canvas.width  = wrap.clientWidth  || 700;
+  canvas.height = 220;
+  const W = canvas.width, H = canvas.height;
+  const PAD = { top: 20, right: 16, bottom: 38, left: 54 };
+  const chartW = W - PAD.left - PAD.right;
+  const chartH = H - PAD.top  - PAD.bottom;
+  const ctx = canvas.getContext('2d');
+  const data = posicionesI36Mensual;
+  const n = data.length;
+  const barW  = (chartW / n) * 0.62;
+  const gap   = (chartW / n) * 0.38;
+  const scale = 7000; // Y max
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid lines + Y labels
+  [5000, 5500, 6000, 6500].forEach(v => {
+    const y = PAD.top + chartH - ((v - 0) / scale) * chartH;
+    ctx.strokeStyle = 'rgba(255,255,255,.08)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left + chartW, y); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.45)';
+    ctx.font = '10px Segoe UI';
+    ctx.textAlign = 'right';
+    ctx.fillText(v.toLocaleString('es-AR'), PAD.left - 6, y + 4);
+  });
+
+  // Promedio line
+  const promedio = Math.round(data.reduce((s,m) => s + m.valor, 0) / data.length);
+  const promY = PAD.top + chartH - (promedio / scale) * chartH;
+  ctx.strokeStyle = 'rgba(54,176,201,.6)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([5, 4]);
+  ctx.beginPath(); ctx.moveTo(PAD.left, promY); ctx.lineTo(PAD.left + chartW, promY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(54,176,201,.9)';
+  ctx.font = 'bold 10px Segoe UI';
+  ctx.textAlign = 'left';
+  ctx.fillText('Prom. ' + promedio.toLocaleString('es-AR'), PAD.left + 4, promY - 4);
+
+  // Bars
+  data.forEach((m, i) => {
+    const x    = PAD.left + i * (barW + gap) + gap / 2;
+    const barH = (m.valor / scale) * chartH;
+    const y    = PAD.top + chartH - barH;
+    const col  = m.valor >= 6200 ? '#00A887' : m.valor >= 5500 ? '#36B0C9' : '#F97316';
+    const isLast = i === data.length - 1;
+
+    // Bar fill
+    ctx.fillStyle = isLast ? col : col + 'BB';
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(x, y, barW, barH, [4,4,0,0]) : ctx.rect(x, y, barW, barH);
+    ctx.fill();
+
+    // Value on top
+    ctx.fillStyle = isLast ? '#fff' : 'rgba(255,255,255,.72)';
+    ctx.font = (isLast ? 'bold ' : '') + '9px Segoe UI';
+    ctx.textAlign = 'center';
+    ctx.fillText(m.valor.toLocaleString('es-AR'), x + barW / 2, y - 4);
+
+    // X label
+    ctx.fillStyle = 'rgba(255,255,255,.55)';
+    ctx.font = '9px Segoe UI';
+    ctx.fillText(m.mes, x + barW / 2, H - PAD.bottom + 13);
   });
 }
 
@@ -1426,6 +1614,7 @@ function renderNode(node) {
         if (item.title === 'DASHBOARD LOGISTICA NACIONAL')   { historyStack.push(node); renderDashboardLogisticaNacional();   return; }
         if (item.title === 'DASHBOARD EQUIPAMIENTO')         { historyStack.push(node); renderDashboardEquipamiento();        return; }
         if (item.title === 'CARGAS I-2')                     { historyStack.push(node); renderIndicadorCargasI2();            return; }
+        if (item.title === 'ALMACENAMIENTO DE POSICIONES')   { historyStack.push(node); renderIndicadorPosiciones();          return; }
         if (item.children)                                   { historyStack.push(node); renderNode(item);                    return; }
         if (item.url)                                        { openModule(item.url);                                         return; }
         historyStack.push(node);
