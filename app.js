@@ -264,6 +264,7 @@ const detailProducts = [
 const historyStack = [];
 const menuGrid = document.getElementById('menuGrid');
 const screenTitle = document.getElementById('screenTitle');
+const menuWrap = document.querySelector('.menu-wrap');
 const screenSubtitle = document.getElementById('screenSubtitle');
 const backBtn = document.getElementById('backBtn');
 const homeBtn = document.getElementById('homeBtn');
@@ -549,6 +550,7 @@ function renderMapaBoxes(showOnlySelected = false){
 
 function renderContenedor6Detail(){
   setHeader('ESTIBA 65984-3');
+  setExpandedMode(true);
   menuGrid.className = '';
   menuGrid.innerHTML = `
     <div class="estiba-detail-wrap">
@@ -634,9 +636,10 @@ function renderContenedor6Detail(){
     window.print();
   });
 
-  document.getElementById('btnAbrirFotos')?.addEventListener('click', () => {
-    alert('Abrir carga de fotos');
-  });
+document.getElementById('btnAbrirFotos')?.addEventListener('click', () => {
+  historyStack.push({ title:'ESTIBA 65984-3', custom:'detalle_estiba_6' });
+  renderFotosForm();
+});
 
   document.getElementById('btnModuloLogistica')?.addEventListener('click', () => {
     alert('Abrir módulo Logística');
@@ -663,6 +666,7 @@ function renderAccionEstibaForm(tipoAccion){
     : 'Complete la información para registrar la intervención.';
 
   setHeader(tituloAccion);
+  setExpandedMode(true);
   menuGrid.className = '';
   menuGrid.innerHTML = `
     <div class="intervencion-wrap">
@@ -782,6 +786,7 @@ function renderAccionEstibaForm(tipoAccion){
 
 function renderTemperaturasForm(){
   setHeader('CARGA DE TEMPERATURAS');
+  setExpandedMode(true);
   menuGrid.className = '';
   menuGrid.innerHTML = `
     <div class="temperaturas-wrap">
@@ -862,6 +867,7 @@ function renderTemperaturasForm(){
 }
 
 function renderNode(node){
+    setExpandedMode(false);
   if(node.custom === 'mapa_boxes'){
     renderMapaBoxes();
     return;
@@ -1002,3 +1008,53 @@ window.addEventListener('resize', updateAdaptiveLayout);
 
 updateAdaptiveLayout();
 renderNode(menuTree);
+
+function setExpandedMode(enabled){
+  if(enabled){
+    menuWrap.classList.add('expanded');
+  } else {
+    menuWrap.classList.remove('expanded');
+  }
+}
+
+function renderFotosForm(){
+  setHeader('CARGA DE FOTOS');
+  setExpandedMode(true);
+  menuGrid.className = '';
+  menuGrid.innerHTML = `
+    <div class="intervencion-wrap">
+      <section class="intervencion-card">
+        <h2 class="intervencion-title">Cargar fotos de estiba 65984-3</h2>
+        <p class="intervencion-subtitle">Adjunte imágenes o evidencias de la estiba.</p>
+      </section>
+
+      <section class="intervencion-card">
+        <div class="intervencion-field">
+          <label class="intervencion-label">Seleccionar archivos</label>
+          <input type="file" multiple accept="image/*" class="intervencion-select">
+        </div>
+      </section>
+
+      <section class="intervencion-card">
+        <div class="intervencion-field">
+          <label class="intervencion-label">Observaciones</label>
+          <textarea class="intervencion-textarea" placeholder="Escriba aquí un detalle de las fotos cargadas..."></textarea>
+        </div>
+      </section>
+
+      <section class="intervencion-card">
+        <div class="intervencion-actions">
+          <button id="btnGuardarFotos" class="intervencion-submit">Guardar fotos</button>
+        </div>
+      </section>
+    </div>
+  `;
+
+  document.getElementById('btnGuardarFotos')?.addEventListener('click', () => {
+    historyStack.length = 0;
+    setExpandedMode(false);
+    renderNode(menuTree);
+  });
+
+  backBtn.disabled = historyStack.length === 0;
+}
