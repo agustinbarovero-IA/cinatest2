@@ -237,14 +237,14 @@ const dashboardLogisticaNacionalData = [
 /* ── DATOS EQUIPAMIENTO ─────────────────────────────────────── */
 // Array mutable — los cambios del usuario se persisten aquí en memoria
 const dashboardEquipamientoData = [
-  { tipo:'Autoelevador',       icono:'img/autoelevador.png', denominacion:'AE-01', estado:'En marcha', planta:'Nacional',       horas:'00:45hs', usuario:'jlopez',     isImage:true },
-  { tipo:'Autoelevador',       icono:'img/autoelevador.png', denominacion:'AE-02', estado:'Cargando',  planta:'Nacional',       horas:'01:20hs', usuario:'mrojas',     isImage:true },
-  { tipo:'Autoelevador',       icono:'img/autoelevador.png', denominacion:'AE-03', estado:'En marcha', planta:'Deposito Fiscal',horas:'00:15hs', usuario:'agarcia',    isImage:true },
-  { tipo:'Autoelevador',       icono:'img/autoelevador.png', denominacion:'AE-04', estado:'Falla',     planta:'Mantenimiento',  horas:'03:40hs', usuario:'lperez',     isImage:true },
-  { tipo:'Autoelevador',       icono:'img/autoelevador.png', denominacion:'AE-05', estado:'En marcha', planta:'Nacional',       horas:'00:05hs', usuario:'jgomez',     isImage:true },
-  { tipo:'Autoelevador',       icono:'img/autoelevador.png', denominacion:'AE-06', estado:'Cargando',  planta:'Otros',          horas:'02:10hs', usuario:'mbazan',     isImage:true },
-  { tipo:'Autoelevador',       icono:'img/autoelevador.png', denominacion:'AE-07', estado:'En marcha', planta:'Deposito Fiscal',horas:'00:55hs', usuario:'fvera',      isImage:true },
-  { tipo:'Autoelevador',       icono:'img/autoelevador.png', denominacion:'AE-08', estado:'Falla',     planta:'Mantenimiento',  horas:'04:25hs', usuario:'acastro',    isImage:true },
+  { tipo:'Autoelevador',       icono:'img/autoelevadores.png', denominacion:'AE-01', estado:'En marcha', planta:'Nacional',       horas:'00:45hs', usuario:'jlopez',     isImage:true },
+  { tipo:'Autoelevador',       icono:'img/autoelevadores.png', denominacion:'AE-02', estado:'Cargando',  planta:'Nacional',       horas:'01:20hs', usuario:'mrojas',     isImage:true },
+  { tipo:'Autoelevador',       icono:'img/autoelevadores.png', denominacion:'AE-03', estado:'En marcha', planta:'Deposito Fiscal',horas:'00:15hs', usuario:'agarcia',    isImage:true },
+  { tipo:'Autoelevador',       icono:'img/autoelevadores.png', denominacion:'AE-04', estado:'Falla',     planta:'Mantenimiento',  horas:'03:40hs', usuario:'lperez',     isImage:true },
+  { tipo:'Autoelevador',       icono:'img/autoelevadores.png', denominacion:'AE-05', estado:'En marcha', planta:'Nacional',       horas:'00:05hs', usuario:'jgomez',     isImage:true },
+  { tipo:'Autoelevador',       icono:'img/autoelevadores.png', denominacion:'AE-06', estado:'Cargando',  planta:'Otros',          horas:'02:10hs', usuario:'mbazan',     isImage:true },
+  { tipo:'Autoelevador',       icono:'img/autoelevadores.png', denominacion:'AE-07', estado:'En marcha', planta:'Deposito Fiscal',horas:'00:55hs', usuario:'fvera',      isImage:true },
+  { tipo:'Autoelevador',       icono:'img/autoelevadores.png', denominacion:'AE-08', estado:'Falla',     planta:'Mantenimiento',  horas:'04:25hs', usuario:'acastro',    isImage:true },
   { tipo:'Zorra electrica',    icono:'🟦',                   denominacion:'ZE-01', estado:'En marcha', planta:'Nacional',       horas:'00:32hs', usuario:'jmartin' },
   { tipo:'Zorra electrica',    icono:'🟦',                   denominacion:'ZE-02', estado:'Cargando',  planta:'Nacional',       horas:'01:05hs', usuario:'rsosa' },
   { tipo:'Zorra electrica',    icono:'🟦',                   denominacion:'ZE-03', estado:'En marcha', planta:'Deposito Fiscal',horas:'00:11hs', usuario:'pdominguez' },

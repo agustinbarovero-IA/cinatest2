@@ -1084,7 +1084,21 @@ body{
 @media (max-width:780px){
   /* Ocultar la tira de datos superior en mobile */
   .meta-panel{
-    display:none !important;
+    display:block !important;  /* mantener visible pero filtrar boxes */
+  }
+
+  /* Ocultar los primeros 5 boxes (tuneles, vehículos, estibas) */
+  .data-strip .data-box:nth-child(1),
+  .data-strip .data-box:nth-child(2),
+  .data-strip .data-box:nth-child(3),
+  .data-strip .data-box:nth-child(4),
+  .data-strip .data-box:nth-child(5){
+    display:none;
+  }
+
+  /* Los 3 restantes (QR, Sin Ubicación, Vencidas) en una fila de 3 columnas */
+  .data-strip{
+    grid-template-columns:repeat(3,1fr);
   }
 
   /* En mobile dejamos que el app-shell maneje el clip, no html/body */
@@ -1168,8 +1182,9 @@ body{
     grid-template-columns:repeat(2,minmax(100px,1fr));
   }
 
+  /* Mantener 3 columnas — solo 3 boxes visibles en mobile */
   .data-strip{
-    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-template-columns:repeat(3,1fr);
   }
 
   .boxes-grid{
