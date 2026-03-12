@@ -133,7 +133,7 @@ const menuTree = {
         { title: 'MOVIMIENTOS' },
         { title: 'ESTADISTICAS DE PERSONAL' },
         { title: 'ALMACENAMIENTO DE POSICIONES' },  // I-36
-        { title: 'ESTIBAS CREADAS ELIMINADAS' },
+        { title: 'POSICIONES INGRESADAS EGRESADAS' },
         { title: 'AJUSTES DE STOCK', url: 'https://sistema.cinafrio.com/intranet/index.php/infostock/ajusteManual' },
         { title: 'CLIENTES QUE OPERARON' }
       ]
@@ -343,6 +343,36 @@ function getCustomTileHTML(item) {
         <div class="tile-kpi-value" style="color:${color};font-size:1.5rem">${actual.toLocaleString('es-AR')}</div>
         <div class="tile-kpi-sublabel">POSICIONES</div>
         <div class="tile-title one-line" style="margin-top:6px">ALMACENAMIENTO</div>
+      </div>`;
+  }
+  // POSICIONES INGRESADAS/EGRESADAS: dos valores verde/rojo con barra
+  if (item.title === 'POSICIONES INGRESADAS EGRESADAS') {
+    return `
+      <div class="tile-kpi-wrap">
+        <div class="tile-kpi-top"><span class="tile-kpi-badge">I/E</span></div>
+        <div class="tile-kpi-dual">
+          <div class="tile-kpi-dual-item green">
+            <span class="tile-kpi-dual-val">14.340</span>
+            <span class="tile-kpi-dual-lbl">INGR.</span>
+          </div>
+          <div class="tile-kpi-dual-sep"></div>
+          <div class="tile-kpi-dual-item red">
+            <span class="tile-kpi-dual-val">15.405</span>
+            <span class="tile-kpi-dual-lbl">EGR.</span>
+          </div>
+        </div>
+        <div class="tile-title one-line" style="margin-top:4px;font-size:.7rem">POS. INGR / EGR</div>
+      </div>`;
+  }
+  // CLIENTES QUE OPERARON: cantidad de clientes
+  if (item.title === 'CLIENTES QUE OPERARON') {
+    const n = clientesOperaron.length;
+    return `
+      <div class="tile-kpi-wrap">
+        <div class="tile-kpi-top"><span class="tile-kpi-badge">CLI</span></div>
+        <div class="tile-kpi-value" style="color:#36B0C9;font-size:2rem">${n}</div>
+        <div class="tile-kpi-sublabel">CLIENTES</div>
+        <div class="tile-title one-line" style="margin-top:6px;font-size:.68rem">QUE OPERARON</div>
       </div>`;
   }
   return null; // usar HTML por defecto
@@ -1278,6 +1308,313 @@ function drawPosicionesBar(minRef, maxRef) {
   });
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   DATOS COMPARTIDOS
+   ═══════════════════════════════════════════════════════════════ */
+
+const clientesOperaron = [
+  'ARCOR S.A.',
+  'CINA S.R.L.',
+  'CONGELADOS DEL SUR S.A. EXP.',
+  'DROGUERÍA KELLERHOFF S.A.',
+  'ETHICAL NUTRITION S.A.',
+  'FROILÁN',
+  'GLUFREEZ (PAULA SILNIK)',
+  'HELACOR S.A. COMERCIO EXTERIOR',
+  'HELACOR S.A. DEPÓSITO NACIONAL',
+  'HELADOS ESTHER SRL',
+  'IPANCO SRL DF',
+  'IPANCO SRL DN',
+  'KECLON S.A.',
+  'LA SIBILA SA',
+  'LOGÍSTICA RR CONGELADOS SA',
+  'MCCAIN ARGENTINA SA',
+  'MINERVA ARGENTINA S.A. (INSUMOS)',
+  'MINERVA BEEF FIESTA',
+  'MINERVA FOOD (0013 PLANTA SWIFT)',
+  'MINERVA FOODS (1113 PLANTA VILLA MERCEDES)',
+  'MINERVA FOODS (1373 PLANTA VENADO TUERTO)',
+  'MINERVA FOODS (CTRO. DE DIST.) AMBIENTE',
+  'MINERVA FOODS (CTRO. DE DIST.) CONGELADO',
+  'MINERVA FOODS (CTRO. DE DIST.) ENFRIADO',
+  'MINERVA FOODS (IMPORTACIÓN)',
+  'MINERVA FOODS (MERCADERÍA DE TERCEROS)',
+  'MINERVA FOODS (ROSARIO MERCADO EXTERNO)',
+  'MINERVA FOODS BEEF CONGELADO',
+  'MINERVA FOODS EXTERNO FISCAL (DEVOLUCIÓN)',
+  'MINERVA FOODS IMPO FISCAL',
+  'MINERVA FOODS MERCADO BEEF (CORTES ENFRIADOS)',
+  'QUICKFOOD S.A. (MATERIA PRIMA)',
+  'QUICKFOOD S.A. VEGETALES',
+  'QUICKFOOD S.A. (SAN JORGE)',
+  'QUICKFOOD SAN JORGE DF',
+  'RAFAELA ALIMENTOS S.A. (CASILDA)',
+  'SAVAZ SRL',
+  'SAVAZ SRL EXP.',
+  'SEJAS, BOGDANICH Y FLORES GALARZA S.H.',
+  'SUDAMERICANA DE LÁCTEOS S.A.',
+  'TERRAGENE ENF S.A.',
+  'TERRAGENE SA.',
+  'TERRAGENE SECO S.A.',
+  'ULTRACONGELADOS ROSARIO',
+  'ULTRACONGELADOS ROSARIO S.A. EXP.',
+];
+
+const ingEgrData = [
+  { mes:'Abr 24', estIn:1820, estOut:1950, kgIn:2980000, kgOut:3120000 },
+  { mes:'May 24', estIn:2100, estOut:2240, kgIn:3280000, kgOut:3410000 },
+  { mes:'Jun 24', estIn:1650, estOut:1580, kgIn:2760000, kgOut:2690000 },
+  { mes:'Jul 24', estIn:2350, estOut:2480, kgIn:3540000, kgOut:3680000 },
+  { mes:'Ago 24', estIn:1980, estOut:2050, kgIn:3050000, kgOut:3190000 },
+  { mes:'Sep 24', estIn:2210, estOut:2180, kgIn:3310000, kgOut:3280000 },
+  { mes:'Oct 24', estIn:1760, estOut:1840, kgIn:2850000, kgOut:2940000 },
+  { mes:'Nov 24', estIn:2440, estOut:2560, kgIn:3620000, kgOut:3750000 },
+  { mes:'Dic 24', estIn:1590, estOut:1620, kgIn:2720000, kgOut:2800000 },
+  { mes:'Ene 25', estIn:2080, estOut:2150, kgIn:3160000, kgOut:3240000 },
+  { mes:'Feb 25', estIn:1920, estOut:1990, kgIn:2990000, kgOut:3080000 },
+  { mes:'Mar 25', estIn:2260, estOut:2380, kgIn:3400000, kgOut:3520000 },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   INDICADOR: CLIENTES QUE OPERARON
+   ═══════════════════════════════════════════════════════════════ */
+function renderIndicadorClientes() {
+  setHeader('INDICADORES');
+  setExpandedMode(false);
+  showMetaPanel(true);
+  menuGrid.className = '';
+  menuGrid.innerHTML = '';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'indicador-wrap';
+
+  // Header card
+  const header = document.createElement('div');
+  header.className = 'indicador-card indicador-card-static';
+  header.innerHTML = `
+    <div class="indicador-card-header">
+      <div class="indicador-card-title">
+        <span class="indicador-badge">CLI</span>
+        CLIENTES QUE OPERARON
+      </div>
+      <span class="indicador-hint">${clientesOperaron.length} clientes activos este período</span>
+    </div>`;
+  wrap.appendChild(header);
+
+  // Search + list
+  const listSection = document.createElement('div');
+  listSection.className = 'indicador-mensual clientes-section';
+  listSection.innerHTML = `
+    <div class="clientes-search-wrap">
+      <input type="text" id="clientesSearch" class="equip-modal-input clientes-search"
+        placeholder="🔍  Buscar cliente..." autocomplete="off">
+      <span class="clientes-count" id="clientesCount">${clientesOperaron.length} clientes</span>
+    </div>
+    <div class="clientes-grid" id="clientesGrid">
+      ${clientesOperaron.map((c, i) => `
+        <div class="cliente-row" data-name="${c.toLowerCase()}">
+          <span class="cliente-num">${String(i+1).padStart(2,'0')}</span>
+          <span class="cliente-name">${c}</span>
+          <span class="cliente-dot"></span>
+        </div>`).join('')}
+    </div>
+  `;
+  wrap.appendChild(listSection);
+  menuGrid.appendChild(wrap);
+  syncBackBtn();
+
+  // Live search
+  requestAnimationFrame(() => {
+    const input = document.getElementById('clientesSearch');
+    const grid  = document.getElementById('clientesGrid');
+    const count = document.getElementById('clientesCount');
+    if (!input) return;
+    input.addEventListener('input', () => {
+      const q = input.value.toLowerCase().trim();
+      let visible = 0;
+      grid.querySelectorAll('.cliente-row').forEach(row => {
+        const match = !q || row.dataset.name.includes(q);
+        row.style.display = match ? '' : 'none';
+        if (match) visible++;
+      });
+      count.textContent = visible + ' clientes';
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INDICADOR: POSICIONES INGRESADAS / EGRESADAS
+   ═══════════════════════════════════════════════════════════════ */
+function renderIndicadorIngEgr() {
+  setHeader('INDICADORES');
+  setExpandedMode(false);
+  showMetaPanel(true);
+  menuGrid.className = '';
+  menuGrid.innerHTML = '';
+
+  const totalIn  = ingEgrData.reduce((s,m) => s + m.estIn,  0);
+  const totalOut = ingEgrData.reduce((s,m) => s + m.estOut, 0);
+  const totalKgIn  = ingEgrData.reduce((s,m) => s + m.kgIn,  0);
+  const totalKgOut = ingEgrData.reduce((s,m) => s + m.kgOut, 0);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'indicador-wrap';
+
+  // Header card con totales
+  const header = document.createElement('div');
+  header.className = 'indicador-card indicador-card-static';
+  header.innerHTML = `
+    <div class="indicador-card-header">
+      <div class="indicador-card-title">
+        <span class="indicador-badge">I/E</span>
+        POSICIONES INGRESADAS / EGRESADAS
+      </div>
+      <span class="indicador-hint">Últimos 12 meses</span>
+    </div>
+    <div class="inegr-totales">
+      <div class="inegr-total-item">
+        <span class="inegr-total-label">Total Estibas Ingresadas</span>
+        <span class="inegr-total-val green">${totalIn.toLocaleString('es-AR')}</span>
+      </div>
+      <div class="inegr-total-sep"></div>
+      <div class="inegr-total-item">
+        <span class="inegr-total-label">Total Estibas Egresadas</span>
+        <span class="inegr-total-val red">${totalOut.toLocaleString('es-AR')}</span>
+      </div>
+      <div class="inegr-total-sep"></div>
+      <div class="inegr-total-item">
+        <span class="inegr-total-label">Total Kg Ingresados</span>
+        <span class="inegr-total-val green">${(totalKgIn/1e6).toFixed(1)}M kg</span>
+      </div>
+      <div class="inegr-total-sep"></div>
+      <div class="inegr-total-item">
+        <span class="inegr-total-label">Total Kg Egresados</span>
+        <span class="inegr-total-val red">${(totalKgOut/1e6).toFixed(1)}M kg</span>
+      </div>
+    </div>`;
+  wrap.appendChild(header);
+
+  // ── 3 gráficos de ESTIBAS ──────────────────────────────────
+  const chartsTitles = [
+    { id:'chartEstIn',    title:'📦 Estibas Ingresadas — mes a mes',  key:'estIn',  color:'#00A887' },
+    { id:'chartEstOut',   title:'📤 Estibas Egresadas — mes a mes',   key:'estOut', color:'#DC2626' },
+    { id:'chartEstSum',   title:'📊 Estibas Totales (Ingr + Egr)',    key:null,     color:'#36B0C9', isSum:true },
+  ];
+  chartsTitles.forEach(cfg => {
+    const sec = document.createElement('div');
+    sec.className = 'indicador-mensual';
+    sec.innerHTML = `
+      <div class="indicador-mensual-title">${cfg.title}</div>
+      <div class="inegr-chart-wrap"><canvas id="${cfg.id}"></canvas></div>`;
+    wrap.appendChild(sec);
+  });
+
+  // ── 3 gráficos de KG ──────────────────────────────────────
+  const kgCharts = [
+    { id:'chartKgIn',  title:'⚖ Kg Ingresados — mes a mes',    key:'kgIn',  color:'#00A887' },
+    { id:'chartKgOut', title:'⚖ Kg Egresados — mes a mes',     key:'kgOut', color:'#DC2626' },
+    { id:'chartKgSum', title:'⚖ Kg Totales (Ingr + Egr)',      key:null,    color:'#36B0C9', isSum:true, isKg:true },
+  ];
+  kgCharts.forEach(cfg => {
+    const sec = document.createElement('div');
+    sec.className = 'indicador-mensual';
+    sec.innerHTML = `
+      <div class="indicador-mensual-title">${cfg.title}</div>
+      <div class="inegr-chart-wrap"><canvas id="${cfg.id}"></canvas></div>`;
+    wrap.appendChild(sec);
+  });
+
+  menuGrid.appendChild(wrap);
+  syncBackBtn();
+
+  // Dibujar todos los gráficos
+  requestAnimationFrame(() => {
+    [...chartsTitles, ...kgCharts].forEach(cfg => drawIngEgrBar(cfg));
+  });
+}
+
+function drawIngEgrBar(cfg) {
+  const canvas = document.getElementById(cfg.id);
+  if (!canvas) return;
+  const wrap = canvas.parentElement;
+  canvas.width  = wrap.clientWidth || 700;
+  canvas.height = 200;
+  const W = canvas.width, H = canvas.height;
+  const PAD = { top:22, right:16, bottom:38, left: cfg.isKg ? 68 : 48 };
+  const chartW = W - PAD.left - PAD.right;
+  const chartH = H - PAD.top  - PAD.bottom;
+  const ctx = canvas.getContext('2d');
+  const data = ingEgrData;
+  const n = data.length;
+
+  // Build values array
+  const vals = data.map(m => {
+    if (cfg.isSum) return cfg.isKg ? m.kgIn + m.kgOut : m.estIn + m.estOut;
+    return m[cfg.key];
+  });
+  const maxVal = Math.max(...vals) * 1.12;
+  const barW = (chartW / n) * 0.58;
+  const gap  = (chartW / n) * 0.42;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid
+  for (let i = 0; i <= 4; i++) {
+    const y = PAD.top + chartH - (i/4) * chartH;
+    ctx.strokeStyle = 'rgba(255,255,255,.07)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left + chartW, y); ctx.stroke();
+    const lbl = cfg.isKg
+      ? ((maxVal * i/4)/1e6).toFixed(1) + 'M'
+      : Math.round(maxVal * i/4).toLocaleString('es-AR');
+    ctx.fillStyle = 'rgba(255,255,255,.42)';
+    ctx.font = '9px Segoe UI';
+    ctx.textAlign = 'right';
+    ctx.fillText(lbl, PAD.left - 5, y + 3);
+  }
+
+  // Bars
+  vals.forEach((v, i) => {
+    const x    = PAD.left + i * (barW + gap) + gap/2;
+    const bH   = (v / maxVal) * chartH;
+    const y    = PAD.top + chartH - bH;
+    const isLast = i === n - 1;
+
+    ctx.fillStyle = isLast ? cfg.color : cfg.color + 'AA';
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x, y, barW, bH, [3,3,0,0]);
+    else ctx.rect(x, y, barW, bH);
+    ctx.fill();
+
+    // Value on top
+    ctx.fillStyle = isLast ? '#fff' : 'rgba(255,255,255,.7)';
+    ctx.font = (isLast ? 'bold ' : '') + '9px Segoe UI';
+    ctx.textAlign = 'center';
+    const vlbl = cfg.isKg ? (v/1e6).toFixed(2)+'M' : v.toLocaleString('es-AR');
+    ctx.fillText(vlbl, x + barW/2, y - 4);
+
+    // X label
+    ctx.fillStyle = 'rgba(255,255,255,.52)';
+    ctx.font = '9px Segoe UI';
+    ctx.fillText(data[i].mes, x + barW/2, H - PAD.bottom + 13);
+  });
+
+  // Promedio line
+  const prom = vals.reduce((s,v) => s+v, 0) / vals.length;
+  const promY = PAD.top + chartH - (prom / maxVal) * chartH;
+  ctx.strokeStyle = 'rgba(255,255,255,.3)';
+  ctx.lineWidth = 1.2;
+  ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(PAD.left, promY); ctx.lineTo(PAD.left + chartW, promY); ctx.stroke();
+  ctx.setLineDash([]);
+  const promLbl = cfg.isKg ? 'Prom ' + (prom/1e6).toFixed(2)+'M' : 'Prom ' + Math.round(prom).toLocaleString('es-AR');
+  ctx.fillStyle = 'rgba(255,255,255,.55)';
+  ctx.font = '9px Segoe UI';
+  ctx.textAlign = 'left';
+  ctx.fillText(promLbl, PAD.left + 4, promY - 4);
+}
+
 function renderMapaBoxes() {
   setHeader('MAPA DE BOXES');
   setExpandedMode(true);
@@ -1648,6 +1985,8 @@ function renderNode(node) {
         if (item.title === 'DASHBOARD EQUIPAMIENTO')         { historyStack.push(node); renderDashboardEquipamiento();        return; }
         if (item.title === 'CARGAS I-2')                     { historyStack.push(node); renderIndicadorCargasI2();            return; }
         if (item.title === 'ALMACENAMIENTO DE POSICIONES')   { historyStack.push(node); renderIndicadorPosiciones();          return; }
+        if (item.title === 'POSICIONES INGRESADAS EGRESADAS') { historyStack.push(node); renderIndicadorIngEgr();             return; }
+        if (item.title === 'CLIENTES QUE OPERARON')           { historyStack.push(node); renderIndicadorClientes();            return; }
         if (item.children)                                   { historyStack.push(node); renderNode(item);                    return; }
         if (item.url)                                        { openModule(item.url);                                         return; }
         historyStack.push(node);
