@@ -500,7 +500,7 @@ function renderDashboardEquipamiento(){
   backBtn.disabled = historyStack.length === 0;
 }
 
-function renderMapaBoxes(){
+function renderMapaBoxes(showOnlySelected = false){
   setHeader('MAPA DE BOXES');
   menuGrid.className = '';
   menuGrid.innerHTML = '';
@@ -510,14 +510,15 @@ function renderMapaBoxes(){
   wrap.innerHTML = `
     <div class="boxes-header">
       <h2>Mapa interno de contenedores</h2>
-      <p>Presione el contenedor que desea consultar. El contenedor 6 abre el detalle solicitado.</p>
+      <p>${showOnlySelected ? 'Vista simplificada para lectura desde QR.' : 'Presione el contenedor que desea consultar. El contenedor 6 abre el detalle solicitado.'}</p>
     </div>
     <div class="boxes-grid" id="boxesGrid"></div>
   `;
 
   const boxesGrid = wrap.querySelector('#boxesGrid');
+  const visibleBoxes = showOnlySelected ? boxesData.filter(box => box.numero === 6) : boxesData;
 
-  boxesData.forEach(box => {
+  visibleBoxes.forEach(box => {
     const btn = document.createElement('button');
     btn.className = 'box-card';
     btn.type = 'button';
@@ -594,6 +595,7 @@ function renderContenedor6Detail(){
         <div class="estiba-actions-grid">
           <button class="estiba-action-btn intervenir" id="btnAbrirIntervencion">Intervenir</button>
           <button class="estiba-action-btn liberar" id="btnAbrirLiberacion">Liberar</button>
+          <button class="estiba-action-btn imprimir" id="btnImprimirEstiba">Imprimir estiba</button>
           <button class="estiba-action-btn fotos" id="btnAbrirFotos">Cargar fotos</button>
           <button class="estiba-action-btn temperaturas" id="btnAbrirTemperaturas">Cargar temperaturas</button>
         </div>
@@ -626,6 +628,10 @@ function renderContenedor6Detail(){
   document.getElementById('btnAbrirTemperaturas')?.addEventListener('click', () => {
     historyStack.push({ title:'ESTIBA 65984-3', custom:'detalle_estiba_6' });
     renderTemperaturasForm();
+  });
+
+  document.getElementById('btnImprimirEstiba')?.addEventListener('click', () => {
+    window.print();
   });
 
   document.getElementById('btnAbrirFotos')?.addEventListener('click', () => {
@@ -928,7 +934,7 @@ function renderNode(node){
         }
 
         historyStack.push(node);
-        renderNode({ title: item.title, url: item.url, children: [] });
+        renderNode({ title:item.title, url:item.url, children:[] });
       });
 
       menuGrid.appendChild(tile);
@@ -980,7 +986,7 @@ userBtn.addEventListener('click', () => {
 
 qrBox.addEventListener('click', () => {
   historyStack.push(menuTree);
-  renderContenedor6Detail();
+  renderMapaBoxes(true);
 });
 
 sinUbicacionBox.addEventListener('click', () => {
