@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+:root {
+  --bg-main: #001F60;
+  --bg-deep: #00174a;
+  --bg-dark: #000f30;
+  --text: #ffffff;
+  --text-soft: rgba(255, 255, 255, .82);
+  --shadow-main: 0 14px 28px rgba(0, 0, 0, .24);
+  --radius-lg: 20px;
+  --gap: 14px;
+  --grid-max: 1500px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Segoe UI", Inter, Tahoma, Verdana, sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(54, 176, 201, .22), transparent 26%),
+    radial-gradient(circle at bottom right, rgba(0, 168, 135, .18), transparent 24%),
+    linear-gradient(135deg, var(--bg-main), var(--bg-deep) 55%, var(--bg-dark));
+  overflow-x: hidden;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 8px;
+  padding: 10px;
+  min-height: 100vh;
+}
+
+.topbar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .08);
+  box-shadow: var(--shadow-main);
+}
+
+.brand { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.brand img { height: 54px; width: auto; object-fit: contain; }
+.brand h1 { margin: 0; font-size: 1.3rem; font-weight: 700; }
+.brand p { margin: 4px 0 0; color: var(--text-soft); font-size: .85rem; }
+
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.toolbar button {
+  background: rgba(255, 255, 255, .1);
+  border: 0;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .18s ease;
+  font-size: .9rem;
+}
+.toolbar button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, .18);
+  transform: translateY(-1px);
+}
+.toolbar .btn-user { background: linear-gradient(135deg, #36B0C9, #00A887); }
+
+.data-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 7px; }
+.data-box {
+  min-height: 52px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 7px 9px;
+  font-size: .74rem;
+  font-weight: 700;
+  color: #fff;
+  box-shadow: var(--shadow-main);
+}
+.data-box.green { background: linear-gradient(135deg, #047857, #059669); }
+.data-box.red { background: linear-gradient(135deg, #b91c1c, #dc2626); }
+.data-box.orange { background: linear-gradient(135deg, #ea580c, #f97316); }
+.data-box.qr { background: linear-gradient(135deg, #001F60, #36B0C9); cursor: pointer; }
+
+.workspace { min-height: 0; overflow: auto; display: flex; justify-content: center; padding: 20px 0; }
+.menu-grid { display: grid; gap: var(--gap); width: 100%; max-width: var(--grid-max); }
+.layout-4x4 { grid-template-columns: repeat(4, 1fr); max-width: 900px; }
+.layout-8x2 { grid-template-columns: repeat(8, 1fr); }
+
+.tile {
+  aspect-ratio: 1/1;
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  color: white;
+  font-weight: 700;
+  text-transform: uppercase;
+  box-shadow: var(--shadow-main);
+  cursor: pointer;
+  transition: all .18s ease;
+  border: 1px solid rgba(255, 255, 255, .18);
+  background: #163A7A;
+}
+.tile:hover { transform: translateY(-4px); filter: brightness(1.1); }
+
+/* Dashboards y detalles */
+.dashboard-grid, .equipment-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; width: 100%; }
+.dashboard-card, .equipment-card {
+  background: linear-gradient(135deg, #163A7A, #0C2554);
+  border-radius: 18px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  box-shadow: var(--shadow-main);
+}
+
+.footer-bar { text-align: center; font-size: .74rem; opacity: .7; padding: 10px; }
+
+/* Modo Compacto */
+body.compact-mode .app-shell { gap: 6px; padding: 8px; }
+body.compact-mode .topbar { padding: 8px 14px; }
+body.compact-mode .brand img { height: 42px; }
+
+@media(max-width: 768px) {
+  .topbar { grid-template-columns: 1fr; }
+  .layout-4x4, .layout-8x2 { grid-template-columns: repeat(2, 1fr); }
+  .data-strip { grid-template-columns: repeat(2, 1fr); }
+}
