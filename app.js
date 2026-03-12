@@ -315,6 +315,39 @@ function getTextInitials(text) {
   return text.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
 }
 
+function getCustomTileHTML(item) {
+  // CARGAS I-2: mostrar % cumplimiento actual
+  if (item.title === 'CARGAS I-2') {
+    const pct   = Math.round((cargasI2Data.cumplidas / (cargasI2Data.planificadas || 1)) * 100);
+    const color = pct >= 80 ? '#00A887' : pct >= 60 ? '#F97316' : '#DC2626';
+    return `
+      <div class="tile-kpi-wrap">
+        <div class="tile-kpi-top">
+          <span class="tile-kpi-badge">I-2</span>
+        </div>
+        <div class="tile-kpi-value" style="color:${color}">${pct}<span class="tile-kpi-sym">%</span></div>
+        <div class="tile-kpi-sublabel">CUMPLIMIENTO</div>
+        <div class="tile-title one-line" style="margin-top:6px">CARGAS</div>
+      </div>`;
+  }
+  // ALMACENAMIENTO DE POSICIONES I-36: mostrar valor actual del contenedor 5
+  if (item.title === 'ALMACENAMIENTO DE POSICIONES') {
+    const estEl  = document.getElementById('estibas-en-planta');
+    const actual = estEl ? parseInt(estEl.textContent.replace(/\D/g,'')) || 6500 : 6500;
+    const color  = actual >= 6200 ? '#00A887' : actual >= 5500 ? '#36B0C9' : '#F97316';
+    return `
+      <div class="tile-kpi-wrap">
+        <div class="tile-kpi-top">
+          <span class="tile-kpi-badge">I-36</span>
+        </div>
+        <div class="tile-kpi-value" style="color:${color};font-size:1.5rem">${actual.toLocaleString('es-AR')}</div>
+        <div class="tile-kpi-sublabel">POSICIONES</div>
+        <div class="tile-title one-line" style="margin-top:6px">ALMACENAMIENTO</div>
+      </div>`;
+  }
+  return null; // usar HTML por defecto
+}
+
 function getIconMarkup(title) {
   const imageMap = {
     'SISTEMA DE GESTION': 'img/iso_logo.png',
@@ -1605,7 +1638,7 @@ function renderNode(node) {
       tile.className = 'tile';
       tile.type = 'button';
       tile.style.background = `linear-gradient(135deg,${colors.start},${colors.end})`;
-      tile.innerHTML = `
+      tile.innerHTML = getCustomTileHTML(item) || `
         <div class="tile-icon">${getIconMarkup(item.title)}</div>
         <div class="tile-title ${titleClass(item.title)}">${formatTitle(item.title)}</div>`;
 
