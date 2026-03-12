@@ -501,8 +501,9 @@ function renderDashboardEquipamiento(){
   backBtn.disabled = historyStack.length === 0;
 }
 
-function renderMapaBoxes(showOnlySelected = false){
+function renderMapaBoxes(){
   setHeader('MAPA DE BOXES');
+  setExpandedMode(false);
   menuGrid.className = '';
   menuGrid.innerHTML = '';
 
@@ -511,15 +512,14 @@ function renderMapaBoxes(showOnlySelected = false){
   wrap.innerHTML = `
     <div class="boxes-header">
       <h2>Mapa interno de contenedores</h2>
-      <p>${showOnlySelected ? 'Vista simplificada para lectura desde QR.' : 'Presione el contenedor que desea consultar. El contenedor 6 abre el detalle solicitado.'}</p>
+      <p>Presione el contenedor que desea consultar. El contenedor 6 abre el detalle solicitado.</p>
     </div>
     <div class="boxes-grid" id="boxesGrid"></div>
   `;
 
   const boxesGrid = wrap.querySelector('#boxesGrid');
-  const visibleBoxes = showOnlySelected ? boxesData.filter(box => box.numero === 6) : boxesData;
 
-  visibleBoxes.forEach(box => {
+  boxesData.forEach(box => {
     const btn = document.createElement('button');
     btn.className = 'box-card';
     btn.type = 'button';
@@ -537,7 +537,7 @@ function renderMapaBoxes(showOnlySelected = false){
       if(box.numero === 6){
         renderContenedor6Detail();
       } else {
-        alert(`Contenedor ${box.numero} seleccionado`);
+        alert(\`Contenedor \${box.numero} seleccionado\`);
       }
     });
 
@@ -867,7 +867,8 @@ function renderTemperaturasForm(){
 }
 
 function renderNode(node){
-    setExpandedMode(false);
+  setExpandedMode(false);
+
   if(node.custom === 'mapa_boxes'){
     renderMapaBoxes();
     return;
@@ -992,7 +993,7 @@ userBtn.addEventListener('click', () => {
 
 qrBox.addEventListener('click', () => {
   historyStack.push(menuTree);
-  renderMapaBoxes(true);
+  renderContenedor6Detail();
 });
 
 sinUbicacionBox.addEventListener('click', () => {
