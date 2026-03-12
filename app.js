@@ -245,13 +245,13 @@ const dashboardEquipamientoData = [
   { tipo:'Autoelevador',       icono:'img/autoelevadores.png', denominacion:'AE-06', estado:'Cargando',  planta:'Otros',          horas:'02:10hs', usuario:'mbazan',     isImage:true },
   { tipo:'Autoelevador',       icono:'img/autoelevadores.png', denominacion:'AE-07', estado:'En marcha', planta:'Deposito Fiscal',horas:'00:55hs', usuario:'fvera',      isImage:true },
   { tipo:'Autoelevador',       icono:'img/autoelevadores.png', denominacion:'AE-08', estado:'Falla',     planta:'Mantenimiento',  horas:'04:25hs', usuario:'acastro',    isImage:true },
-  { tipo:'Zorra electrica',    icono:'img/apilador.png',denominacion:'ZE-01', estado:'En marcha', planta:'Nacional',       horas:'00:32hs', usuario:'jmartin' },
-  { tipo:'Zorra electrica',    icono:'img/apilador.png',denominacion:'ZE-02', estado:'Cargando',  planta:'Nacional',       horas:'01:05hs', usuario:'rsosa' },
-  { tipo:'Zorra electrica',    icono:'img/apilador.png',denominacion:'ZE-03', estado:'En marcha', planta:'Deposito Fiscal',horas:'00:11hs', usuario:'pdominguez' },
-  { tipo:'Zorra electrica',    icono:'img/apilador.png',denominacion:'ZE-04', estado:'Falla',     planta:'Mantenimiento',  horas:'05:50hs', usuario:'cmedina' },
-  { tipo:'Zorra electrica',    icono:'img/apilador.png',denominacion:'ZE-05', estado:'En marcha', planta:'Otros',          horas:'00:48hs', usuario:'sgimenez' },
-  { tipo:'Autoelevador diesel', icono:'img/autoelevadores.png',denominacion:'AD-01', estado:'En marcha', planta:'Deposito Fiscal',horas:'02:30hs', usuario:'rbenitez' },
-  { tipo:'Limpiador',           icono:'img/robotlimpieza.png',denominacion:'RL-01', estado:'Cargando',  planta:'Mantenimiento',  horas:'00:25hs', usuario:'lortiz' },
+  { tipo:'Zorra electrica',    icono:'img/apilador.png', denominacion:'ZE-01', estado:'En marcha', planta:'Nacional',       horas:'00:32hs', usuario:'jmartin' },
+  { tipo:'Zorra electrica',    icono:'img/apilador.png', denominacion:'ZE-02', estado:'Cargando',  planta:'Nacional',       horas:'01:05hs', usuario:'rsosa' },
+  { tipo:'Zorra electrica',    icono:'img/apilador.png', denominacion:'ZE-03', estado:'En marcha', planta:'Deposito Fiscal',horas:'00:11hs', usuario:'pdominguez' },
+  { tipo:'Zorra electrica',    icono:'img/apilador.png', denominacion:'ZE-04', estado:'Falla',     planta:'Mantenimiento',  horas:'05:50hs', usuario:'cmedina' },
+  { tipo:'Zorra electrica',    icono:'img/apilador.png', denominacion:'ZE-05', estado:'En marcha', planta:'Otros',          horas:'00:48hs', usuario:'sgimenez' },
+  { tipo:'Autoelevador diesel', icono:'img/autoelevadores.png', denominacion:'AD-01', estado:'En marcha', planta:'Deposito Fiscal',horas:'02:30hs', usuario:'rbenitez' },
+  { tipo:'Limpiador',           icono:'img/robotlimpieza.png', denominacion:'RL-01', estado:'Cargando',  planta:'Mantenimiento',  horas:'00:25hs', usuario:'lortiz' },
   { tipo:'Camion',              icono:'🚚',                  denominacion:'CM-01', estado:'En marcha', planta:'Nacional',       horas:'06:10hs', usuario:'druiz' }
 ];
 
