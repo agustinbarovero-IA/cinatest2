@@ -1082,6 +1082,11 @@ body{
 
 /* MOBILE */
 @media (max-width:780px){
+  /* Ocultar la tira de datos superior en mobile */
+  .meta-panel{
+    display:none !important;
+  }
+
   /* En mobile dejamos que el app-shell maneje el clip, no html/body */
   html,body{
     overflow:visible;
