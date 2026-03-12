@@ -1155,3 +1155,58 @@ body{
     grid-template-columns:1fr;
   }
 }
+
+/* MODO PANTALLA DE TRABAJO */
+.menu-wrap.expanded{
+  max-width:100%;
+}
+
+.menu-wrap.expanded .estiba-detail-wrap,
+.menu-wrap.expanded .intervencion-wrap,
+.menu-wrap.expanded .temperaturas-wrap,
+.menu-wrap.expanded .boxes-wrap{
+  max-width:100%;
+}
+
+.menu-wrap.expanded .estiba-detail-wrap{
+  max-width:1400px;
+}
+
+.menu-wrap.expanded .intervencion-wrap{
+  max-width:1200px;
+}
+
+.menu-wrap.expanded .temperaturas-wrap{
+  max-width:1400px;
+}
+
+.menu-wrap.expanded .boxes-wrap{
+  max-width:1400px;
+}
+
+.menu-wrap.expanded .temperaturas-list{
+  width:100%;
+}
+
+.menu-wrap.expanded .temperaturas-row{
+  grid-template-columns:1.3fr .85fr .85fr;
+}
+
+@media (max-width:900px){
+  .menu-wrap.expanded .estiba-detail-wrap,
+  .menu-wrap.expanded .intervencion-wrap,
+  .menu-wrap.expanded .temperaturas-wrap,
+  .menu-wrap.expanded .boxes-wrap{
+    max-width:100%;
+  }
+}
+
+@media (max-width:780px){
+  .menu-wrap.expanded{
+    max-width:100%;
+  }
+
+  .menu-wrap.expanded .temperaturas-row{
+    grid-template-columns:1fr;
+  }
+}
