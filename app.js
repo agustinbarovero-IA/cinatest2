@@ -2757,6 +2757,7 @@ function renderContenedor6Detail() {
           <button class="estiba-action-btn imprimir"     id="btnImprimirEstiba">Imprimir estiba</button>
           <button class="estiba-action-btn fotos"        id="btnAbrirFotos">Cargar fotos</button>
           <button class="estiba-action-btn temperaturas" id="btnAbrirTemperaturas">Cargar temperaturas</button>
+          <button class="estiba-action-btn certificado" id="btnAbrirCertificado">Control certificado</button>
         </div>
       </section>
 
@@ -2788,6 +2789,10 @@ function renderContenedor6Detail() {
   document.getElementById('btnAbrirFotos').addEventListener('click', () => {
     historyStack.push({ title: 'ESTIBA 65984-3', custom: 'detalle_estiba_6' });
     renderFotosForm();
+  });
+  document.getElementById('btnAbrirCertificado').addEventListener('click', () => {
+    historyStack.push({ title: 'ESTIBA 65984-3', custom: 'detalle_estiba_6' });
+    renderControlCertificado();
   });
   document.getElementById('btnModuloLogistica').addEventListener('click', () => { alert('Abrir módulo Logística'); });
   document.getElementById('btnModuloCalidad').addEventListener('click',   () => { alert('Abrir módulo Calidad'); });
@@ -4167,9 +4172,8 @@ function renderDetalleOC(ord) {
   const now    = () => new Date().toLocaleDateString('es-AR');
 
   const puedeAutorizar  = ['PENDIENTE','EN_REVISION'].includes(ord.estado);
-  const puedeCargarProv = ord.estado === 'SIN_PROV';
-  const puedeConfirmar  = ord.estado === 'AUTORIZADA' && ord.proveedor;
-  const puedeFactura    = ord.estado === 'CONFIRMADA';
+  const puedeCargarProv = ord.estado === 'AUTORIZADA' && !ord.proveedor;
+  const puedeFactura    = ord.estado === 'AUTORIZADA' && ord.proveedor;
   const puedeAbonar     = ord.estado === 'FACTURADA';
 
   const wrap = document.createElement('div');
@@ -4227,41 +4231,44 @@ function renderDetalleOC(ord) {
 
       ${puedeCargarProv ? `
         <div class="oc-accion-bloque">
-          <label class="fact-date-label">Cargar proveedor para poder imprimir y continuar</label>
+          <div class="oc-comentario-box" style="margin-bottom:8px">
+            🏭 Orden autorizada sin proveedor. Asigná uno para poder registrar la factura.
+          </div>
+          <label class="fact-date-label">Proveedor</label>
           <select class="oc-select" id="detProvSelect" style="margin-top:6px">
             <option value="">— Seleccionar proveedor —</option>
             ${comprasDB.proveedores.map(p => '<option value="' + p + '"' + (ord.proveedor===p?' selected':'') + '>' + p + '</option>').join('')}
           </select>
           <div class="oc-accion-btns" style="margin-top:10px">
             <button class="fact-download-btn oc-btn-aprobar" data-act="guardarProv">💾 Guardar proveedor</button>
-            <button class="fact-download-btn" style="background:linear-gradient(135deg,#1A4E8A,#0E3060)" data-act="imprimir">🖨 Imprimir OC</button>
           </div>
         </div>` : ''}
 
-      ${puedeConfirmar ? `
-        <div class="oc-accion-bloque">
-          <div class="oc-accion-btns">
-            <button class="fact-download-btn" style="background:linear-gradient(135deg,#1A4E8A,#0E3060)" data-act="imprimir">🖨 Imprimir OC</button>
-            <button class="fact-download-btn oc-btn-aprobar" data-act="confirmarRecep">📦 Confirmar recepción y aprobar</button>
-          </div>
-        </div>` : ''}
 
       ${puedeFactura ? `
         <div class="oc-accion-bloque">
+          <div class="oc-comentario-box" style="margin-bottom:10px">
+            ✅ Orden autorizada &nbsp;·&nbsp; Proveedor: ${ord.proveedor}
+          </div>
           <div class="oc-fields-grid">
             <div class="oc-field-group">
-              <label class="fact-date-label">Fecha de factura</label>
+              <label class="fact-date-label">Fecha de la factura</label>
               <input class="fact-date-input" id="detFechaFact" type="date" value="${new Date().toISOString().split('T')[0]}" />
             </div>
             <div class="oc-field-group">
               <label class="fact-date-label">Plazo de pago</label>
               <select class="oc-select" id="detPlazo">
-                <option>Contado</option><option>15 días</option><option>30 días</option>
-                <option>45 días</option><option>60 días</option><option>90 días</option>
+                <option value="0">Contado</option>
+                <option value="15">15 días</option>
+                <option value="30">30 días</option>
+                <option value="45">45 días</option>
+                <option value="60">60 días</option>
+                <option value="90">90 días</option>
               </select>
             </div>
           </div>
           <div class="oc-accion-btns" style="margin-top:10px">
+            <button class="fact-download-btn" style="background:linear-gradient(135deg,#1A4E8A,#0E3060)" data-act="imprimir">🖨 Imprimir OC</button>
             <button class="fact-download-btn oc-btn-aprobar" data-act="recibirFactura">🧾 Registrar factura recibida</button>
           </div>
         </div>` : ''}
@@ -4314,14 +4321,9 @@ function renderDetalleOC(ord) {
     const n   = now();
 
     if (act === 'aprobar') {
-      if (!ord.proveedor && !ord.tieneProveedor) {
-        ord.estado = 'SIN_PROV';
-        ord.historial.push({ accion:'Autorizada — pendiente de asignar proveedor', fecha:n, user:'autorizador', obs });
-      } else {
-        ord.estado = 'AUTORIZADA';
-        ord.historial.push({ accion:'Aprobada', fecha:n, user:'autorizador', obs });
-      }
-      showToast('✅ Orden aprobada');
+      ord.estado = 'AUTORIZADA';
+      ord.historial.push({ accion:'Aprobada — en espera de factura', fecha:n, user:'autorizador', obs });
+      showToast('✅ Orden autorizada');
       setTimeout(() => renderDetalleOC(ord), 400);
     } else if (act === 'revision') {
       ord.estado = 'EN_REVISION';
@@ -4340,7 +4342,7 @@ function renderDetalleOC(ord) {
       if (!sel) { showToast('⚠ Seleccioná un proveedor'); return; }
       ord.proveedor = sel; ord.tieneProveedor = true;
       ord.historial.push({ accion:'Proveedor asignado: ' + sel, fecha:n, user:'agustin.barovero' });
-      showToast('🏭 Proveedor guardado');
+      showToast('🏭 Proveedor guardado — ya podés registrar la factura');
       setTimeout(() => renderDetalleOC(ord), 400);
     } else if (act === 'imprimir') {
       showToast('🖨 Abriendo impresión...');
@@ -4353,6 +4355,7 @@ function renderDetalleOC(ord) {
     } else if (act === 'recibirFactura') {
       const ff   = wrap.querySelector('#detFechaFact')?.value;
       const pl   = wrap.querySelector('#detPlazo')?.value;
+      if (!ff) { showToast('⚠ Indicá la fecha de la factura'); return; }
       ord.estado = 'FACTURADA';
       ord.fechaFactura = ff; ord.plazo = pl;
       const dias = parseInt(pl)||0;
@@ -4370,4 +4373,147 @@ function renderDetalleOC(ord) {
       setTimeout(() => renderDetalleOC(ord), 400);
     }
   });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MÓDULO: CONTROL DE CALIDAD — CERTIFICADO DE TEMPERATURA
+   Basado en formulario físico SENASA / CINA
+   ═══════════════════════════════════════════════════════════════ */
+function renderControlCertificado() {
+  setHeader('CONTROL CERTIFICADO');
+  setExpandedMode(true);
+  showMetaPanel(false);
+  menuGrid.className = '';
+
+  const checkItems = [
+    { id: 'condTransporte',   label: 'Cond. de Transporte',               opA: 'Aceptable',         opB: 'Inaceptable'      },
+    { id: 'examOrgano',       label: 'Exámen Organoléptico',              opA: 'Aceptable',         opB: 'Inaceptable'      },
+    { id: 'estadoEnvases',    label: 'Estado de los Envases',             opA: 'Aceptable',         opB: 'Inaceptable'      },
+    { id: 'estadoTarimas',    label: 'Estado de las Tarimas',             opA: 'Aceptable',         opB: 'Inaceptable'      },
+    { id: 'estadoSanitario',  label: 'Estado Sanitario del Transporte',   opA: 'Aceptable',         opB: 'Inaceptable'      },
+    { id: 'estadoParedes',    label: 'Estado de las Paredes, Piso y Techo', opA: 'Aceptable',       opB: 'Inaceptable'      },
+    { id: 'equipoFrio',       label: 'Funcionamiento del Equipo de Frío', opA: 'En funcionamiento', opB: 'Fuera de servicio' },
+    { id: 'setPoint',         label: 'Set Point Equipo de Frío vs. Carga',opA: 'Correcto',          opB: 'Incorrecto'       },
+  ];
+
+  menuGrid.innerHTML = `
+    <div class="cert-wrap">
+      <div class="cert-header">
+        <div class="cert-header-title">
+          <span class="indicador-badge" style="background:rgba(0,168,135,.2);color:#00A887;border-color:rgba(0,168,135,.4)">QR</span>
+          CONTROL DE CERTIFICADO — ESTIBA 65984-3
+        </div>
+        <span class="indicador-hint">Completá los datos del certificado de temperatura al momento de la recepción</span>
+      </div>
+
+      <!-- Temperatura certificado + Termómetro -->
+      <div class="cert-section">
+        <div class="cert-section-title">
+          <span class="cert-section-icon">🌡</span> Temperatura y termómetro
+        </div>
+        <div class="cert-top-grid">
+          <div class="cert-field-group">
+            <label class="cert-label">Temperatura indicada en el certificado (°C)</label>
+            <div class="cert-temp-input-wrap">
+              <input class="cert-temp-input" id="certTemp" type="number" step="0.1" placeholder="ej. −18.5" />
+              <span class="cert-temp-unit">°C</span>
+            </div>
+          </div>
+          <div class="cert-field-group">
+            <label class="cert-label">Termómetro N°</label>
+            <input class="cert-text-input" id="certTermometro" type="text" placeholder="N° de termómetro" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Checklist -->
+      <div class="cert-section">
+        <div class="cert-section-title">
+          <span class="cert-section-icon">✅</span> Checklist de recepción
+          <span class="cert-check-count" id="certCheckCount">0 / ${checkItems.length} completados</span>
+        </div>
+        <div class="cert-checklist" id="certChecklist">
+          ${checkItems.map((item, idx) => `
+            <div class="cert-check-row" id="row_${item.id}">
+              <div class="cert-check-label">${idx + 1}. ${item.label}</div>
+              <div class="cert-check-options">
+                <button class="cert-opt-btn cert-opt-a" data-id="${item.id}" data-val="A">
+                  <span class="cert-opt-icon">○</span> ${item.opA}
+                </button>
+                <button class="cert-opt-btn cert-opt-b" data-id="${item.id}" data-val="B">
+                  <span class="cert-opt-icon">○</span> ${item.opB}
+                </button>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- Observaciones -->
+      <div class="cert-section">
+        <div class="cert-section-title"><span class="cert-section-icon">💬</span> Observaciones</div>
+        <textarea class="oc-textarea" id="certObs" placeholder="Observaciones sobre el estado de la mercadería..." rows="3"></textarea>
+      </div>
+
+      <!-- Guardar -->
+      <div class="cert-section" style="background:transparent;border:none;padding:4px 0">
+        <button class="fact-download-btn cert-save-btn" id="certSaveBtn" disabled>
+          💾 Guardar control de certificado
+        </button>
+      </div>
+    </div>`;
+
+  syncBackBtn();
+
+  const selections = {};
+  const total      = checkItems.length;
+  const countEl    = document.getElementById('certCheckCount');
+  const saveBtn    = document.getElementById('certSaveBtn');
+
+  const updateCount = () => {
+    const done = Object.keys(selections).length;
+    countEl.textContent = done + ' / ' + total + ' completados';
+    countEl.style.color = done === total ? '#00A887' : 'rgba(255,255,255,.4)';
+    saveBtn.disabled = done < total;
+  };
+
+  document.getElementById('certChecklist').addEventListener('click', e => {
+    const btn = e.target.closest('.cert-opt-btn');
+    if (!btn) return;
+    const id  = btn.dataset.id;
+    const val = btn.dataset.val;
+    selections[id] = val;
+
+    // Toggle visual en la fila
+    const row = document.getElementById('row_' + id);
+    row.querySelectorAll('.cert-opt-btn').forEach(b => {
+      b.classList.remove('selected-a', 'selected-b');
+      b.querySelector('.cert-opt-icon').textContent = '○';
+    });
+    btn.classList.add(val === 'A' ? 'selected-a' : 'selected-b');
+    btn.querySelector('.cert-opt-icon').textContent = '●';
+    row.classList.add('row-done');
+
+    updateCount();
+  });
+
+  saveBtn.addEventListener('click', () => {
+    const temp    = document.getElementById('certTemp').value;
+    const termom  = document.getElementById('certTermometro').value;
+    if (!temp) { showToast('⚠ Ingresá la temperatura del certificado'); return; }
+
+    // Verificar si hay inaceptables
+    const inaceptables = checkItems.filter(item => selections[item.id] === 'B').map(i => i.label);
+    if (inaceptables.length > 0) {
+      showToast('⚠ Hay ' + inaceptables.length + ' ítem(s) inaceptable(s)');
+    } else {
+      showToast('✅ Control guardado — todos los ítems aceptables');
+    }
+
+    setTimeout(() => {
+      historyStack.length = 0;
+      renderContenedor6Detail();
+    }, 800);
+  });
+
+  updateCount();
 }
