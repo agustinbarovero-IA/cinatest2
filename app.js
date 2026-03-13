@@ -71,8 +71,8 @@ const menuTree = {
       title: 'ADMINISTRACION',
       children: [
         { title: 'FACTURACION' },
-        { title: 'REMITOS',     url: 'https://sistema.cinafrio.com/intranet/index.php/facturacion/remitos' },
-        { title: 'COMPRAS',     url: 'https://sistema.cinafrio.com/intranet/index.php/pim/index/estadoPIM/1' }
+        { title: 'REMITOS' },
+        { title: 'COMPRAS' }
       ]
     },
     {
@@ -3019,6 +3019,8 @@ function renderNode(node) {
         if (item.title === 'ESTIBAS CONGELADAS')             { historyStack.push(node); renderIndicadorEstibasCongeladas();   return; }
         if (item.children)                                   { historyStack.push(node); renderNode(item);                    return; }
         if (item.title === 'FACTURACION' && node.title === 'ADMINISTRACION') { historyStack.push(node); renderFacturacion(); return; }
+        if (item.title === 'REMITOS'     && node.title === 'ADMINISTRACION') { historyStack.push(node); renderRemitos();      return; }
+        if (item.title === 'COMPRAS'     && node.title === 'ADMINISTRACION') { historyStack.push(node); renderCompras();      return; }
         if (item.url)                                        { openModule(item.url);                                         return; }
         historyStack.push(node);
         renderNode({ title: item.title, url: item.url, children: [] });
@@ -3505,4 +3507,773 @@ function renderFacturacion() {
   });
 
   updateUI();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MÓDULO: REMITOS (igual a facturación, descarga remitos)
+   ═══════════════════════════════════════════════════════════════ */
+function renderRemitos() {
+  setHeader('ADMINISTRACION');
+  setExpandedMode(false);
+  showMetaPanel(true);
+  menuGrid.className = '';
+  menuGrid.innerHTML = '';
+
+  let seleccionados = new Set();
+  const hoy          = new Date();
+  const primeroDeMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+  const fmtDate      = d => d.toISOString().split('T')[0];
+
+  const wrap = document.createElement('div');
+  wrap.className = 'fact-wrap';
+  wrap.innerHTML = `
+    <div class="fact-header">
+      <div class="fact-header-title">
+        <span class="indicador-badge" style="background:rgba(167,139,250,.2);color:#A78BFA;border-color:rgba(167,139,250,.35)">REM</span>
+        REMITOS — RESÚMENES POR CLIENTE
+      </div>
+      <span class="indicador-hint">Seleccioná clientes, período y descargá los remitos</span>
+    </div>
+    <div class="fact-section">
+      <div class="fact-section-title">
+        <span class="fact-section-icon">👥</span>
+        Clientes que operaron en el mes
+        <span class="fact-sel-count" id="remSelCount">0 seleccionados</span>
+        <button class="fact-sel-all-btn" id="remSelAll">Seleccionar todos</button>
+        <button class="fact-sel-none-btn" id="remSelNone">Limpiar</button>
+      </div>
+      <div class="fact-search-wrap">
+        <input class="fact-search" id="remSearch" type="text" placeholder="🔍  Buscar cliente..." autocomplete="off" />
+      </div>
+      <div class="fact-clients-grid" id="remClientsGrid">
+        ${clientesOperaron.map((c, i) => `
+          <button class="fact-client-chip" data-idx="${i}" data-name="${c.toLowerCase()}" title="${c}">
+            <span class="fact-chip-check">✓</span>
+            <span class="fact-chip-name">${c}</span>
+          </button>`).join('')}
+      </div>
+    </div>
+    <div class="fact-section fact-period-section">
+      <div class="fact-section-title">
+        <span class="fact-section-icon">📅</span>
+        Período
+      </div>
+      <div class="fact-period-row">
+        <div class="fact-date-group">
+          <label class="fact-date-label">Desde</label>
+          <input class="fact-date-input" id="remDesde" type="date" value="${fmtDate(primeroDeMes)}" />
+        </div>
+        <div class="fact-period-sep">→</div>
+        <div class="fact-date-group">
+          <label class="fact-date-label">Hasta</label>
+          <input class="fact-date-input" id="remHasta" type="date" value="${fmtDate(hoy)}" />
+        </div>
+        <div class="fact-period-shortcuts">
+          <button class="fact-shortcut-btn" data-range="mes">Mes actual</button>
+          <button class="fact-shortcut-btn" data-range="mesant">Mes anterior</button>
+          <button class="fact-shortcut-btn" data-range="trim">Trimestre</button>
+          <button class="fact-shortcut-btn" data-range="anio">Año</button>
+        </div>
+      </div>
+    </div>
+    <div class="fact-section fact-download-section">
+      <div class="fact-section-title">
+        <span class="fact-section-icon">📄</span>
+        Remitos a generar
+        <span class="fact-hint-small" id="remHint">Seleccioná al menos un cliente</span>
+      </div>
+      <div class="fact-download-row">
+        <div class="fact-summary-preview" id="remPreview">
+          <span class="fact-preview-empty">— sin clientes seleccionados —</span>
+        </div>
+        <button class="fact-download-btn" id="remDownBtn" style="background:linear-gradient(135deg,#7C3AED,#5B21B6);box-shadow:0 6px 20px rgba(124,58,237,.3)" disabled>
+          ⬇ Descargar remitos
+        </button>
+      </div>
+    </div>`;
+
+  menuGrid.appendChild(wrap);
+  syncBackBtn();
+
+  const grid      = wrap.querySelector('#remClientsGrid');
+  const searchEl  = wrap.querySelector('#remSearch');
+  const countEl   = wrap.querySelector('#remSelCount');
+  const previewEl = wrap.querySelector('#remPreview');
+  const dlBtn     = wrap.querySelector('#remDownBtn');
+  const hintEl    = wrap.querySelector('#remHint');
+
+  const updateUI = () => {
+    const n = seleccionados.size;
+    countEl.textContent = n === 0 ? '0 seleccionados' : n === 1 ? '1 seleccionado' : n + ' seleccionados';
+    countEl.style.color = n > 0 ? '#A78BFA' : 'rgba(255,255,255,.4)';
+    dlBtn.disabled = n === 0;
+    hintEl.textContent = n === 0 ? 'Seleccioná al menos un cliente'
+      : n + ' remito' + (n>1?'s':'') + ' · ' + wrap.querySelector('#remDesde').value + ' → ' + wrap.querySelector('#remHasta').value;
+    hintEl.style.color = n > 0 ? '#A78BFA' : 'rgba(255,255,255,.35)';
+    if (n === 0) {
+      previewEl.innerHTML = '<span class="fact-preview-empty">— sin clientes seleccionados —</span>';
+    } else {
+      previewEl.innerHTML = [...seleccionados].map(i =>
+        '<div class="fact-preview-chip" style="background:rgba(124,58,237,.15);border-color:rgba(124,58,237,.3)">'
+        + '<span class="fact-preview-name">' + clientesOperaron[i] + '</span>'
+        + '<span class="fact-preview-period">' + wrap.querySelector('#remDesde').value + ' → ' + wrap.querySelector('#remHasta').value + '</span>'
+        + '</div>'
+      ).join('');
+    }
+  };
+
+  grid.addEventListener('click', e => {
+    const chip = e.target.closest('.fact-client-chip');
+    if (!chip) return;
+    const idx = parseInt(chip.dataset.idx);
+    if (seleccionados.has(idx)) { seleccionados.delete(idx); chip.classList.remove('selected'); }
+    else { seleccionados.add(idx); chip.classList.add('selected'); }
+    updateUI();
+  });
+
+  searchEl.addEventListener('input', () => {
+    const q = searchEl.value.toLowerCase().trim();
+    grid.querySelectorAll('.fact-client-chip').forEach(c => {
+      c.style.display = (!q || c.dataset.name.includes(q)) ? '' : 'none';
+    });
+  });
+
+  wrap.querySelector('#remSelAll').addEventListener('click', () => {
+    grid.querySelectorAll('.fact-client-chip:not([style*="none"])').forEach(c => {
+      seleccionados.add(parseInt(c.dataset.idx)); c.classList.add('selected');
+    });
+    updateUI();
+  });
+  wrap.querySelector('#remSelNone').addEventListener('click', () => {
+    seleccionados.clear();
+    grid.querySelectorAll('.fact-client-chip').forEach(c => c.classList.remove('selected'));
+    updateUI();
+  });
+
+  wrap.querySelectorAll('.fact-shortcut-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      wrap.querySelectorAll('.fact-shortcut-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const now = new Date();
+      const desde = wrap.querySelector('#remDesde');
+      const hasta = wrap.querySelector('#remHasta');
+      if (btn.dataset.range === 'mes') {
+        desde.value = fmtDate(new Date(now.getFullYear(), now.getMonth(), 1)); hasta.value = fmtDate(now);
+      } else if (btn.dataset.range === 'mesant') {
+        desde.value = fmtDate(new Date(now.getFullYear(), now.getMonth()-1, 1));
+        hasta.value = fmtDate(new Date(now.getFullYear(), now.getMonth(), 0));
+      } else if (btn.dataset.range === 'trim') {
+        desde.value = fmtDate(new Date(now.getFullYear(), now.getMonth()-2, 1)); hasta.value = fmtDate(now);
+      } else {
+        desde.value = fmtDate(new Date(now.getFullYear(), 0, 1)); hasta.value = fmtDate(now);
+      }
+      updateUI();
+    });
+  });
+
+  wrap.querySelector('#remDesde').addEventListener('change', updateUI);
+  wrap.querySelector('#remHasta').addEventListener('change', updateUI);
+
+  dlBtn.addEventListener('click', () => {
+    const plural = seleccionados.size > 1 ? 's' : '';
+    showToast('Generando ' + seleccionados.size + ' remito' + plural + '...');
+    setTimeout(() => openModule('https://sistema.cinafrio.com/intranet/index.php/facturacion/remitos'), 800);
+  });
+
+  updateUI();
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   MÓDULO: COMPRAS
+   Datos persistidos en memoria durante la sesión
+   ═══════════════════════════════════════════════════════════════ */
+
+const comprasDB = {
+  ordenes: [],
+  nextNum: 1001,
+
+  empresas: [
+    'ARCOR S.A.', 'CINA S.R.L.', 'QUICKFOOD S.A.', 'MCCAIN ARGENTINA SA',
+    'MINERVA FOODS', 'TERRAGENE S.A.', 'SAVAZ SRL', 'LA SIBILA SA',
+    'HELACOR S.A.', 'RAFAELA ALIMENTOS S.A.', 'SUDAMERICANA DE LÁCTEOS S.A.',
+    'LOGÍSTICA RR CONGELADOS SA', 'ULTRACONGELADOS ROSARIO', 'OTRA EMPRESA'
+  ],
+  destinos: [
+    'Depósito Nacional', 'Depósito Fiscal', 'Sala de Máquinas',
+    'Administración', 'RRHH', 'Mantenimiento', 'Portería', 'Logística'
+  ],
+  sectores: [
+    'Logística', 'Administración', 'RRHH', 'Calidad', 'Mantenimiento',
+    'Sala de Máquinas', 'Portería', 'Gerencia', 'Compras', 'IT'
+  ],
+  proveedores: [
+    'Proveedor A - CUIT 20-12345678-9', 'Proveedor B - CUIT 30-87654321-0',
+    'Distribuidora Norte SRL', 'Suministros del Sur S.A.',
+    'Tech Solutions SA', 'Servicios Integrales SRL',
+    'Materiales & Más SA', 'Importadora del Centro',
+    'Logística Express SRL', 'Otro proveedor'
+  ],
+
+  ESTADOS: {
+    BORRADOR:    { label: 'Borrador',          color: '#6B7280', icon: '📝' },
+    PENDIENTE:   { label: 'Pendiente autorización', color: '#F97316', icon: '⏳' },
+    EN_REVISION: { label: 'En revisión',        color: '#FACC15', icon: '🔄' },
+    RECHAZADA:   { label: 'Rechazada',          color: '#DC2626', icon: '❌' },
+    AUTORIZADA:  { label: 'Autorizada',         color: '#36B0C9', icon: '✅' },
+    SIN_PROV:    { label: 'Esperando proveedor',color: '#A78BFA', icon: '🏭' },
+    CONFIRMADA:  { label: 'Recepción confirmada', color: '#00A887', icon: '📦' },
+    FACTURADA:   { label: 'Factura recibida',   color: '#4ade80', icon: '🧾' },
+    ABONADA:     { label: 'Abonada',            color: '#86efac', icon: '💰' },
+  }
+};
+
+function renderCompras() {
+  setHeader('ADMINISTRACION');
+  setExpandedMode(false);
+  showMetaPanel(true);
+  menuGrid.className = '';
+  menuGrid.innerHTML = '';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'fact-wrap';
+  wrap.innerHTML = `
+    <div class="fact-header">
+      <div class="fact-header-title">
+        <span class="indicador-badge" style="background:rgba(250,204,21,.15);color:#FACC15;border-color:rgba(250,204,21,.3)">OC</span>
+        COMPRAS — ÓRDENES DE COMPRA
+      </div>
+      <span class="indicador-hint">Gestión completa del flujo de compras</span>
+    </div>
+    <div class="compras-actions-row">
+      <button class="compras-main-btn compras-btn-nueva" id="btnNuevaOC">
+        <span>＋</span> Emitir nueva orden de compra
+      </button>
+      <button class="compras-main-btn compras-btn-gestionar" id="btnGestionar">
+        <span>📋</span> Gestionar órdenes
+      </button>
+    </div>`;
+
+  menuGrid.appendChild(wrap);
+  syncBackBtn();
+
+  wrap.querySelector('#btnNuevaOC').addEventListener('click',  () => renderNuevaOC());
+  wrap.querySelector('#btnGestionar').addEventListener('click', () => renderGestionOC());
+}
+
+/* ── NUEVA ORDEN DE COMPRA ────────────────────────────────────── */
+function renderNuevaOC(editData) {
+  setHeader('COMPRAS');
+  menuGrid.className = '';
+  menuGrid.innerHTML = '';
+
+  const esEdicion   = !!editData;
+  const numOrden    = esEdicion ? editData.numero : comprasDB.nextNum;
+  let   renglones   = esEdicion ? JSON.parse(JSON.stringify(editData.items)) : [{ desc:'', cant:1, precio:0 }];
+  let   tieneProveedor = esEdicion ? editData.tieneProveedor : false;
+
+  const opt = arr => arr.map(v => '<option value="' + v + '">' + v + '</option>').join('');
+
+  const wrap = document.createElement('div');
+  wrap.className = 'fact-wrap';
+  wrap.innerHTML = `
+    <div class="fact-header">
+      <div class="fact-header-title">
+        <span class="indicador-badge" style="background:rgba(250,204,21,.15);color:#FACC15;border-color:rgba(250,204,21,.3)">OC</span>
+        ${esEdicion ? 'EDITAR' : 'NUEVA'} ORDEN DE COMPRA
+      </div>
+      <button class="fact-sel-none-btn" id="ocBackBtn">← Volver</button>
+    </div>
+
+    <!-- Número + bloqueado -->
+    <div class="fact-section">
+      <div class="fact-section-title"><span class="fact-section-icon">🔢</span> Datos de la orden</div>
+      <div class="oc-fields-grid">
+        <div class="oc-field-group">
+          <label class="fact-date-label">N° de orden</label>
+          <input class="fact-date-input oc-input-locked" value="OC-${numOrden}" readonly />
+        </div>
+        <div class="oc-field-group">
+          <label class="fact-date-label">Empresa</label>
+          <select class="oc-select" id="ocEmpresa">
+            <option value="">— Seleccionar —</option>${opt(comprasDB.empresas)}
+          </select>
+        </div>
+        <div class="oc-field-group">
+          <label class="fact-date-label">Destino</label>
+          <select class="oc-select" id="ocDestino">
+            <option value="">— Seleccionar —</option>${opt(comprasDB.destinos)}
+          </select>
+        </div>
+        <div class="oc-field-group">
+          <label class="fact-date-label">Centro de costo / Sector</label>
+          <select class="oc-select" id="ocSector">
+            <option value="">— Seleccionar —</option>${opt(comprasDB.sectores)}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proveedor -->
+    <div class="fact-section">
+      <div class="fact-section-title"><span class="fact-section-icon">🏭</span> Proveedor</div>
+      <div class="oc-prov-row">
+        <span class="fact-date-label" style="font-size:.8rem">¿Tengo proveedor definido?</span>
+        <div class="oc-toggle-group">
+          <button class="oc-toggle-btn${tieneProveedor ? '' : ' active'}" data-val="no" id="ocProvNo">NO</button>
+          <button class="oc-toggle-btn${tieneProveedor ? ' active' : ''}" data-val="si" id="ocProvSi">SÍ</button>
+        </div>
+        <select class="oc-select oc-prov-select${tieneProveedor ? '' : ' hidden'}" id="ocProvSelect">
+          <option value="">— Seleccionar proveedor —</option>${opt(comprasDB.proveedores)}
+        </select>
+      </div>
+    </div>
+
+    <!-- Detalle de compra -->
+    <div class="fact-section">
+      <div class="fact-section-title">
+        <span class="fact-section-icon">📦</span> Detalle de la compra
+        <button class="fact-sel-all-btn" id="ocAddRenglon" style="margin-left:auto">+ Agregar ítem</button>
+      </div>
+      <div class="oc-table-wrap">
+        <table class="oc-table">
+          <thead>
+            <tr>
+              <th class="oc-th-desc">Descripción</th>
+              <th class="oc-th-num">Cantidad</th>
+              <th class="oc-th-num">Precio unit. (sin IVA)</th>
+              <th class="oc-th-num">Total</th>
+              <th class="oc-th-del"></th>
+            </tr>
+          </thead>
+          <tbody id="ocRenglones"></tbody>
+          <tfoot>
+            <tr class="oc-total-row">
+              <td colspan="3" class="oc-total-label">TOTAL (sin IVA)</td>
+              <td class="oc-total-val" id="ocTotal">$ 0,00</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Comentarios -->
+    <div class="fact-section">
+      <div class="fact-section-title"><span class="fact-section-icon">💬</span> Comentarios</div>
+      <textarea class="oc-textarea" id="ocComentarios" placeholder="Observaciones, referencias, condiciones especiales..." rows="3">${esEdicion ? (editData.comentarios||'') : ''}</textarea>
+    </div>
+
+    <!-- Botón solicitar -->
+    <div class="fact-section" style="background:transparent;border:none;padding:4px 0">
+      <button class="fact-download-btn oc-submit-btn" id="ocSubmitBtn">
+        📨 Solicitar autorización
+      </button>
+    </div>`;
+
+  menuGrid.appendChild(wrap);
+  syncBackBtn();
+
+  // Restaurar valores si es edición
+  if (esEdicion) {
+    wrap.querySelector('#ocEmpresa').value = editData.empresa || '';
+    wrap.querySelector('#ocDestino').value = editData.destino || '';
+    wrap.querySelector('#ocSector').value  = editData.sector  || '';
+    if (editData.proveedor) wrap.querySelector('#ocProvSelect').value = editData.proveedor;
+  }
+
+  // ── Renglones ─────────────────────────────────────────────────
+  const tbody   = wrap.querySelector('#ocRenglones');
+  const totalEl = wrap.querySelector('#ocTotal');
+
+  const fmtPeso = n => '$ ' + parseFloat(n||0).toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  const recalcTotal = () => {
+    let sum = 0;
+    tbody.querySelectorAll('tr').forEach(tr => {
+      const c = parseFloat(tr.querySelector('.oc-cant')?.value) || 0;
+      const p = parseFloat(tr.querySelector('.oc-precio')?.value) || 0;
+      sum += c * p;
+      const tEl = tr.querySelector('.oc-row-total');
+      if (tEl) tEl.textContent = fmtPeso(c * p);
+    });
+    totalEl.textContent = fmtPeso(sum);
+  };
+
+  const addRenglon = (item) => {
+    const tr = document.createElement('tr');
+    tr.className = 'oc-row';
+    tr.innerHTML = `
+      <td><input class="oc-input oc-desc" type="text" placeholder="Descripción del ítem" value="${item ? item.desc : ''}" /></td>
+      <td><input class="oc-input oc-cant" type="number" min="1" value="${item ? item.cant : 1}" /></td>
+      <td><input class="oc-input oc-precio" type="number" min="0" step="0.01" placeholder="0,00" value="${item ? item.precio : ''}" /></td>
+      <td class="oc-row-total">${fmtPeso(item ? item.cant * item.precio : 0)}</td>
+      <td><button class="oc-del-btn" title="Eliminar">✕</button></td>`;
+    tr.querySelector('.oc-cant').addEventListener('input', recalcTotal);
+    tr.querySelector('.oc-precio').addEventListener('input', recalcTotal);
+    tr.querySelector('.oc-del-btn').addEventListener('click', () => {
+      if (tbody.children.length > 1) { tr.remove(); recalcTotal(); }
+    });
+    tbody.appendChild(tr);
+    recalcTotal();
+  };
+
+  renglones.forEach(r => addRenglon(r));
+  wrap.querySelector('#ocAddRenglon').addEventListener('click', () => addRenglon(null));
+
+  // ── Toggle proveedor ──────────────────────────────────────────
+  const provSelect = wrap.querySelector('#ocProvSelect');
+  wrap.querySelector('#ocProvNo').addEventListener('click', () => {
+    tieneProveedor = false;
+    wrap.querySelector('#ocProvNo').classList.add('active');
+    wrap.querySelector('#ocProvSi').classList.remove('active');
+    provSelect.classList.add('hidden');
+  });
+  wrap.querySelector('#ocProvSi').addEventListener('click', () => {
+    tieneProveedor = true;
+    wrap.querySelector('#ocProvSi').classList.add('active');
+    wrap.querySelector('#ocProvNo').classList.remove('active');
+    provSelect.classList.remove('hidden');
+  });
+
+  // ── Volver ────────────────────────────────────────────────────
+  wrap.querySelector('#ocBackBtn').addEventListener('click', () => renderCompras());
+
+  // ── Submit ────────────────────────────────────────────────────
+  wrap.querySelector('#ocSubmitBtn').addEventListener('click', () => {
+    const empresa = wrap.querySelector('#ocEmpresa').value;
+    const destino = wrap.querySelector('#ocDestino').value;
+    const sector  = wrap.querySelector('#ocSector').value;
+    if (!empresa || !destino || !sector) {
+      showToast('⚠ Completá empresa, destino y sector'); return;
+    }
+    // Recolectar ítems
+    const items = [];
+    let totalVal = 0;
+    tbody.querySelectorAll('tr').forEach(tr => {
+      const desc  = tr.querySelector('.oc-desc')?.value.trim();
+      const cant  = parseFloat(tr.querySelector('.oc-cant')?.value) || 0;
+      const precio= parseFloat(tr.querySelector('.oc-precio')?.value) || 0;
+      if (desc) { items.push({ desc, cant, precio }); totalVal += cant * precio; }
+    });
+    if (!items.length) { showToast('⚠ Agregá al menos un ítem'); return; }
+
+    const proveedor = tieneProveedor ? wrap.querySelector('#ocProvSelect').value : '';
+    const comentarios = wrap.querySelector('#ocComentarios').value.trim();
+    const now = new Date().toLocaleDateString('es-AR');
+
+    if (esEdicion) {
+      // Update existing
+      const ord = comprasDB.ordenes.find(o => o.numero === numOrden);
+      if (ord) {
+        Object.assign(ord, { empresa, destino, sector, tieneProveedor, proveedor, items, totalVal, comentarios,
+          estado: 'PENDIENTE', historial: [...(ord.historial||[]), { accion:'Reenviado a autorización', fecha: now, user:'agustin.barovero' }]
+        });
+      }
+    } else {
+      comprasDB.ordenes.push({
+        numero: numOrden, empresa, destino, sector, tieneProveedor, proveedor,
+        items, totalVal, comentarios, estado: 'PENDIENTE',
+        fechaCreacion: now,
+        historial: [{ accion:'Orden creada y enviada a autorización', fecha: now, user:'agustin.barovero' }]
+      });
+      comprasDB.nextNum++;
+    }
+
+    showToast('✅ OC-' + numOrden + ' enviada a autorización');
+    setTimeout(() => renderGestionOC(), 600);
+  });
+}
+
+/* ── GESTIÓN DE ÓRDENES ──────────────────────────────────────── */
+function renderGestionOC() {
+  setHeader('COMPRAS');
+  menuGrid.className = '';
+  menuGrid.innerHTML = '';
+
+  const estados = comprasDB.ESTADOS;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'fact-wrap';
+
+  const buildList = () => {
+    const filas = comprasDB.ordenes.length === 0
+      ? '<tr><td colspan="7" class="oc-empty">No hay órdenes de compra registradas</td></tr>'
+      : comprasDB.ordenes.slice().reverse().map(o => {
+          const est = estados[o.estado] || estados.BORRADOR;
+          const tot = '$ ' + (o.totalVal||0).toLocaleString('es-AR', {minimumFractionDigits:2});
+          return `<tr class="oc-list-row" data-num="${o.numero}">
+            <td class="oc-td-num">OC-${o.numero}</td>
+            <td class="oc-td-empresa">${o.empresa||'—'}</td>
+            <td class="oc-td-dest">${o.destino||'—'}</td>
+            <td class="oc-td-total">${tot}</td>
+            <td class="oc-td-fecha">${o.fechaCreacion||'—'}</td>
+            <td class="oc-td-estado">
+              <span class="oc-estado-badge" style="color:${est.color};border-color:${est.color}40;background:${est.color}18">
+                ${est.icon} ${est.label}
+              </span>
+            </td>
+            <td class="oc-td-actions">
+              <button class="oc-action-btn" data-action="ver" data-num="${o.numero}">Ver →</button>
+            </td>
+          </tr>`;
+        }).join('');
+
+    return `<table class="oc-table oc-list-table">
+      <thead>
+        <tr>
+          <th>N° Orden</th><th>Empresa</th><th>Destino</th>
+          <th>Total</th><th>Fecha</th><th>Estado</th><th></th>
+        </tr>
+      </thead>
+      <tbody>${filas}</tbody>
+    </table>`;
+  };
+
+  wrap.innerHTML = `
+    <div class="fact-header">
+      <div class="fact-header-title">
+        <span class="indicador-badge" style="background:rgba(250,204,21,.15);color:#FACC15;border-color:rgba(250,204,21,.3)">OC</span>
+        GESTIÓN DE ÓRDENES
+      </div>
+      <button class="compras-main-btn compras-btn-nueva" id="gcNewBtn" style="padding:8px 16px;font-size:.8rem">
+        ＋ Nueva OC
+      </button>
+    </div>
+    <div class="fact-section">
+      <div class="fact-section-title"><span class="fact-section-icon">📋</span>
+        Todas las órdenes
+        <span style="margin-left:auto;color:rgba(255,255,255,.4);font-weight:700">${comprasDB.ordenes.length} órdenes</span>
+      </div>
+      <div class="oc-table-wrap" id="gcListWrap">${buildList()}</div>
+    </div>`;
+
+  menuGrid.appendChild(wrap);
+  syncBackBtn();
+
+  wrap.querySelector('#gcNewBtn').addEventListener('click', () => renderNuevaOC());
+
+  wrap.addEventListener('click', e => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const num = parseInt(btn.dataset.num);
+    const ord = comprasDB.ordenes.find(o => o.numero === num);
+    if (ord) renderDetalleOC(ord);
+  });
+}
+
+/* ── DETALLE / FLUJO DE UNA ORDEN ────────────────────────────── */
+function renderDetalleOC(ord) {
+  setHeader('COMPRAS');
+  menuGrid.className = '';
+  menuGrid.innerHTML = '';
+
+  const est    = comprasDB.ESTADOS[ord.estado] || comprasDB.ESTADOS.BORRADOR;
+  const fmtP   = n => '$ ' + parseFloat(n||0).toLocaleString('es-AR', {minimumFractionDigits:2});
+  const now    = () => new Date().toLocaleDateString('es-AR');
+
+  const puedeAutorizar  = ['PENDIENTE','EN_REVISION'].includes(ord.estado);
+  const puedeCargarProv = ord.estado === 'SIN_PROV';
+  const puedeConfirmar  = ord.estado === 'AUTORIZADA' && ord.proveedor;
+  const puedeFactura    = ord.estado === 'CONFIRMADA';
+  const puedeAbonar     = ord.estado === 'FACTURADA';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'fact-wrap';
+
+  wrap.innerHTML = `
+    <div class="fact-header">
+      <div class="fact-header-title">
+        <span class="indicador-badge" style="background:rgba(250,204,21,.15);color:#FACC15;border-color:rgba(250,204,21,.3)">OC</span>
+        OC-${ord.numero} — ${ord.empresa||'Sin empresa'}
+        <span class="oc-estado-badge" style="color:${est.color};border-color:${est.color}40;background:${est.color}18;margin-left:8px">
+          ${est.icon} ${est.label}
+        </span>
+      </div>
+      <button class="fact-sel-none-btn" id="detBackBtn">← Volver</button>
+    </div>
+
+    <!-- Resumen -->
+    <div class="fact-section">
+      <div class="fact-section-title"><span class="fact-section-icon">📄</span> Resumen de la orden</div>
+      <div class="oc-fields-grid">
+        <div class="oc-field-group"><label class="fact-date-label">Empresa</label><div class="oc-val">${ord.empresa||'—'}</div></div>
+        <div class="oc-field-group"><label class="fact-date-label">Destino</label><div class="oc-val">${ord.destino||'—'}</div></div>
+        <div class="oc-field-group"><label class="fact-date-label">Sector / CC</label><div class="oc-val">${ord.sector||'—'}</div></div>
+        <div class="oc-field-group"><label class="fact-date-label">Proveedor</label><div class="oc-val">${ord.proveedor||'<span style="color:rgba(255,255,255,.35)">Sin proveedor</span>'}</div></div>
+      </div>
+      <table class="oc-table" style="margin-top:10px">
+        <thead><tr><th class="oc-th-desc">Ítem</th><th class="oc-th-num">Cant.</th><th class="oc-th-num">P. Unit.</th><th class="oc-th-num">Total</th></tr></thead>
+        <tbody>
+          ${(ord.items||[]).map(i => `<tr class="oc-row">
+            <td>${i.desc}</td><td>${i.cant}</td><td>${fmtP(i.precio)}</td><td>${fmtP(i.cant*i.precio)}</td>
+          </tr>`).join('')}
+        </tbody>
+        <tfoot>
+          <tr class="oc-total-row"><td colspan="3" class="oc-total-label">TOTAL (sin IVA)</td>
+          <td class="oc-total-val">${fmtP(ord.totalVal)}</td></tr>
+        </tfoot>
+      </table>
+      ${ord.comentarios ? '<div class="oc-comentario-box">💬 ' + ord.comentarios + '</div>' : ''}
+    </div>
+
+    <!-- Acciones según estado -->
+    <div class="fact-section" id="detAcciones">
+      <div class="fact-section-title"><span class="fact-section-icon">⚙</span> Acciones</div>
+
+      ${puedeAutorizar ? `
+        <div class="oc-accion-bloque">
+          <textarea class="oc-textarea" id="detObs" placeholder="Observaciones del autorizador..." rows="2"></textarea>
+          <div class="oc-accion-btns">
+            <button class="fact-download-btn oc-btn-aprobar" data-act="aprobar">✅ Aprobar</button>
+            <button class="fact-download-btn oc-btn-revision" data-act="revision">🔄 Pedir revisión</button>
+            <button class="fact-download-btn oc-btn-rechazar" data-act="rechazar">❌ Rechazar</button>
+          </div>
+        </div>` : ''}
+
+      ${puedeCargarProv ? `
+        <div class="oc-accion-bloque">
+          <label class="fact-date-label">Cargar proveedor para poder imprimir y continuar</label>
+          <select class="oc-select" id="detProvSelect" style="margin-top:6px">
+            <option value="">— Seleccionar proveedor —</option>
+            ${comprasDB.proveedores.map(p => '<option value="' + p + '"' + (ord.proveedor===p?' selected':'') + '>' + p + '</option>').join('')}
+          </select>
+          <div class="oc-accion-btns" style="margin-top:10px">
+            <button class="fact-download-btn oc-btn-aprobar" data-act="guardarProv">💾 Guardar proveedor</button>
+            <button class="fact-download-btn" style="background:linear-gradient(135deg,#1A4E8A,#0E3060)" data-act="imprimir">🖨 Imprimir OC</button>
+          </div>
+        </div>` : ''}
+
+      ${puedeConfirmar ? `
+        <div class="oc-accion-bloque">
+          <div class="oc-accion-btns">
+            <button class="fact-download-btn" style="background:linear-gradient(135deg,#1A4E8A,#0E3060)" data-act="imprimir">🖨 Imprimir OC</button>
+            <button class="fact-download-btn oc-btn-aprobar" data-act="confirmarRecep">📦 Confirmar recepción y aprobar</button>
+          </div>
+        </div>` : ''}
+
+      ${puedeFactura ? `
+        <div class="oc-accion-bloque">
+          <div class="oc-fields-grid">
+            <div class="oc-field-group">
+              <label class="fact-date-label">Fecha de factura</label>
+              <input class="fact-date-input" id="detFechaFact" type="date" value="${new Date().toISOString().split('T')[0]}" />
+            </div>
+            <div class="oc-field-group">
+              <label class="fact-date-label">Plazo de pago</label>
+              <select class="oc-select" id="detPlazo">
+                <option>Contado</option><option>15 días</option><option>30 días</option>
+                <option>45 días</option><option>60 días</option><option>90 días</option>
+              </select>
+            </div>
+          </div>
+          <div class="oc-accion-btns" style="margin-top:10px">
+            <button class="fact-download-btn oc-btn-aprobar" data-act="recibirFactura">🧾 Registrar factura recibida</button>
+          </div>
+        </div>` : ''}
+
+      ${puedeAbonar ? `
+        <div class="oc-accion-bloque">
+          <div class="oc-comentario-box">
+            📅 Vencimiento: ${ord.vencimientoPago||'—'} &nbsp;|&nbsp; Plazo: ${ord.plazo||'—'}
+          </div>
+          <div class="oc-accion-btns" style="margin-top:10px">
+            <button class="fact-download-btn oc-btn-aprobar" data-act="abonar">💰 Marcar como abonada</button>
+          </div>
+        </div>` : ''}
+
+      ${['RECHAZADA','ABONADA'].includes(ord.estado) ? `
+        <div class="oc-comentario-box" style="color:rgba(255,255,255,.55)">
+          ${ord.estado === 'ABONADA' ? '💰 Orden abonada el ' + (ord.fechaAbono||'—') : '❌ Orden rechazada'}
+        </div>` : ''}
+
+      ${['PENDIENTE','EN_REVISION'].includes(ord.estado) ? `
+        <div style="margin-top:8px">
+          <button class="fact-sel-all-btn" data-act="editar">✏ Editar orden</button>
+        </div>` : ''}
+    </div>
+
+    <!-- Historial -->
+    <div class="fact-section">
+      <div class="fact-section-title"><span class="fact-section-icon">📜</span> Historial</div>
+      <div class="oc-historial" id="detHistorial">
+        ${(ord.historial||[]).slice().reverse().map(h => `
+          <div class="oc-hist-row">
+            <span class="oc-hist-fecha">${h.fecha}</span>
+            <span class="oc-hist-accion">${h.accion}</span>
+            <span class="oc-hist-user">${h.user||''}</span>
+            ${h.obs ? '<span class="oc-hist-obs">' + h.obs + '</span>' : ''}
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+  menuGrid.appendChild(wrap);
+  syncBackBtn();
+
+  wrap.querySelector('#detBackBtn').addEventListener('click', () => renderGestionOC());
+
+  wrap.addEventListener('click', e => {
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    const act = btn.dataset.act;
+    const obs = wrap.querySelector('#detObs')?.value.trim();
+    const n   = now();
+
+    if (act === 'aprobar') {
+      if (!ord.proveedor && !ord.tieneProveedor) {
+        ord.estado = 'SIN_PROV';
+        ord.historial.push({ accion:'Autorizada — pendiente de asignar proveedor', fecha:n, user:'autorizador', obs });
+      } else {
+        ord.estado = 'AUTORIZADA';
+        ord.historial.push({ accion:'Aprobada', fecha:n, user:'autorizador', obs });
+      }
+      showToast('✅ Orden aprobada');
+      setTimeout(() => renderDetalleOC(ord), 400);
+    } else if (act === 'revision') {
+      ord.estado = 'EN_REVISION';
+      ord.historial.push({ accion:'Enviada a revisión', fecha:n, user:'autorizador', obs });
+      showToast('🔄 Enviada a revisión');
+      setTimeout(() => renderDetalleOC(ord), 400);
+    } else if (act === 'rechazar') {
+      ord.estado = 'RECHAZADA';
+      ord.historial.push({ accion:'Rechazada', fecha:n, user:'autorizador', obs });
+      showToast('❌ Orden rechazada');
+      setTimeout(() => renderDetalleOC(ord), 400);
+    } else if (act === 'editar') {
+      renderNuevaOC(ord);
+    } else if (act === 'guardarProv') {
+      const sel = wrap.querySelector('#detProvSelect')?.value;
+      if (!sel) { showToast('⚠ Seleccioná un proveedor'); return; }
+      ord.proveedor = sel; ord.tieneProveedor = true;
+      ord.historial.push({ accion:'Proveedor asignado: ' + sel, fecha:n, user:'agustin.barovero' });
+      showToast('🏭 Proveedor guardado');
+      setTimeout(() => renderDetalleOC(ord), 400);
+    } else if (act === 'imprimir') {
+      showToast('🖨 Abriendo impresión...');
+      setTimeout(() => window.print(), 600);
+    } else if (act === 'confirmarRecep') {
+      ord.estado = 'CONFIRMADA';
+      ord.historial.push({ accion:'Recepción confirmada', fecha:n, user:'agustin.barovero' });
+      showToast('📦 Recepción confirmada');
+      setTimeout(() => renderDetalleOC(ord), 400);
+    } else if (act === 'recibirFactura') {
+      const ff   = wrap.querySelector('#detFechaFact')?.value;
+      const pl   = wrap.querySelector('#detPlazo')?.value;
+      ord.estado = 'FACTURADA';
+      ord.fechaFactura = ff; ord.plazo = pl;
+      const dias = parseInt(pl)||0;
+      const venc = new Date(ff);
+      venc.setDate(venc.getDate() + dias);
+      ord.vencimientoPago = venc.toLocaleDateString('es-AR');
+      ord.historial.push({ accion:'Factura recibida — vence ' + ord.vencimientoPago, fecha:n, user:'agustin.barovero' });
+      showToast('🧾 Factura registrada');
+      setTimeout(() => renderDetalleOC(ord), 400);
+    } else if (act === 'abonar') {
+      ord.estado = 'ABONADA';
+      ord.fechaAbono = n;
+      ord.historial.push({ accion:'Marcada como abonada', fecha:n, user:'agustin.barovero' });
+      showToast('💰 Orden abonada');
+      setTimeout(() => renderDetalleOC(ord), 400);
+    }
+  });
 }

@@ -2781,3 +2781,313 @@ body{
   .fact-download-row { flex-direction: column; }
   .fact-download-btn { width: 100%; text-align: center; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   MÓDULO COMPRAS — Órdenes de compra
+   ═══════════════════════════════════════════════════════════════ */
+.compras-actions-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.compras-main-btn {
+  flex: 1;
+  min-width: 200px;
+  padding: 18px 24px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(255,255,255,.16);
+  font-size: .95rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  cursor: pointer;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all .18s;
+}
+.compras-btn-nueva    { background: linear-gradient(135deg,#00A887,#007A62); box-shadow: 0 6px 20px rgba(0,168,135,.3); }
+.compras-btn-gestionar{ background: linear-gradient(135deg,#1A4E8A,#0E3060); box-shadow: 0 6px 20px rgba(14,48,96,.4); }
+.compras-main-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+/* ── Campos de formulario ── */
+.oc-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+.oc-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.oc-select {
+  padding: 9px 12px;
+  border-radius: 11px;
+  border: 1.5px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  font-size: .85rem;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  transition: border-color .2s;
+  -webkit-appearance: none;
+  color-scheme: dark;
+}
+.oc-select:focus { border-color: rgba(54,176,201,.55); }
+.oc-select option { background: #0d1f3c; color: #fff; }
+.oc-select.hidden { display: none; }
+
+.oc-input-locked {
+  background: rgba(255,255,255,.04) !important;
+  color: rgba(255,255,255,.4) !important;
+  cursor: not-allowed !important;
+  font-weight: 900;
+  letter-spacing: .5px;
+}
+.oc-val {
+  padding: 9px 12px;
+  border-radius: 11px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.05);
+  color: #fff;
+  font-size: .85rem;
+  font-weight: 700;
+  min-height: 38px;
+}
+
+/* ── Toggle proveedor sí/no ── */
+.oc-prov-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.oc-toggle-group {
+  display: flex;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1.5px solid rgba(255,255,255,.16);
+}
+.oc-toggle-btn {
+  padding: 8px 20px;
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.55);
+  font-weight: 800;
+  font-size: .82rem;
+  border: none;
+  cursor: pointer;
+  transition: all .15s;
+}
+.oc-toggle-btn.active {
+  background: linear-gradient(135deg,#1A4E8A,#0E3060);
+  color: #fff;
+}
+.oc-prov-select { flex: 1; min-width: 240px; }
+
+/* ── Tabla de ítems ── */
+.oc-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+.oc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .83rem;
+}
+.oc-table th {
+  background: rgba(255,255,255,.07);
+  color: rgba(255,255,255,.55);
+  font-size: .7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  padding: 9px 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+.oc-th-desc { width: 45%; }
+.oc-th-num  { width: 15%; text-align: right; }
+.oc-th-del  { width: 36px; }
+
+.oc-row td {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  vertical-align: middle;
+  color: rgba(255,255,255,.85);
+}
+.oc-row td:nth-child(2),
+.oc-row td:nth-child(3),
+.oc-row td:nth-child(4) { text-align: right; white-space: nowrap; }
+
+.oc-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.07);
+  color: #fff;
+  font-size: .82rem;
+  outline: none;
+  transition: border-color .2s;
+}
+.oc-input:focus { border-color: rgba(54,176,201,.5); }
+.oc-cant, .oc-precio { text-align: right; max-width: 100px; }
+
+.oc-del-btn {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  border: 1px solid rgba(220,38,38,.3);
+  background: rgba(220,38,38,.12);
+  color: #f87171;
+  font-size: .8rem;
+  cursor: pointer;
+  transition: all .15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.oc-del-btn:hover { background: rgba(220,38,38,.28); }
+
+.oc-total-row td {
+  padding: 10px 8px;
+  border-top: 2px solid rgba(255,255,255,.12);
+}
+.oc-total-label {
+  color: rgba(255,255,255,.55);
+  font-weight: 800;
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+.oc-total-val {
+  text-align: right;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #FACC15;
+  white-space: nowrap;
+}
+
+/* ── Textarea ── */
+.oc-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border-radius: 11px;
+  border: 1.5px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.07);
+  color: #fff;
+  font-size: .84rem;
+  resize: vertical;
+  outline: none;
+  transition: border-color .2s;
+  font-family: inherit;
+  min-height: 72px;
+}
+.oc-textarea:focus { border-color: rgba(54,176,201,.5); }
+.oc-textarea::placeholder { color: rgba(255,255,255,.3); }
+
+/* ── Submit ── */
+.oc-submit-btn {
+  background: linear-gradient(135deg,#F97316,#C2410C) !important;
+  box-shadow: 0 6px 20px rgba(249,115,22,.3) !important;
+  width: 100%;
+  justify-content: center;
+  font-size: 1rem !important;
+  padding: 16px 28px !important;
+}
+.oc-submit-btn:hover { box-shadow: 0 10px 28px rgba(249,115,22,.45) !important; }
+
+/* ── Lista gestión ── */
+.oc-list-table th { font-size: .68rem; }
+.oc-list-row td {
+  padding: 10px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  color: rgba(255,255,255,.82);
+  font-size: .82rem;
+  vertical-align: middle;
+}
+.oc-list-row:hover td { background: rgba(255,255,255,.04); }
+.oc-td-num     { font-weight: 900; color: #FACC15 !important; white-space: nowrap; }
+.oc-td-empresa { font-weight: 700; max-width: 200px; }
+.oc-td-total   { font-weight: 900; text-align: right; white-space: nowrap; }
+.oc-td-fecha   { color: rgba(255,255,255,.45) !important; font-size: .76rem !important; white-space: nowrap; }
+.oc-empty { text-align: center; padding: 32px !important; color: rgba(255,255,255,.3) !important; font-style: italic; }
+
+.oc-estado-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  border: 1px solid;
+  font-size: .72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.oc-action-btn {
+  padding: 5px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(54,176,201,.35);
+  background: rgba(54,176,201,.12);
+  color: #36B0C9;
+  font-size: .76rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.oc-action-btn:hover { background: rgba(54,176,201,.25); }
+
+/* ── Acciones en detalle ── */
+.oc-accion-bloque {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.oc-accion-btns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.oc-btn-aprobar  { background: linear-gradient(135deg,#00A887,#007A62) !important; box-shadow: 0 4px 14px rgba(0,168,135,.25) !important; }
+.oc-btn-revision { background: linear-gradient(135deg,#CA8A04,#92400E) !important; box-shadow: 0 4px 14px rgba(202,138,4,.25) !important; }
+.oc-btn-rechazar { background: linear-gradient(135deg,#DC2626,#991B1B) !important; box-shadow: 0 4px 14px rgba(220,38,38,.25) !important; }
+.oc-accion-btns .fact-download-btn { flex: 1; min-width: 140px; font-size: .82rem !important; padding: 11px 16px !important; text-align:center; }
+
+/* ── Comentario box ── */
+.oc-comentario-box {
+  padding: 10px 14px;
+  border-radius: 11px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  font-size: .82rem;
+  color: rgba(255,255,255,.7);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ── Historial ── */
+.oc-historial { display: flex; flex-direction: column; gap: 8px; }
+.oc-hist-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+}
+.oc-hist-fecha  { font-size: .7rem; color: rgba(255,255,255,.4); white-space: nowrap; flex-shrink:0; }
+.oc-hist-accion { font-size: .82rem; font-weight: 700; color: rgba(255,255,255,.85); flex: 1; }
+.oc-hist-user   { font-size: .7rem; color: rgba(54,176,201,.7); white-space: nowrap; }
+.oc-hist-obs    { font-size: .78rem; color: rgba(250,204,21,.7); font-style:italic; width:100%; padding-left:2px; }
+
+@media (max-width:680px) {
+  .compras-actions-row { flex-direction: column; }
+  .oc-accion-btns .fact-download-btn { min-width: 100%; }
+  .oc-fields-grid { grid-template-columns: 1fr; }
+}
