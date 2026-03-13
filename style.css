@@ -2231,3 +2231,29 @@ body{
 
 /* Horizontal bar canvas wrap */
 .inegr-chart-wrap canvas { display:block; }
+
+/* ═══════════════════════════════════════════════════════════════
+   CARGAS I-2 — Nacional / Fiscal split
+   ═══════════════════════════════════════════════════════════════ */
+.cargas-dep-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.cargas-dep-col {
+  min-width: 0;
+}
+.cargas-dep-card {
+  padding: 14px !important;
+}
+.cargas-dep-grid {
+  grid-template-columns: repeat(4, 1fr) !important;
+}
+@media (max-width: 780px) {
+  .cargas-dep-row {
+    grid-template-columns: 1fr;
+  }
+  .cargas-dep-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}

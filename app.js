@@ -136,7 +136,8 @@ const menuTree = {
         { title: 'POSICIONES INGRESADAS EGRESADAS' },
         { title: 'AJUSTES DE STOCK' },
         { title: 'CLIENTES QUE OPERARON' },
-        { title: 'USO DE EQUIPOS' }
+        { title: 'USO DE EQUIPOS' },
+        { title: 'ESTIBAS CONGELADAS' }
       ]
     },
     {
@@ -400,7 +401,7 @@ function getCustomTileHTML(item) {
         <div class="tile-kpi-top"><span class="tile-kpi-badge">AJS</span></div>
         <div class="tile-adj-dual">
           <div class="tile-adj-row"><span class="tile-adj-code">I-3</span><span class="tile-adj-val">1</span></div>
-          <div class="tile-adj-row"><span class="tile-adj-code">I-4</span><span class="tile-adj-val">2</span></div>
+          <div class="tile-adj-row"><span class="tile-adj-code">I-49</span><span class="tile-adj-val">2</span></div>
         </div>
         <div class="tile-title one-line" style="margin-top:4px;font-size:.68rem">AJUSTES STOCK</div>
       </div>`;
@@ -431,6 +432,17 @@ function getCustomTileHTML(item) {
           <div class="tile-mov-item"><span class="tile-mov-code">LIM</span><span class="tile-mov-val" style="color:#36B0C9">${mes.limpieza}h</span></div>
         </div>
         <div class="tile-title one-line" style="margin-top:4px;font-size:.68rem">USO EQUIPOS</div>
+      </div>`;
+  }
+  // ESTIBAS CONGELADAS: valor del mes en curso
+  if (item.title === 'ESTIBAS CONGELADAS') {
+    const actual = estibasCongeladasData.meses[estibasCongeladasData.meses.length-1].valor;
+    return `
+      <div class="tile-kpi-wrap">
+        <div class="tile-kpi-top"><span class="tile-kpi-badge">❄</span></div>
+        <div class="tile-kpi-value" style="color:#60c8e0;font-size:1.55rem">${actual.toLocaleString('es-AR')}</div>
+        <div class="tile-kpi-sublabel">ESTIBAS MES</div>
+        <div class="tile-title one-line" style="margin-top:6px;font-size:.68rem">CONGELADAS</div>
       </div>`;
   }
   return null; // usar HTML por defecto
@@ -868,6 +880,36 @@ const cargasI2Mensual = [
   { mes: 'Mar 25', cumplidas: 7,  total: 33 },
 ];
 
+
+// Datos cargas por depósito (misma proporción, dividida Nacional 60% / Fiscal 40%)
+const cargasI2Nacional = [
+  { mes: 'Abr 24', cumplidas: 25, total: 35 },
+  { mes: 'May 24', cumplidas: 33, total: 42 },
+  { mes: 'Jun 24', cumplidas: 23, total: 31 },
+  { mes: 'Jul 24', cumplidas: 37, total: 44 },
+  { mes: 'Ago 24', cumplidas: 29, total: 38 },
+  { mes: 'Sep 24', cumplidas: 32, total: 41 },
+  { mes: 'Oct 24', cumplidas: 28, total: 36 },
+  { mes: 'Nov 24', cumplidas: 40, total: 47 },
+  { mes: 'Dic 24', cumplidas: 26, total: 35 },
+  { mes: 'Ene 25', cumplidas: 35, total: 43 },
+  { mes: 'Feb 25', cumplidas: 31, total: 39 },
+  { mes: 'Mar 25', cumplidas: 4,  total: 20 },
+];
+const cargasI2Fiscal = [
+  { mes: 'Abr 24', cumplidas: 17, total: 23 },
+  { mes: 'May 24', cumplidas: 22, total: 28 },
+  { mes: 'Jun 24', cumplidas: 15, total: 21 },
+  { mes: 'Jul 24', cumplidas: 24, total: 30 },
+  { mes: 'Ago 24', cumplidas: 20, total: 25 },
+  { mes: 'Sep 24', cumplidas: 21, total: 27 },
+  { mes: 'Oct 24', cumplidas: 19, total: 24 },
+  { mes: 'Nov 24', cumplidas: 26, total: 32 },
+  { mes: 'Dic 24', cumplidas: 18, total: 23 },
+  { mes: 'Ene 25', cumplidas: 23, total: 28 },
+  { mes: 'Feb 25', cumplidas: 20, total: 26 },
+  { mes: 'Mar 25', cumplidas: 3,  total: 13 },
+];
 function renderIndicadorCargasI2() {
   setHeader('INDICADORES');
   setExpandedMode(false);
@@ -936,12 +978,122 @@ function renderIndicadorCargasI2() {
     </div>
   `;
   wrap.appendChild(mensualSection);
+
+  // ── SEPARADOR DEPOSITOS ──────────────────────────────────────
+  const depTitle = document.createElement('div');
+  depTitle.className = 'indicador-mensual';
+  depTitle.innerHTML = '<div class="indicador-mensual-title">🏭 Cargas por Depósito — Depósito Nacional vs Depósito Fiscal</div>';
+  wrap.appendChild(depTitle);
+
+  // función helper: card con torta + tabla mensual para un set de datos
+  const buildDepCard = (datos, label, badgeColor, pieId) => {
+    const total = datos.reduce((s,m)=>s+m.total,0);
+    const cumpl = datos.reduce((s,m)=>s+m.cumplidas,0);
+    const pctG  = Math.round((cumpl/total)*100);
+    const colorG = pctG>=80?'#00A887':pctG>=60?'#F97316':'#DC2626';
+
+    const col = document.createElement('div');
+    col.className = 'cargas-dep-col';
+    col.innerHTML = `
+      <div class="indicador-card indicador-card-static cargas-dep-card">
+        <div class="indicador-card-header">
+          <div class="indicador-card-title">
+            <span class="indicador-badge" style="background:${badgeColor}20;color:${badgeColor};border-color:${badgeColor}40">I-2</span>
+            ${label}
+          </div>
+        </div>
+        <div class="indicador-card-body" style="gap:12px">
+          <canvas id="${pieId}" width="160" height="160"></canvas>
+          <div class="indicador-legend">
+            <div class="ind-leg-item"><span class="ind-leg-dot" style="background:#36B0C9"></span>Planif.<strong>${Math.round(total*0.3)}</strong></div>
+            <div class="ind-leg-item"><span class="ind-leg-dot" style="background:#00A887"></span>Cumpl.<strong>${cumpl}</strong></div>
+            <div class="ind-leg-item"><span class="ind-leg-dot" style="background:#F97316"></span>Pend.<strong>${Math.round(total*0.18)}</strong></div>
+            <div class="ind-leg-item"><span class="ind-leg-dot" style="background:#DC2626"></span>Post.<strong>${Math.round(total*0.06)}</strong></div>
+            <div class="ind-leg-sep"></div>
+            <div class="ind-leg-item ind-leg-pct"><span>Cumpl.</span><strong style="color:${colorG}">${pctG}%</strong></div>
+          </div>
+        </div>
+        <div class="indicador-mensual-grid cargas-dep-grid" style="margin-top:10px">
+          ${datos.map(m => {
+            const p = Math.round((m.cumplidas/m.total)*100);
+            const c = p>=80?'#00A887':p>=60?'#F97316':'#DC2626';
+            return \`<div class="ind-mes-card">
+              <div class="ind-mes-label">\${m.mes}</div>
+              <div class="ind-mes-pct" style="color:\${c}">\${p}%</div>
+              <div class="ind-mes-bar-wrap"><div class="ind-mes-bar-fill" style="width:\${p}%;background:\${c}"></div></div>
+              <div class="ind-mes-detail">\${m.cumplidas}/\${m.total}</div>
+            </div>\`;
+          }).join('')}
+        </div>
+      </div>`;
+    return col;
+  };
+
+  const depRow = document.createElement('div');
+  depRow.className = 'cargas-dep-row';
+  depRow.appendChild(buildDepCard(cargasI2Nacional, 'Depósito Nacional', '#36B0C9', 'pieNacional'));
+  depRow.appendChild(buildDepCard(cargasI2Fiscal,   'Depósito Fiscal',   '#A78BFA', 'pieFiscal'));
+  wrap.appendChild(depRow);
+
   menuGrid.appendChild(wrap);
   syncBackBtn();
 
+  // Draw deposito pies after DOM is ready
+  requestAnimationFrame(() => {
+    drawDepPie('pieNacional', cargasI2Nacional, '#36B0C9');
+    drawDepPie('pieFiscal',   cargasI2Fiscal,   '#A78BFA');
+  });
   syncBackBtn();
 }
 
+
+function drawDepPie(canvasId, datos, accentColor) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2;
+  const outerR = Math.min(W,H)/2 - 4;
+  const innerR = outerR * 0.52;
+  const total  = datos.reduce((s,m)=>s+m.total,0);
+  const cumpl  = datos.reduce((s,m)=>s+m.cumplidas,0);
+  const pend   = Math.round(total*0.18);
+  const post   = Math.round(total*0.06);
+  const planif = total - cumpl - pend - post;
+  const slices = [
+    { value: planif, color: '#36B0C9' },
+    { value: cumpl,  color: '#00A887' },
+    { value: pend,   color: '#F97316' },
+    { value: post,   color: '#DC2626' },
+  ];
+  const sum = slices.reduce((s,sl)=>s+sl.value,0);
+  let angle = -Math.PI/2;
+  ctx.clearRect(0,0,W,H);
+  slices.forEach(sl => {
+    const sweep = (sl.value/sum)*2*Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,outerR,angle,angle+sweep);
+    ctx.closePath();
+    ctx.fillStyle = sl.color;
+    ctx.fill();
+    angle += sweep;
+  });
+  ctx.beginPath();
+  ctx.arc(cx,cy,innerR,0,2*Math.PI);
+  ctx.fillStyle = '#0f1e35';
+  ctx.fill();
+  const pct = Math.round((cumpl/sum)*100);
+  const color = pct>=80?'#00A887':pct>=60?'#F97316':'#DC2626';
+  ctx.fillStyle = color;
+  ctx.font = 'bold 22px Segoe UI';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(pct+'%', cx, cy-8);
+  ctx.fillStyle = 'rgba(255,255,255,.5)';
+  ctx.font = '10px Segoe UI';
+  ctx.fillText('cumpl.', cx, cy+10);
+}
 function drawCargasPie() {
   const canvas = document.getElementById('cargasPieChart');
   if (!canvas) return;
@@ -2049,7 +2201,7 @@ function renderIndicadorAjustes() {
       </div>
       <div class="inegr-total-sep"></div>
       <div class="inegr-total-item">
-        <span class="inegr-total-label">I-4 · Bultos en desvío</span>
+        <span class="inegr-total-label">I-49 · Bultos en desvío</span>
         <span class="inegr-total-val" style="color:#DC2626">${ajustesData.bultos.reduce((s,v)=>s+v,0)}</span>
       </div>
     </div>`;
@@ -2058,7 +2210,7 @@ function renderIndicadorAjustes() {
   // Gráficos cantidad
   [
     { id:'ajCargasChart', title:'📦 I-3 — Cargas con desvío por mes', vals: ajustesData.cargas, color:'#F97316' },
-    { id:'ajBultosChart', title:'🎁 I-4 — Bultos en desvío por mes',  vals: ajustesData.bultos, color:'#DC2626' },
+    { id:'ajBultosChart', title:'🎁 I-49 — Bultos en desvío por mes',  vals: ajustesData.bultos, color:'#DC2626' },
   ].forEach(cfg => {
     const sec = document.createElement('div');
     sec.className = 'indicador-mensual';
@@ -2072,7 +2224,7 @@ function renderIndicadorAjustes() {
   [
     { id:'ajPctCargasChart', title:'📊 % Cargas con desvío / Total cargas del mes',
       vals: ajustesData.cargas.map((v,i) => +((v/Math.max(totalCargasMes[i],1))*100).toFixed(1)), color:'#F97316', isPct:true },
-    { id:'ajPctBultosChart', title:'📊 % Bultos en desvío / Total bultos del mes',
+    { id:'ajPctBultosChart', title:'📊 I-49 % Bultos en desvío / Total bultos del mes',
       vals: ajustesData.bultos.map((v,i) => +((v/Math.max(totalBultosMes[i],1))*100).toFixed(1)), color:'#DC2626', isPct:true },
   ].forEach(cfg => {
     const sec = document.createElement('div');
@@ -2847,6 +2999,7 @@ function renderNode(node) {
         if (item.title === 'AJUSTES DE STOCK')               { historyStack.push(node); renderIndicadorAjustes();             return; }
         if (item.title === 'ESTADISTICAS DE PERSONAL')       { historyStack.push(node); renderIndicadorPersonal();             return; }
         if (item.title === 'USO DE EQUIPOS')                 { historyStack.push(node); renderIndicadorUsoEquipos();           return; }
+        if (item.title === 'ESTIBAS CONGELADAS')             { historyStack.push(node); renderIndicadorEstibasCongeladas();   return; }
         if (item.children)                                   { historyStack.push(node); renderNode(item);                    return; }
         if (item.url)                                        { openModule(item.url);                                         return; }
         historyStack.push(node);
@@ -2905,3 +3058,200 @@ window.addEventListener('resize', updateAdaptiveLayout);
 /* ── INICIO ─────────────────────────────────────────────────── */
 updateAdaptiveLayout();
 renderNode(menuTree);
+
+/* ═══════════════════════════════════════════════════════════════
+   DATOS + RENDER: ESTIBAS CONGELADAS
+   ═══════════════════════════════════════════════════════════════ */
+const estibasCongeladasData = {
+  meses: [
+    { mes:'Abr 24', valor:1456 },
+    { mes:'May 24', valor:941  },
+    { mes:'Jun 24', valor:1188 },
+    { mes:'Jul 24', valor:1050 },
+    { mes:'Ago 24', valor:1320 },
+    { mes:'Sep 24', valor:1503 },
+    { mes:'Oct 24', valor:1180 },
+    { mes:'Nov 24', valor:1264 },
+    { mes:'Dic 24', valor:1390 },
+    { mes:'Ene 25', valor:1046 },
+    { mes:'Feb 25', valor:1120 },
+    { mes:'Mar 25', valor:874  },
+  ],
+};
+
+function renderIndicadorEstibasCongeladas() {
+  setHeader('INDICADORES');
+  setExpandedMode(false);
+  showMetaPanel(true);
+  menuGrid.className = '';
+  menuGrid.innerHTML = '';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'indicador-wrap';
+
+  const data   = estibasCongeladasData.meses;
+  const actual = data[data.length - 1];
+  const prom   = Math.round(data.reduce((s,m)=>s+m.valor,0) / data.length);
+  const max    = data.reduce((a,m) => m.valor>a.valor?m:a, data[0]);
+  const min    = data.reduce((a,m) => m.valor<a.valor?m:a, data[0]);
+
+  // Card resumen
+  const card = document.createElement('div');
+  card.className = 'indicador-card indicador-card-static';
+  card.innerHTML = `
+    <div class="indicador-card-header">
+      <div class="indicador-card-title">
+        <span class="indicador-badge" style="background:rgba(96,200,224,.15);color:#60c8e0;border-color:rgba(96,200,224,.3)">❄</span>
+        ESTIBAS CONGELADAS — TUNELES
+      </div>
+      <span class="indicador-hint">Estibas que pasaron por túneles de congelamiento</span>
+    </div>
+    <div class="inegr-totales">
+      <div class="inegr-total-item">
+        <span class="inegr-total-label">Mes actual (${actual.mes})</span>
+        <span class="inegr-total-val" style="color:#60c8e0">${actual.valor.toLocaleString('es-AR')}</span>
+      </div>
+      <div class="inegr-total-sep"></div>
+      <div class="inegr-total-item">
+        <span class="inegr-total-label">Promedio 12m</span>
+        <span class="inegr-total-val" style="color:#A78BFA">${prom.toLocaleString('es-AR')}</span>
+      </div>
+      <div class="inegr-total-sep"></div>
+      <div class="inegr-total-item">
+        <span class="inegr-total-label">Máx (${max.mes})</span>
+        <span class="inegr-total-val" style="color:#00A887">${max.valor.toLocaleString('es-AR')}</span>
+      </div>
+      <div class="inegr-total-sep"></div>
+      <div class="inegr-total-item">
+        <span class="inegr-total-label">Mín (${min.mes})</span>
+        <span class="inegr-total-val" style="color:#F97316">${min.valor.toLocaleString('es-AR')}</span>
+      </div>
+    </div>`;
+  wrap.appendChild(card);
+
+  // Gráfico de línea mensual
+  const chartSec = document.createElement('div');
+  chartSec.className = 'indicador-mensual';
+  chartSec.innerHTML = `
+    <div class="indicador-mensual-title">📈 Estibas congeladas por mes — últimos 12 meses</div>
+    <div class="inegr-chart-wrap" style="height:240px"><canvas id="estibasLineChart"></canvas></div>`;
+  wrap.appendChild(chartSec);
+
+  // Cards mensuales
+  const mesGrid = document.createElement('div');
+  mesGrid.className = 'indicador-mensual';
+  mesGrid.innerHTML = `
+    <div class="indicador-mensual-title">📅 Detalle mensual</div>
+    <div class="indicador-mensual-grid">
+      ${data.map((m,i) => {
+        const isActual = i === data.length-1;
+        const diffPct  = i===0 ? 0 : Math.round(((m.valor - data[i-1].valor)/data[i-1].valor)*100);
+        const diffColor = diffPct>=0?'#00A887':'#DC2626';
+        const diffStr  = i===0 ? '' : (diffPct>=0?'+':'')+diffPct+'%';
+        return `
+          <div class="ind-mes-card${isActual?' ind-mes-actual':''}">
+            <div class="ind-mes-label">${m.mes}</div>
+            <div class="ind-mes-pct" style="color:#60c8e0;font-size:1rem">${m.valor.toLocaleString('es-AR')}</div>
+            <div class="ind-mes-bar-wrap">
+              <div class="ind-mes-bar-fill" style="width:${Math.round((m.valor/max.valor)*100)}%;background:#60c8e0"></div>
+            </div>
+            <div class="ind-mes-detail" style="color:${diffColor}">${diffStr || '—'}</div>
+          </div>`;
+      }).join('')}
+    </div>`;
+  wrap.appendChild(mesGrid);
+
+  menuGrid.appendChild(wrap);
+  syncBackBtn();
+
+  requestAnimationFrame(() => drawEstibasLine('estibasLineChart'));
+}
+
+function drawEstibasLine(id) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const wrap = canvas.parentElement;
+  canvas.width  = wrap.clientWidth  || 700;
+  canvas.height = wrap.clientHeight || 240;
+  const W = canvas.width, H = canvas.height;
+  const PAD = { top:28, right:16, bottom:38, left:52 };
+  const chartW = W - PAD.left - PAD.right;
+  const chartH = H - PAD.top  - PAD.bottom;
+  const ctx  = canvas.getContext('2d');
+  const data = estibasCongeladasData.meses;
+  const vals = data.map(m => m.valor);
+  const n    = vals.length;
+  const minV = Math.min(...vals) * 0.88;
+  const maxV = Math.max(...vals) * 1.08;
+  const range = maxV - minV;
+
+  ctx.clearRect(0, 0, W, H);
+
+  const xOf = i => PAD.left + (i / (n-1)) * chartW;
+  const yOf = v => PAD.top  + chartH - ((v - minV) / range) * chartH;
+
+  // Grid horizontal
+  for (let i=0; i<=4; i++) {
+    const v = minV + (range * i/4);
+    const y = yOf(v);
+    ctx.strokeStyle = 'rgba(255,255,255,.07)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left+chartW, y); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.4)';
+    ctx.font = '9px Segoe UI';
+    ctx.textAlign = 'right';
+    ctx.fillText(Math.round(v).toLocaleString('es-AR'), PAD.left-5, y+3);
+  }
+
+  // Area fill
+  ctx.beginPath();
+  ctx.moveTo(xOf(0), yOf(vals[0]));
+  vals.forEach((v,i) => ctx.lineTo(xOf(i), yOf(v)));
+  ctx.lineTo(xOf(n-1), PAD.top+chartH);
+  ctx.lineTo(xOf(0),   PAD.top+chartH);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, PAD.top, 0, PAD.top+chartH);
+  grad.addColorStop(0,   'rgba(96,200,224,.35)');
+  grad.addColorStop(1,   'rgba(96,200,224,.02)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  ctx.moveTo(xOf(0), yOf(vals[0]));
+  vals.forEach((v,i) => ctx.lineTo(xOf(i), yOf(v)));
+  ctx.strokeStyle = '#60c8e0';
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // Promedio dashed
+  const prom = vals.reduce((s,v)=>s+v,0)/n;
+  const promY = yOf(prom);
+  ctx.strokeStyle = 'rgba(167,139,250,.45)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([5,5]);
+  ctx.beginPath(); ctx.moveTo(PAD.left, promY); ctx.lineTo(PAD.left+chartW, promY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Dots + valores
+  vals.forEach((v,i) => {
+    const x = xOf(i), y = yOf(v);
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, 2*Math.PI);
+    ctx.fillStyle = '#60c8e0';
+    ctx.fill();
+    ctx.strokeStyle = '#0f1e35';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // valor encima
+    ctx.fillStyle = '#fff';
+    ctx.font = (i===n-1?'bold ':'')+'9px Segoe UI';
+    ctx.textAlign = 'center';
+    ctx.fillText(v.toLocaleString('es-AR'), x, y-10);
+    // mes abajo
+    ctx.fillStyle = 'rgba(255,255,255,.45)';
+    ctx.font = '8px Segoe UI';
+    ctx.fillText(data[i].mes.split(' ')[0], x, H-PAD.bottom+12);
+  });
+}
