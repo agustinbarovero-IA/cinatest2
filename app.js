@@ -2935,28 +2935,91 @@ function renderFotosForm() {
     <div class="intervencion-wrap">
       <section class="intervencion-card">
         <h2 class="intervencion-title">Cargar fotos de estiba 65984-3</h2>
-        <p class="intervencion-subtitle">Adjunte imágenes o evidencias de la estiba.</p>
+        <p class="intervencion-subtitle">Adjuntá imágenes desde archivo o tomá una foto directamente con la cámara.</p>
       </section>
+
       <section class="intervencion-card">
-        <div class="intervencion-field">
-          <label class="intervencion-label">Seleccionar archivos</label>
-          <input type="file" multiple accept="image/*" class="intervencion-select">
+        <div class="foto-upload-row">
+          <!-- Desde archivo -->
+          <label class="foto-source-btn foto-btn-archivo" for="fotoFileInput">
+            <span class="foto-btn-icon">🖼</span>
+            <span class="foto-btn-label">Seleccionar<br>desde archivo</span>
+            <input type="file" id="fotoFileInput" multiple accept="image/*" style="display:none" />
+          </label>
+          <!-- Desde cámara -->
+          <label class="foto-source-btn foto-btn-camara" for="fotoCameraInput">
+            <span class="foto-btn-icon">📷</span>
+            <span class="foto-btn-label">Tomar foto<br>con cámara</span>
+            <input type="file" id="fotoCameraInput" accept="image/*" capture="environment" style="display:none" />
+          </label>
         </div>
       </section>
+
+      <!-- Preview de fotos cargadas -->
+      <section class="intervencion-card" id="fotoPreviewSection" style="display:none">
+        <div class="intervencion-field">
+          <label class="intervencion-label">Fotos seleccionadas (<span id="fotoCount">0</span>)</label>
+          <div class="foto-preview-grid" id="fotoPreviewGrid"></div>
+        </div>
+      </section>
+
       <section class="intervencion-card">
         <div class="intervencion-field">
           <label class="intervencion-label">Observaciones</label>
-          <textarea class="intervencion-textarea" placeholder="Escriba aquí un detalle de las fotos cargadas..."></textarea>
+          <textarea class="intervencion-textarea" id="fotoObs" placeholder="Escriba aquí un detalle de las fotos cargadas..."></textarea>
         </div>
       </section>
       <section class="intervencion-card">
         <div class="intervencion-actions">
-          <button id="btnGuardarFotos" class="intervencion-submit">Guardar fotos</button>
+          <button id="btnGuardarFotos" class="intervencion-submit" disabled>Guardar fotos</button>
         </div>
       </section>
     </div>`;
 
+  // Acumular fotos de ambas fuentes
+  const fotosAcumuladas = [];
+
+  const renderPreviews = () => {
+    const grid    = document.getElementById('fotoPreviewGrid');
+    const section = document.getElementById('fotoPreviewSection');
+    const countEl = document.getElementById('fotoCount');
+    const saveBtn = document.getElementById('btnGuardarFotos');
+    if (!grid) return;
+    grid.innerHTML = '';
+    fotosAcumuladas.forEach((file, i) => {
+      const url = URL.createObjectURL(file);
+      const div = document.createElement('div');
+      div.className = 'foto-preview-item';
+      div.innerHTML =
+        '<img src="' + url + '" class="foto-preview-img" />'
+        + '<button class="foto-remove-btn" data-i="' + i + '" title="Eliminar">✕</button>'
+        + '<span class="foto-preview-name">' + file.name + '</span>';
+      grid.appendChild(div);
+    });
+    if (countEl) countEl.textContent = fotosAcumuladas.length;
+    if (section) section.style.display = fotosAcumuladas.length ? '' : 'none';
+    if (saveBtn) saveBtn.disabled = fotosAcumuladas.length === 0;
+  };
+
+  const addFiles = (files) => {
+    Array.from(files).forEach(f => fotosAcumuladas.push(f));
+    renderPreviews();
+  };
+
+  const fileInput   = document.getElementById('fotoFileInput');
+  const cameraInput = document.getElementById('fotoCameraInput');
+  if (fileInput)   fileInput.addEventListener('change',   e => addFiles(e.target.files));
+  if (cameraInput) cameraInput.addEventListener('change', e => addFiles(e.target.files));
+
+  document.getElementById('fotoPreviewGrid')?.addEventListener('click', e => {
+    const btn = e.target.closest('.foto-remove-btn');
+    if (!btn) return;
+    fotosAcumuladas.splice(parseInt(btn.dataset.i), 1);
+    renderPreviews();
+  });
+
   document.getElementById('btnGuardarFotos').addEventListener('click', () => {
+    showToast('✅ ' + fotosAcumuladas.length + ' foto' + (fotosAcumuladas.length > 1 ? 's' : '') + ' guardada' + (fotosAcumuladas.length > 1 ? 's' : ''));
     showMetaPanel(true);
     setExpandedMode(false);
     historyStack.length = 0;
@@ -3017,10 +3080,10 @@ function renderNode(node) {
         if (item.title === 'ESTADISTICAS DE PERSONAL')       { historyStack.push(node); renderIndicadorPersonal();             return; }
         if (item.title === 'USO DE EQUIPOS')                 { historyStack.push(node); renderIndicadorUsoEquipos();           return; }
         if (item.title === 'ESTIBAS CONGELADAS')             { historyStack.push(node); renderIndicadorEstibasCongeladas();   return; }
-        if (item.children)                                   { historyStack.push(node); renderNode(item);                    return; }
         if (item.title === 'FACTURACION' && node.title === 'ADMINISTRACION') { historyStack.push(node); renderFacturacion(); return; }
         if (item.title === 'REMITOS'     && node.title === 'ADMINISTRACION') { historyStack.push(node); renderRemitos();      return; }
         if (item.title === 'COMPRAS'     && node.title === 'ADMINISTRACION') { historyStack.push(node); renderCompras();      return; }
+        if (item.children)                                   { historyStack.push(node); renderNode(item);                    return; }
         if (item.url)                                        { openModule(item.url);                                         return; }
         historyStack.push(node);
         renderNode({ title: item.title, url: item.url, children: [] });

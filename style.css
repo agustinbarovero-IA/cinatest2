@@ -3091,3 +3091,90 @@ body{
   .oc-accion-btns .fact-download-btn { min-width: 100%; }
   .oc-fields-grid { grid-template-columns: 1fr; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   CARGA DE FOTOS — archivo + cámara
+   ═══════════════════════════════════════════════════════════════ */
+.foto-upload-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.foto-source-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 28px 16px;
+  border-radius: 16px;
+  border: 2px dashed rgba(255,255,255,.22);
+  background: rgba(255,255,255,.05);
+  color: rgba(255,255,255,.75);
+  cursor: pointer;
+  transition: all .18s;
+  text-align: center;
+}
+.foto-source-btn:hover {
+  border-color: rgba(54,176,201,.55);
+  background: rgba(54,176,201,.10);
+  color: #fff;
+  transform: translateY(-2px);
+}
+.foto-btn-archivo:hover { border-color: rgba(54,176,201,.55); background: rgba(54,176,201,.10); }
+.foto-btn-camara:hover  { border-color: rgba(0,168,135,.55);  background: rgba(0,168,135,.10); }
+.foto-btn-camara { border-color: rgba(0,168,135,.3); }
+
+.foto-btn-icon  { font-size: 2.2rem; line-height: 1; }
+.foto-btn-label { font-size: .8rem; font-weight: 800; text-transform: uppercase; letter-spacing: .3px; line-height: 1.3; }
+
+.foto-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 6px;
+}
+.foto-preview-item {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  display: flex;
+  flex-direction: column;
+}
+.foto-preview-img {
+  width: 100%;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  display: block;
+}
+.foto-remove-btn {
+  position: absolute;
+  top: 5px; right: 5px;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(220,38,38,.85);
+  color: #fff;
+  font-size: .7rem;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+  box-shadow: 0 2px 6px rgba(0,0,0,.4);
+}
+.foto-remove-btn:hover { background: #DC2626; }
+.foto-preview-name {
+  font-size: .62rem;
+  color: rgba(255,255,255,.45);
+  padding: 4px 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+@media (max-width: 480px) {
+  .foto-upload-row { grid-template-columns: 1fr; }
+}
