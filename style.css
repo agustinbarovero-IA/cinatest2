@@ -3375,3 +3375,20 @@ body{
   .cert-check-options { width: 100%; }
   .cert-opt-btn { flex: 1; justify-content: center; }
 }
+
+/* Tabla gestión OC — columnas factura */
+.oc-fields-3col { grid-template-columns: repeat(3, 1fr) !important; }
+.oc-td-nfact { white-space: nowrap; }
+.oc-fact-num {
+  font-weight: 900;
+  color: #4ade80;
+  font-size: .78rem;
+  background: rgba(74,222,128,.12);
+  border: 1px solid rgba(74,222,128,.3);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.oc-fact-empty { color: rgba(255,255,255,.25); font-size: .78rem; }
+.oc-td-venc { white-space: nowrap; color: rgba(255,255,255,.45) !important; font-size: .76rem !important; }
+.oc-td-venc-activo { color: #fbbf24 !important; font-weight: 800 !important; }
+.oc-list-table th, .oc-list-table td { font-size: .75rem !important; padding: 8px 8px !important; }

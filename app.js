@@ -4097,7 +4097,7 @@ function renderGestionOC() {
 
   const buildList = () => {
     const filas = comprasDB.ordenes.length === 0
-      ? '<tr><td colspan="7" class="oc-empty">No hay órdenes de compra registradas</td></tr>'
+      ? '<tr><td colspan="10" class="oc-empty">No hay órdenes de compra registradas</td></tr>'
       : comprasDB.ordenes.slice().reverse().map(o => {
           const est = estados[o.estado] || estados.BORRADOR;
           const tot = '$ ' + (o.totalVal||0).toLocaleString('es-AR', {minimumFractionDigits:2});
@@ -4107,6 +4107,9 @@ function renderGestionOC() {
             <td class="oc-td-dest">${o.destino||'—'}</td>
             <td class="oc-td-total">${tot}</td>
             <td class="oc-td-fecha">${o.fechaCreacion||'—'}</td>
+            <td class="oc-td-nfact">${o.numFactura ? '<span class="oc-fact-num">' + o.numFactura + '</span>' : '<span class="oc-fact-empty">—</span>'}</td>
+            <td class="oc-td-fecha">${o.fechaFactura ? o.fechaFactura.split('-').reverse().join('/') : '—'}</td>
+            <td class="oc-td-venc${o.vencimientoPago && o.estado !== 'ABONADA' ? ' oc-td-venc-activo' : ''}">${o.vencimientoPago||'—'}</td>
             <td class="oc-td-estado">
               <span class="oc-estado-badge" style="color:${est.color};border-color:${est.color}40;background:${est.color}18">
                 ${est.icon} ${est.label}
@@ -4122,7 +4125,9 @@ function renderGestionOC() {
       <thead>
         <tr>
           <th>N° Orden</th><th>Empresa</th><th>Destino</th>
-          <th>Total</th><th>Fecha</th><th>Estado</th><th></th>
+          <th>Total</th><th>Creación</th>
+          <th>N° Factura</th><th>Fec. Factura</th><th>Vencimiento</th>
+          <th>Estado</th><th></th>
         </tr>
       </thead>
       <tbody>${filas}</tbody>
@@ -4250,7 +4255,11 @@ function renderDetalleOC(ord) {
           <div class="oc-comentario-box" style="margin-bottom:10px">
             ✅ Orden autorizada &nbsp;·&nbsp; Proveedor: ${ord.proveedor}
           </div>
-          <div class="oc-fields-grid">
+          <div class="oc-fields-grid oc-fields-3col">
+            <div class="oc-field-group">
+              <label class="fact-date-label">N° de factura</label>
+              <input class="oc-input" id="detNumFact" type="text" placeholder="ej. 0001-00012345" style="padding:9px 12px;font-size:.88rem;font-weight:800" />
+            </div>
             <div class="oc-field-group">
               <label class="fact-date-label">Fecha de la factura</label>
               <input class="fact-date-input" id="detFechaFact" type="date" value="${new Date().toISOString().split('T')[0]}" />
@@ -4353,17 +4362,19 @@ function renderDetalleOC(ord) {
       showToast('📦 Recepción confirmada');
       setTimeout(() => renderDetalleOC(ord), 400);
     } else if (act === 'recibirFactura') {
+      const nf   = wrap.querySelector('#detNumFact')?.value.trim();
       const ff   = wrap.querySelector('#detFechaFact')?.value;
       const pl   = wrap.querySelector('#detPlazo')?.value;
+      if (!nf) { showToast('⚠ Ingresá el N° de factura'); return; }
       if (!ff) { showToast('⚠ Indicá la fecha de la factura'); return; }
       ord.estado = 'FACTURADA';
-      ord.fechaFactura = ff; ord.plazo = pl;
+      ord.numFactura = nf; ord.fechaFactura = ff; ord.plazo = pl;
       const dias = parseInt(pl)||0;
       const venc = new Date(ff);
       venc.setDate(venc.getDate() + dias);
-      ord.vencimientoPago = venc.toLocaleDateString('es-AR');
-      ord.historial.push({ accion:'Factura recibida — vence ' + ord.vencimientoPago, fecha:n, user:'agustin.barovero' });
-      showToast('🧾 Factura registrada');
+      ord.vencimientoPago = dias === 0 ? 'Contado' : venc.toLocaleDateString('es-AR');
+      ord.historial.push({ accion:'Factura N° ' + nf + ' registrada — vence ' + ord.vencimientoPago, fecha:n, user:'agustin.barovero' });
+      showToast('🧾 Factura ' + nf + ' registrada');
       setTimeout(() => renderDetalleOC(ord), 400);
     } else if (act === 'abonar') {
       ord.estado = 'ABONADA';
