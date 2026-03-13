@@ -327,9 +327,9 @@ function getCustomTileHTML(item) {
         <div class="tile-kpi-top">
           <span class="tile-kpi-badge">I-2</span>
         </div>
-        <div class="tile-kpi-value" style="color:${color}">${pct}<span class="tile-kpi-sym">%</span></div>
+        <div class="tile-kpi-value tile-kpi-value--lg" style="color:${color}">${pct}<span class="tile-kpi-sym">%</span></div>
         <div class="tile-kpi-sublabel">CUMPLIMIENTO</div>
-        <div class="tile-title one-line" style="margin-top:6px">CARGAS</div>
+        <div class="tile-title one-line tile-label">CARGAS</div>
       </div>`;
   }
   // ALMACENAMIENTO DE POSICIONES I-36: mostrar valor actual del contenedor 5
@@ -342,9 +342,9 @@ function getCustomTileHTML(item) {
         <div class="tile-kpi-top">
           <span class="tile-kpi-badge">I-36</span>
         </div>
-        <div class="tile-kpi-value" style="color:${color};font-size:1.5rem">${actual.toLocaleString('es-AR')}</div>
+        <div class="tile-kpi-value tile-kpi-value--md" style="color:${color}">${actual.toLocaleString('es-AR')}</div>
         <div class="tile-kpi-sublabel">POSICIONES</div>
-        <div class="tile-title one-line" style="margin-top:6px">ALMACENAMIENTO</div>
+        <div class="tile-title one-line tile-label">ALMACENAMIENTO</div>
       </div>`;
   }
   // POSICIONES INGRESADAS/EGRESADAS: dos valores verde/rojo con barra
@@ -363,7 +363,7 @@ function getCustomTileHTML(item) {
             <span class="tile-kpi-dual-lbl">EGR.</span>
           </div>
         </div>
-        <div class="tile-title one-line" style="margin-top:4px;font-size:.7rem">POS. INGR / EGR</div>
+        <div class="tile-title one-line tile-label">POS. INGR / EGR</div>
       </div>`;
   }
   // CLIENTES QUE OPERARON: cantidad de clientes
@@ -372,9 +372,9 @@ function getCustomTileHTML(item) {
     return `
       <div class="tile-kpi-wrap">
         <div class="tile-kpi-top"><span class="tile-kpi-badge">CLI</span></div>
-        <div class="tile-kpi-value" style="color:#36B0C9;font-size:2rem">${n}</div>
+        <div class="tile-kpi-value tile-kpi-value--lg" style="color:#36B0C9">${n}</div>
         <div class="tile-kpi-sublabel">CLIENTES</div>
-        <div class="tile-title one-line" style="margin-top:6px;font-size:.68rem">QUE OPERARON</div>
+        <div class="tile-title one-line tile-label">QUE OPERARON</div>
       </div>`;
   }
   // MOVIMIENTOS (dentro de INDICADORES): 6 tiempos promedio
@@ -391,7 +391,7 @@ function getCustomTileHTML(item) {
               <span class="tile-mov-val">${Math.round(mes.promedios[v.id].prom * 60)}m</span>
             </div>`).join('')}
         </div>
-        <div class="tile-title one-line" style="margin-top:4px;font-size:.68rem">MOVIMIENTOS</div>
+        <div class="tile-title one-line tile-label">MOVIMIENTOS</div>
       </div>`;
   }
   // AJUSTES DE STOCK: I-3 y I-4 con 2 números
@@ -403,7 +403,7 @@ function getCustomTileHTML(item) {
           <div class="tile-adj-row"><span class="tile-adj-code">I-3</span><span class="tile-adj-val">1</span></div>
           <div class="tile-adj-row"><span class="tile-adj-code">I-49</span><span class="tile-adj-val">2</span></div>
         </div>
-        <div class="tile-title one-line" style="margin-top:4px;font-size:.68rem">AJUSTES STOCK</div>
+        <div class="tile-title one-line tile-label">AJUSTES STOCK</div>
       </div>`;
   }
   // ESTADISTICAS DE PERSONAL: total usuarios online
@@ -412,9 +412,9 @@ function getCustomTileHTML(item) {
     return `
       <div class="tile-kpi-wrap">
         <div class="tile-kpi-top"><span class="tile-kpi-badge">RRHH</span></div>
-        <div class="tile-kpi-value" style="color:#A78BFA;font-size:1.9rem">${total}</div>
+        <div class="tile-kpi-value tile-kpi-value--lg" style="color:#A78BFA">${total}</div>
         <div class="tile-kpi-sublabel">USUARIOS</div>
-        <div class="tile-title one-line" style="margin-top:6px;font-size:.68rem">ESTADÍSTICAS</div>
+        <div class="tile-title one-line tile-label">ESTADÍSTICAS</div>
       </div>`;
   }
   // USO DE EQUIPOS
@@ -431,7 +431,7 @@ function getCustomTileHTML(item) {
           <div class="tile-mov-item"><span class="tile-mov-code">CAM</span><span class="tile-mov-val" style="color:#36B0C9">${mes.camion}h</span></div>
           <div class="tile-mov-item"><span class="tile-mov-code">LIM</span><span class="tile-mov-val" style="color:#36B0C9">${mes.limpieza}h</span></div>
         </div>
-        <div class="tile-title one-line" style="margin-top:4px;font-size:.68rem">USO EQUIPOS</div>
+        <div class="tile-title one-line tile-label">USO EQUIPOS</div>
       </div>`;
   }
   // ESTIBAS CONGELADAS: valor del mes en curso
@@ -440,9 +440,9 @@ function getCustomTileHTML(item) {
     return `
       <div class="tile-kpi-wrap">
         <div class="tile-kpi-top"><span class="tile-kpi-badge">❄</span></div>
-        <div class="tile-kpi-value" style="color:#60c8e0;font-size:1.55rem">${actual.toLocaleString('es-AR')}</div>
+        <div class="tile-kpi-value tile-kpi-value--md" style="color:#60c8e0">${actual.toLocaleString('es-AR')}</div>
         <div class="tile-kpi-sublabel">ESTIBAS MES</div>
-        <div class="tile-title one-line" style="margin-top:6px;font-size:.68rem">CONGELADAS</div>
+        <div class="tile-title one-line tile-label">CONGELADAS</div>
       </div>`;
   }
   return null; // usar HTML por defecto
@@ -487,7 +487,12 @@ function getEquipmentIconMarkup(item) {
 }
 
 function getGridLayout(count) {
-  return count > 8 ? 'layout-8x2' : 'layout-4x4';
+  if (count <= 4)  return 'layout-2x2';
+  if (count <= 6)  return 'layout-3x2';
+  if (count <= 8)  return 'layout-4x2';
+  if (count <= 9)  return 'layout-3x3';
+  if (count <= 12) return 'layout-4x3';
+  return 'layout-5x3';
 }
 
 function formatTitle(title) {
