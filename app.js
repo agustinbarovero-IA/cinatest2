@@ -70,7 +70,7 @@ const menuTree = {
     {
       title: 'ADMINISTRACION',
       children: [
-        { title: 'FACTURACION', url: 'https://sistema.cinafrio.com/intranet/index.php/facturacion' },
+        { title: 'FACTURACION' },
         { title: 'REMITOS',     url: 'https://sistema.cinafrio.com/intranet/index.php/facturacion/remitos' },
         { title: 'COMPRAS',     url: 'https://sistema.cinafrio.com/intranet/index.php/pim/index/estadoPIM/1' }
       ]
@@ -487,12 +487,19 @@ function getEquipmentIconMarkup(item) {
 }
 
 function getGridLayout(count) {
-  if (count <= 4)  return 'layout-2x2';
-  if (count <= 6)  return 'layout-3x2';
-  if (count <= 8)  return 'layout-4x2';
-  if (count <= 9)  return 'layout-3x3';
-  if (count <= 12) return 'layout-4x3';
-  return 'layout-5x3';
+  // Returns a CSS class and also sets a data-count attribute on menuGrid
+  // so CSS can use the right tile size
+  if (count === 1)  return 'layout-1';
+  if (count === 2)  return 'layout-2';
+  if (count === 3)  return 'layout-3';
+  if (count <= 4)   return 'layout-4';
+  if (count <= 5)   return 'layout-5';
+  if (count <= 6)   return 'layout-6';
+  if (count <= 8)   return 'layout-8';
+  if (count <= 9)   return 'layout-9';
+  if (count <= 12)  return 'layout-12';
+  if (count <= 14)  return 'layout-14';
+  return 'layout-16';
 }
 
 function formatTitle(title) {
@@ -2971,7 +2978,9 @@ function renderNode(node) {
   const level = historyStack.length;
 
   setHeader(level ? node.title : 'BIENVENIDOS AL SISTEMA DE GRUPO CINA');
-  menuGrid.className = `menu-grid ${getGridLayout(items.length || 1)}`;
+  const cnt = items.length || 1;
+  menuGrid.className = `menu-grid ${getGridLayout(cnt)}`;
+  menuGrid.dataset.count = cnt;
   menuGrid.innerHTML = '';
 
   if (!items.length) {
@@ -3009,6 +3018,7 @@ function renderNode(node) {
         if (item.title === 'USO DE EQUIPOS')                 { historyStack.push(node); renderIndicadorUsoEquipos();           return; }
         if (item.title === 'ESTIBAS CONGELADAS')             { historyStack.push(node); renderIndicadorEstibasCongeladas();   return; }
         if (item.children)                                   { historyStack.push(node); renderNode(item);                    return; }
+        if (item.title === 'FACTURACION' && node.title === 'ADMINISTRACION') { historyStack.push(node); renderFacturacion(); return; }
         if (item.url)                                        { openModule(item.url);                                         return; }
         historyStack.push(node);
         renderNode({ title: item.title, url: item.url, children: [] });
@@ -3262,4 +3272,237 @@ function drawEstibasLine(id) {
     ctx.font = '8px Segoe UI';
     ctx.fillText(data[i].mes.split(' ')[0], x, H-PAD.bottom+12);
   });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MÓDULO: FACTURACIÓN
+   ═══════════════════════════════════════════════════════════════ */
+function renderFacturacion() {
+  setHeader('ADMINISTRACION');
+  setExpandedMode(false);
+  showMetaPanel(true);
+  menuGrid.className = '';
+  menuGrid.innerHTML = '';
+
+  // Estado
+  let seleccionados = new Set();
+  let busqueda = '';
+
+  // ── Fecha default: 1ro del mes actual hasta hoy ──────────────
+  const hoy     = new Date();
+  const primeroDeMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+  const fmtDate = d => d.toISOString().split('T')[0];
+
+  const wrap = document.createElement('div');
+  wrap.className = 'fact-wrap';
+
+  wrap.innerHTML = `
+    <div class="fact-header">
+      <div class="fact-header-title">
+        <span class="indicador-badge" style="background:rgba(249,115,22,.2);color:#F97316;border-color:rgba(249,115,22,.35)">FAC</span>
+        FACTURACIÓN — RESÚMENES POR CLIENTE
+      </div>
+      <span class="indicador-hint">Seleccioná clientes, período y descargá los resúmenes</span>
+    </div>
+
+    <!-- ── BLOQUE 1: SELECCIÓN DE CLIENTES ── -->
+    <div class="fact-section">
+      <div class="fact-section-title">
+        <span class="fact-section-icon">👥</span>
+        Clientes que operaron en el mes
+        <span class="fact-sel-count" id="factSelCount">0 seleccionados</span>
+        <button class="fact-sel-all-btn" id="factSelAll">Seleccionar todos</button>
+        <button class="fact-sel-none-btn" id="factSelNone">Limpiar</button>
+      </div>
+
+      <div class="fact-search-wrap">
+        <input class="fact-search" id="factSearch" type="text" placeholder="🔍  Buscar cliente..." autocomplete="off" />
+      </div>
+
+      <div class="fact-clients-grid" id="factClientsGrid">
+        ${clientesOperaron.map((c, i) => `
+          <button class="fact-client-chip" data-idx="${i}" data-name="${c.toLowerCase()}" title="${c}">
+            <span class="fact-chip-check">✓</span>
+            <span class="fact-chip-name">${c}</span>
+          </button>`).join('')}
+      </div>
+    </div>
+
+    <!-- ── BLOQUE 2: PERÍODO ── -->
+    <div class="fact-section fact-period-section">
+      <div class="fact-section-title">
+        <span class="fact-section-icon">📅</span>
+        Período de facturación
+      </div>
+      <div class="fact-period-row">
+        <div class="fact-date-group">
+          <label class="fact-date-label">Desde</label>
+          <input class="fact-date-input" id="factDesde" type="date" value="${fmtDate(primeroDeMes)}" />
+        </div>
+        <div class="fact-period-sep">→</div>
+        <div class="fact-date-group">
+          <label class="fact-date-label">Hasta</label>
+          <input class="fact-date-input" id="factHasta" type="date" value="${fmtDate(hoy)}" />
+        </div>
+        <div class="fact-period-shortcuts">
+          <button class="fact-shortcut-btn" data-range="mes">Mes actual</button>
+          <button class="fact-shortcut-btn" data-range="mesant">Mes anterior</button>
+          <button class="fact-shortcut-btn" data-range="trim">Trimestre</button>
+          <button class="fact-shortcut-btn" data-range="anio">Año</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BLOQUE 3: DESCARGA ── -->
+    <div class="fact-section fact-download-section">
+      <div class="fact-section-title">
+        <span class="fact-section-icon">📄</span>
+        Resúmenes a generar
+        <span class="fact-hint-small" id="factResumenHint">Seleccioná al menos un cliente</span>
+      </div>
+      <div class="fact-download-row">
+        <div class="fact-summary-preview" id="factSummaryPreview">
+          <span class="fact-preview-empty">— sin clientes seleccionados —</span>
+        </div>
+        <button class="fact-download-btn" id="factDownloadBtn" disabled>
+          ⬇ Descargar resúmenes
+        </button>
+      </div>
+    </div>
+  `;
+
+  menuGrid.appendChild(wrap);
+  syncBackBtn();
+
+  // ── Referencias ──────────────────────────────────────────────
+  const grid      = wrap.querySelector('#factClientsGrid');
+  const searchEl  = wrap.querySelector('#factSearch');
+  const countEl   = wrap.querySelector('#factSelCount');
+  const previewEl = wrap.querySelector('#factSummaryPreview');
+  const dlBtn     = wrap.querySelector('#factDownloadBtn');
+  const hintEl    = wrap.querySelector('#factResumenHint');
+  const selAllBtn = wrap.querySelector('#factSelAll');
+  const selNoneBtn= wrap.querySelector('#factSelNone');
+
+  // ── Actualizar contador y preview ───────────────────────────
+  const updateUI = () => {
+    const n = seleccionados.size;
+    countEl.textContent = n === 0 ? '0 seleccionados'
+                        : n === 1 ? '1 seleccionado'
+                        : `${n} seleccionados`;
+    countEl.style.color = n > 0 ? '#36B0C9' : 'rgba(255,255,255,.4)';
+
+    dlBtn.disabled = n === 0;
+    hintEl.textContent = n === 0
+      ? 'Seleccioná al menos un cliente'
+      : `${n} resumen${n>1?'es':''} · período ${wrap.querySelector('#factDesde').value} → ${wrap.querySelector('#factHasta').value}`;
+    hintEl.style.color = n > 0 ? '#00A887' : 'rgba(255,255,255,.35)';
+
+    if (n === 0) {
+      previewEl.innerHTML = '<span class="fact-preview-empty">— sin clientes seleccionados —</span>';
+    } else {
+      const names = [...seleccionados].map(i => clientesOperaron[i]);
+      previewEl.innerHTML = names.map(name => `
+        <div class="fact-preview-chip">
+          <span class="fact-preview-name">${name}</span>
+          <span class="fact-preview-period">${wrap.querySelector('#factDesde').value} → ${wrap.querySelector('#factHasta').value}</span>
+        </div>`).join('');
+    }
+  };
+
+  // ── Toggle chip ──────────────────────────────────────────────
+  const toggleChip = (chip, idx) => {
+    if (seleccionados.has(idx)) {
+      seleccionados.delete(idx);
+      chip.classList.remove('selected');
+    } else {
+      seleccionados.add(idx);
+      chip.classList.add('selected');
+    }
+    updateUI();
+  };
+
+  grid.addEventListener('click', e => {
+    const chip = e.target.closest('.fact-client-chip');
+    if (!chip) return;
+    toggleChip(chip, parseInt(chip.dataset.idx));
+  });
+
+  // ── Buscar ───────────────────────────────────────────────────
+  searchEl.addEventListener('input', () => {
+    busqueda = searchEl.value.toLowerCase().trim();
+    grid.querySelectorAll('.fact-client-chip').forEach(chip => {
+      chip.style.display = (!busqueda || chip.dataset.name.includes(busqueda)) ? '' : 'none';
+    });
+  });
+
+  // ── Seleccionar / limpiar todos ──────────────────────────────
+  selAllBtn.addEventListener('click', () => {
+    grid.querySelectorAll('.fact-client-chip:not([style*="none"])').forEach(chip => {
+      const idx = parseInt(chip.dataset.idx);
+      seleccionados.add(idx);
+      chip.classList.add('selected');
+    });
+    updateUI();
+  });
+  selNoneBtn.addEventListener('click', () => {
+    seleccionados.clear();
+    grid.querySelectorAll('.fact-client-chip').forEach(c => c.classList.remove('selected'));
+    updateUI();
+  });
+
+  // ── Atajos de fecha ──────────────────────────────────────────
+  wrap.querySelectorAll('.fact-shortcut-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      wrap.querySelectorAll('.fact-shortcut-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const now   = new Date();
+      const desde = wrap.querySelector('#factDesde');
+      const hasta = wrap.querySelector('#factHasta');
+      switch (btn.dataset.range) {
+        case 'mes':
+          desde.value = fmtDate(new Date(now.getFullYear(), now.getMonth(), 1));
+          hasta.value = fmtDate(now);
+          break;
+        case 'mesant': {
+          const pm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+          desde.value = fmtDate(pm);
+          hasta.value = fmtDate(new Date(now.getFullYear(), now.getMonth(), 0));
+          break;
+        }
+        case 'trim':
+          desde.value = fmtDate(new Date(now.getFullYear(), now.getMonth() - 2, 1));
+          hasta.value = fmtDate(now);
+          break;
+        case 'anio':
+          desde.value = fmtDate(new Date(now.getFullYear(), 0, 1));
+          hasta.value = fmtDate(now);
+          break;
+      }
+      updateUI();
+    });
+  });
+
+  // Actualizar hint cuando cambian fechas
+  wrap.querySelector('#factDesde').addEventListener('change', updateUI);
+  wrap.querySelector('#factHasta').addEventListener('change', updateUI);
+
+  // ── Botón descargar ──────────────────────────────────────────
+  dlBtn.addEventListener('click', () => {
+    const desde  = wrap.querySelector('#factDesde').value;
+    const hasta  = wrap.querySelector('#factHasta').value;
+    const names  = [...seleccionados].map(i => clientesOperaron[i]);
+
+    // Simula descarga: muestra toast + abre URL del sistema por cliente
+    const plural = names.length > 1 ? 'es' : '';
+    showToast('Generando ' + names.length + ' resumen' + plural + '...');
+
+    // En producción esto llamaría a la API real por cada cliente.
+    // Por ahora abre el módulo de facturación del sistema.
+    setTimeout(() => {
+      openModule(`https://sistema.cinafrio.com/intranet/index.php/facturacion?desde=${desde}&hasta=${hasta}`);
+    }, 800);
+  });
+
+  updateUI();
 }

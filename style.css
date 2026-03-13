@@ -266,38 +266,97 @@ body{
   width:100%;
 }
 
-.menu-grid.layout-2x2{
-  grid-template-columns:repeat(2,minmax(150px,1fr));
-  max-width:480px;
+/* ─── GRID ADAPTATIVOS — caben siempre en pantalla ───────────
+   Principio: cols × rows definidos por cantidad de items.
+   El tile usa height relativo al viewport para entrar siempre.
+   La variable --tile-h controla el alto disponible del workspace.
+   ────────────────────────────────────────────────────────── */
+
+/* Workspace disponible: 100dvh - header(54px) - strip(70px) - padding(24px) */
+:root {
+  --workspace-h: calc(100dvh - 148px);
+  --tile-gap: 10px;
 }
-.menu-grid.layout-3x2{
-  grid-template-columns:repeat(3,minmax(140px,1fr));
-  max-width:660px;
+
+.menu-grid {
+  /* base ya definida arriba, añadimos align */
+  align-items: stretch;
 }
-.menu-grid.layout-4x2{
-  grid-template-columns:repeat(4,minmax(130px,1fr));
-  max-width:860px;
+
+/* 1 item */
+.menu-grid.layout-1  { grid-template-columns: repeat(1, 1fr); max-width: 240px; }
+/* 2 items — fila única */
+.menu-grid.layout-2  { grid-template-columns: repeat(2, 1fr); max-width: 460px; }
+/* 3 items — fila única */
+.menu-grid.layout-3  { grid-template-columns: repeat(3, 1fr); max-width: 600px; }
+/* 4 items — fila única */
+.menu-grid.layout-4  { grid-template-columns: repeat(4, 1fr); max-width: 760px; }
+/* 5 items — fila única */
+.menu-grid.layout-5  { grid-template-columns: repeat(5, 1fr); max-width: 920px; }
+/* 6 items — 3×2 */
+.menu-grid.layout-6  { grid-template-columns: repeat(3, 1fr); max-width: 680px; }
+/* 8 items — 4×2 */
+.menu-grid.layout-8  { grid-template-columns: repeat(4, 1fr); max-width: 860px; }
+/* 9 items — 3×3 */
+.menu-grid.layout-9  { grid-template-columns: repeat(3, 1fr); max-width: 700px; }
+/* 12 items — 4×3 */
+.menu-grid.layout-12 { grid-template-columns: repeat(4, 1fr); max-width: 860px; }
+/* 14 items — 7×2  o  4+4+4+2 → usamos 7 cols */
+.menu-grid.layout-14 { grid-template-columns: repeat(7, 1fr); max-width: 1200px; }
+/* 16 items — 4×4 */
+.menu-grid.layout-16 { grid-template-columns: repeat(4, 1fr); max-width: 860px; }
+
+/* Legacy aliases (por si algún código viejo los usa) */
+.menu-grid.layout-4x4 { grid-template-columns: repeat(4, 1fr); max-width: 860px; }
+.menu-grid.layout-8x2 { grid-template-columns: repeat(4, 1fr); max-width: 860px; }
+
+/* ── Altura de tile: calcula cuántas filas hay y divide el espacio ─── */
+/* Fórmula: (workspace-h - gaps) / filas   */
+
+/* 1 fila: 1,2,3,4,5 */
+.menu-grid.layout-1  .tile,
+.menu-grid.layout-2  .tile,
+.menu-grid.layout-3  .tile,
+.menu-grid.layout-4  .tile,
+.menu-grid.layout-5  .tile {
+  height: calc((var(--workspace-h) - var(--tile-gap)) / 1);
+  max-height: 280px;
+  aspect-ratio: unset;
+  min-height: 120px;
 }
-.menu-grid.layout-3x3{
-  grid-template-columns:repeat(3,minmax(160px,1fr));
-  max-width:740px;
+
+/* 2 filas: 6, 8 */
+.menu-grid.layout-6  .tile,
+.menu-grid.layout-8  .tile {
+  height: calc((var(--workspace-h) - var(--tile-gap) * 2) / 2);
+  max-height: 240px;
+  aspect-ratio: unset;
+  min-height: 110px;
 }
-.menu-grid.layout-4x3{
-  grid-template-columns:repeat(4,minmax(130px,1fr));
-  max-width:900px;
+
+/* 2 filas horizontales: 14 (7×2) */
+.menu-grid.layout-14 .tile {
+  height: calc((var(--workspace-h) - var(--tile-gap) * 2) / 2);
+  max-height: 200px;
+  aspect-ratio: unset;
+  min-height: 100px;
 }
-.menu-grid.layout-5x3{
-  grid-template-columns:repeat(5,minmax(120px,1fr));
-  max-width:1050px;
+
+/* 3 filas: 9, 12 */
+.menu-grid.layout-9  .tile,
+.menu-grid.layout-12 .tile {
+  height: calc((var(--workspace-h) - var(--tile-gap) * 3) / 3);
+  max-height: 210px;
+  aspect-ratio: unset;
+  min-height: 100px;
 }
-/* Legacy aliases */
-.menu-grid.layout-4x4{
-  grid-template-columns:repeat(4,minmax(130px,1fr));
-  max-width:860px;
-}
-.menu-grid.layout-8x2{
-  grid-template-columns:repeat(4,minmax(130px,1fr));
-  max-width:860px;
+
+/* 4 filas: 16 */
+.menu-grid.layout-16 .tile {
+  height: calc((var(--workspace-h) - var(--tile-gap) * 4) / 4);
+  max-height: 180px;
+  aspect-ratio: unset;
+  min-height: 90px;
 }
 
 .tile{
@@ -2384,4 +2443,341 @@ body{
   .tile-mov-grid {
     grid-template-columns: 1fr 1fr 1fr;
   }
+}
+
+/* ── Responsive: en pantallas pequeñas reducir columnas ─── */
+@media (max-width: 1100px) {
+  .menu-grid.layout-14 { grid-template-columns: repeat(5, 1fr); }
+}
+@media (max-width: 900px) {
+  .menu-grid.layout-5,
+  .menu-grid.layout-8,
+  .menu-grid.layout-14 { grid-template-columns: repeat(4, 1fr); }
+  .menu-grid.layout-12 { grid-template-columns: repeat(3, 1fr); }
+  /* Ajuste de alturas en pantallas medianas */
+  .menu-grid.layout-5  .tile { max-height: 200px; }
+}
+@media (max-width: 680px) {
+  .menu-grid.layout-4,
+  .menu-grid.layout-5,
+  .menu-grid.layout-6,
+  .menu-grid.layout-8,
+  .menu-grid.layout-9,
+  .menu-grid.layout-12,
+  .menu-grid.layout-14,
+  .menu-grid.layout-16 { grid-template-columns: repeat(3, 1fr); }
+  :root { --workspace-h: calc(100dvh - 120px); }
+}
+@media (max-width: 480px) {
+  .menu-grid[class*="layout-"] { grid-template-columns: repeat(2, 1fr); }
+  :root { --workspace-h: calc(100dvh - 100px); }
+}
+
+/* Asegurar que el tile-kpi-value nunca sobresalga en tiles pequeños */
+.menu-grid.layout-14 .tile-kpi-value,
+.menu-grid.layout-16 .tile-kpi-value { font-size: 1.2rem !important; }
+.menu-grid.layout-14 .tile-kpi-value--lg,
+.menu-grid.layout-16 .tile-kpi-value--lg { font-size: 1.35rem !important; }
+.menu-grid.layout-14 .tile-label,
+.menu-grid.layout-16 .tile-label { font-size: .58rem !important; }
+
+/* ═══════════════════════════════════════════════════════════════
+   MÓDULO FACTURACIÓN
+   ═══════════════════════════════════════════════════════════════ */
+.fact-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 1100px;
+  padding: 4px 0 24px;
+  box-sizing: border-box;
+}
+
+.fact-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, rgba(0,31,96,.85), rgba(0,23,74,.9));
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 18px;
+}
+.fact-header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  color: #fff;
+}
+
+/* ── Secciones ── */
+.fact-section {
+  background: rgba(0,15,48,.6);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.fact-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: .78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  color: rgba(255,255,255,.65);
+  flex-wrap: wrap;
+}
+.fact-section-icon { font-size: 1rem; }
+
+/* ── Contador + botones de selección ── */
+.fact-sel-count {
+  margin-left: auto;
+  font-size: .78rem;
+  font-weight: 800;
+  color: rgba(255,255,255,.4);
+  transition: color .2s;
+}
+.fact-sel-all-btn,
+.fact-sel-none-btn {
+  padding: 4px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.07);
+  color: rgba(255,255,255,.65);
+  font-size: .72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.fact-sel-all-btn:hover  { background: rgba(54,176,201,.25); color:#36B0C9; border-color:rgba(54,176,201,.4); }
+.fact-sel-none-btn:hover { background: rgba(220,38,38,.2);   color:#f87171; border-color:rgba(220,38,38,.35); }
+
+/* ── Buscador ── */
+.fact-search-wrap { width: 100%; }
+.fact-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.07);
+  color: #fff;
+  font-size: .84rem;
+  font-weight: 600;
+  outline: none;
+  transition: border-color .2s, background .2s;
+}
+.fact-search::placeholder { color: rgba(255,255,255,.35); }
+.fact-search:focus {
+  border-color: rgba(54,176,201,.5);
+  background: rgba(255,255,255,.10);
+}
+
+/* ── Grid de chips ── */
+.fact-clients-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.fact-client-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 99px;
+  border: 1.5px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.72);
+  font-size: .75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+  text-align: left;
+  max-width: 260px;
+  overflow: hidden;
+}
+.fact-client-chip:hover {
+  border-color: rgba(54,176,201,.45);
+  background: rgba(54,176,201,.12);
+  color: #fff;
+}
+.fact-client-chip.selected {
+  background: linear-gradient(135deg, rgba(54,176,201,.28), rgba(0,168,135,.22));
+  border-color: rgba(54,176,201,.7);
+  color: #fff;
+}
+.fact-chip-check {
+  display: none;
+  font-size: .7rem;
+  color: #36B0C9;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+.fact-client-chip.selected .fact-chip-check { display: inline; }
+.fact-chip-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Período ── */
+.fact-period-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.fact-date-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.fact-date-label {
+  font-size: .68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  color: rgba(255,255,255,.45);
+}
+.fact-date-input {
+  padding: 9px 14px;
+  border-radius: 11px;
+  border: 1.5px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  font-size: .88rem;
+  font-weight: 700;
+  outline: none;
+  cursor: pointer;
+  transition: border-color .2s;
+  color-scheme: dark;
+}
+.fact-date-input:focus { border-color: rgba(54,176,201,.55); }
+.fact-period-sep {
+  font-size: 1.2rem;
+  color: rgba(255,255,255,.3);
+  padding-top: 18px;
+}
+.fact-period-shortcuts {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding-top: 18px;
+}
+.fact-shortcut-btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.6);
+  font-size: .74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.fact-shortcut-btn:hover,
+.fact-shortcut-btn.active {
+  background: linear-gradient(135deg,#1A4E8A,#0E3060);
+  border-color: rgba(54,176,201,.55);
+  color: #fff;
+}
+
+/* ── Descarga ── */
+.fact-hint-small {
+  margin-left: auto;
+  font-size: .74rem;
+  font-weight: 700;
+  color: rgba(255,255,255,.35);
+  transition: color .2s;
+}
+.fact-download-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.fact-summary-preview {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-height: 44px;
+  align-content: flex-start;
+}
+.fact-preview-empty {
+  color: rgba(255,255,255,.25);
+  font-size: .78rem;
+  font-style: italic;
+  font-weight: 600;
+  padding: 10px 0;
+}
+.fact-preview-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 12px;
+  border-radius: 10px;
+  background: rgba(0,168,135,.15);
+  border: 1px solid rgba(0,168,135,.3);
+  max-width: 220px;
+}
+.fact-preview-name {
+  font-size: .75rem;
+  font-weight: 800;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fact-preview-period {
+  font-size: .65rem;
+  font-weight: 700;
+  color: rgba(255,255,255,.45);
+  white-space: nowrap;
+}
+.fact-download-btn {
+  padding: 14px 28px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #00A887, #007A62);
+  color: #fff;
+  font-size: .92rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  cursor: pointer;
+  transition: all .2s;
+  box-shadow: 0 6px 20px rgba(0,168,135,.3);
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+.fact-download-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(0,168,135,.45);
+  filter: brightness(1.08);
+}
+.fact-download-btn:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+@media (max-width: 680px) {
+  .fact-period-row { flex-direction: column; align-items: flex-start; }
+  .fact-period-sep { display: none; }
+  .fact-download-row { flex-direction: column; }
+  .fact-download-btn { width: 100%; text-align: center; }
 }
