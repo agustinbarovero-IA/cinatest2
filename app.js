@@ -445,6 +445,37 @@ function getCustomTileHTML(item) {
         <div class="tile-title one-line tile-label">CONGELADAS</div>
       </div>`;
   }
+  // FACTURACIÓN
+  if (item.title === 'FACTURACION') {
+    return `
+      <div class="tile-kpi-wrap">
+        <div class="tile-kpi-top"><span class="tile-kpi-badge" style="background:rgba(249,115,22,.2);color:#F97316;border-color:rgba(249,115,22,.4)">FAC</span></div>
+        <div style="font-size:2rem;line-height:1">🧾</div>
+        <div class="tile-kpi-sublabel">RESÚMENES</div>
+        <div class="tile-title one-line tile-label">FACTURACIÓN</div>
+      </div>`;
+  }
+  // REMITOS
+  if (item.title === 'REMITOS') {
+    return `
+      <div class="tile-kpi-wrap">
+        <div class="tile-kpi-top"><span class="tile-kpi-badge" style="background:rgba(167,139,250,.2);color:#A78BFA;border-color:rgba(167,139,250,.4)">REM</span></div>
+        <div style="font-size:2rem;line-height:1">📋</div>
+        <div class="tile-kpi-sublabel">DESCARGA</div>
+        <div class="tile-title one-line tile-label">REMITOS</div>
+      </div>`;
+  }
+  // COMPRAS
+  if (item.title === 'COMPRAS') {
+    const pendientes = (typeof comprasDB !== 'undefined') ? comprasDB.ordenes.filter(o => o.estado === 'PENDIENTE').length : 0;
+    return `
+      <div class="tile-kpi-wrap">
+        <div class="tile-kpi-top"><span class="tile-kpi-badge" style="background:rgba(250,204,21,.15);color:#FACC15;border-color:rgba(250,204,21,.3)">OC</span></div>
+        <div class="tile-kpi-value tile-kpi-value--lg" style="color:#FACC15">${pendientes > 0 ? pendientes : '—'}</div>
+        <div class="tile-kpi-sublabel">${pendientes > 0 ? 'PENDIENTES' : 'ÓRDENES'}</div>
+        <div class="tile-title one-line tile-label">COMPRAS</div>
+      </div>`;
+  }
   return null; // usar HTML por defecto
 }
 
