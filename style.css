@@ -2146,3 +2146,88 @@ body{
     grid-template-columns: 1fr 1fr 1fr;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   AJUSTES DE STOCK — selector de mes
+   ═══════════════════════════════════════════════════════════════ */
+.ajustes-mes-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.ajustes-mes-btn {
+  padding: 7px 13px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 10px;
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.65);
+  font-weight: 700;
+  font-size: .78rem;
+  cursor: pointer;
+  transition: all .15s;
+  min-width: 70px;
+  text-align: center;
+}
+.ajustes-mes-btn:hover { background:rgba(255,255,255,.12); color:#fff; }
+.ajustes-mes-btn.active {
+  background: linear-gradient(135deg,#1A4E8A,#0E3060);
+  border-color: rgba(54,176,201,.55);
+  color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ESTADÍSTICAS DE PERSONAL
+   ═══════════════════════════════════════════════════════════════ */
+.personal-perfil-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.personal-perfil-btn {
+  min-width: 0 !important;
+  font-size: .74rem !important;
+  padding: 6px 11px !important;
+}
+.personal-user-row {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.personal-stat {
+  font-size: .8rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TILE AJUSTES STOCK dual vertical
+   ═══════════════════════════════════════════════════════════════ */
+.tile-adj-dual {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  padding: 0 8px;
+}
+.tile-adj-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px;
+  background: rgba(255,255,255,.06);
+  border-radius: 6px;
+}
+.tile-adj-code {
+  font-size: .65rem;
+  font-weight: 900;
+  color: rgba(255,255,255,.5);
+}
+.tile-adj-val {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #F97316;
+}
+
+/* Horizontal bar canvas wrap */
+.inegr-chart-wrap canvas { display:block; }

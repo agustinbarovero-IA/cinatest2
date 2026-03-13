@@ -134,8 +134,9 @@ const menuTree = {
         { title: 'ESTADISTICAS DE PERSONAL' },
         { title: 'ALMACENAMIENTO DE POSICIONES' },  // I-36
         { title: 'POSICIONES INGRESADAS EGRESADAS' },
-        { title: 'AJUSTES DE STOCK', url: 'https://sistema.cinafrio.com/intranet/index.php/infostock/ajusteManual' },
-        { title: 'CLIENTES QUE OPERARON' }
+        { title: 'AJUSTES DE STOCK' },
+        { title: 'CLIENTES QUE OPERARON' },
+        { title: 'USO DE EQUIPOS' }
       ]
     },
     {
@@ -386,10 +387,50 @@ function getCustomTileHTML(item) {
           ${veh.map(v => `
             <div class="tile-mov-item">
               <span class="tile-mov-code">${v.code}</span>
-              <span class="tile-mov-val">${mes.promedios[v.id].prom}h</span>
+              <span class="tile-mov-val">${Math.round(mes.promedios[v.id].prom * 60)}m</span>
             </div>`).join('')}
         </div>
         <div class="tile-title one-line" style="margin-top:4px;font-size:.68rem">MOVIMIENTOS</div>
+      </div>`;
+  }
+  // AJUSTES DE STOCK: I-3 y I-4 con 2 números
+  if (item.title === 'AJUSTES DE STOCK') {
+    return `
+      <div class="tile-kpi-wrap">
+        <div class="tile-kpi-top"><span class="tile-kpi-badge">AJS</span></div>
+        <div class="tile-adj-dual">
+          <div class="tile-adj-row"><span class="tile-adj-code">I-3</span><span class="tile-adj-val">1</span></div>
+          <div class="tile-adj-row"><span class="tile-adj-code">I-4</span><span class="tile-adj-val">2</span></div>
+        </div>
+        <div class="tile-title one-line" style="margin-top:4px;font-size:.68rem">AJUSTES STOCK</div>
+      </div>`;
+  }
+  // ESTADISTICAS DE PERSONAL: total usuarios online
+  if (item.title === 'ESTADISTICAS DE PERSONAL') {
+    const total = personalData.usuarios.length;
+    return `
+      <div class="tile-kpi-wrap">
+        <div class="tile-kpi-top"><span class="tile-kpi-badge">RRHH</span></div>
+        <div class="tile-kpi-value" style="color:#A78BFA;font-size:1.9rem">${total}</div>
+        <div class="tile-kpi-sublabel">USUARIOS</div>
+        <div class="tile-title one-line" style="margin-top:6px;font-size:.68rem">ESTADÍSTICAS</div>
+      </div>`;
+  }
+  // USO DE EQUIPOS
+  if (item.title === 'USO DE EQUIPOS') {
+    const ue = usoEquiposData;
+    const mes = ue.meses[ue.meses.length-1];
+    return `
+      <div class="tile-kpi-wrap tile-mov-wrap">
+        <div class="tile-kpi-top"><span class="tile-kpi-badge">EQP</span></div>
+        <div class="tile-mov-grid">
+          <div class="tile-mov-item"><span class="tile-mov-code">BOX</span><span class="tile-mov-val" style="color:#36B0C9">${mes.boxes}h</span></div>
+          <div class="tile-mov-item"><span class="tile-mov-code">TRON</span><span class="tile-mov-val" style="color:#36B0C9">${mes.troneras}h</span></div>
+          <div class="tile-mov-item"><span class="tile-mov-code">AE</span><span class="tile-mov-val" style="color:#36B0C9">${mes.autoelevadores}h</span></div>
+          <div class="tile-mov-item"><span class="tile-mov-code">CAM</span><span class="tile-mov-val" style="color:#36B0C9">${mes.camion}h</span></div>
+          <div class="tile-mov-item"><span class="tile-mov-code">LIM</span><span class="tile-mov-val" style="color:#36B0C9">${mes.limpieza}h</span></div>
+        </div>
+        <div class="tile-title one-line" style="margin-top:4px;font-size:.68rem">USO EQUIPOS</div>
       </div>`;
   }
   return null; // usar HTML por defecto
@@ -1781,7 +1822,7 @@ function drawMovBar(canvasId, vId, tipo, unidad) {
   const colores = { entrada:'#00A887', salida:'#DC2626', prom:'#36B0C9' };
   const color   = colores[tipo];
 
-  const vals = meses.map(m => m.promedios[vId][unidad][tipo]);
+  const vals = meses.map(m => m.promedios[vId][unidad] ? m.promedios[vId][unidad][tipo] : m.promedios[vId]['cargas'][tipo]);
   const maxVal = Math.max(...vals, 1) * 1.18;
 
   ctx.clearRect(0, 0, W, H);
@@ -1831,6 +1872,604 @@ function drawMovBar(canvasId, vId, tipo, unidad) {
   ctx.beginPath(); ctx.moveTo(PAD.left, promY); ctx.lineTo(PAD.left+chartW, promY); ctx.stroke();
   ctx.setLineDash([]);
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   DATOS: AJUSTES DE STOCK
+   ═══════════════════════════════════════════════════════════════ */
+const ajustesData = {
+  meses: ['Abr 24','May 24','Jun 24','Jul 24','Ago 24','Sep 24','Oct 24','Nov 24','Dic 24','Ene 25','Feb 25','Mar 25'],
+  cargas:  [3,5,2,7,4,6,3,8,5,4,6,1],
+  bultos:  [42,68,31,95,57,74,45,102,63,51,78,12],
+  totalCargas: 28940,
+  totalBultos: 338421,
+  ajustesDetalle: [
+    // mes 0=Abr24 .. 11=Mar25
+    // { mes, carga, bultos, usuario, motivo }
+    {mes:0,  carga:'C-48201', bultos:12, usuario:'mario.garcia',    motivo:'Error conteo entrada'},
+    {mes:0,  carga:'C-48356', bultos:8,  usuario:'laura.benitez',   motivo:'Daño en estiba'},
+    {mes:0,  carga:'C-48490', bultos:22, usuario:'mario.garcia',    motivo:'Faltante descarga'},
+    {mes:1,  carga:'C-49102', bultos:5,  usuario:'pedro.suarez',    motivo:'Error conteo entrada'},
+    {mes:1,  carga:'C-49250', bultos:15, usuario:'mario.garcia',    motivo:'Sobrante en recuento'},
+    {mes:1,  carga:'C-49380', bultos:18, usuario:'laura.benitez',   motivo:'Daño en estiba'},
+    {mes:1,  carga:'C-49510', bultos:9,  usuario:'ana.torres',      motivo:'Error etiquetado'},
+    {mes:1,  carga:'C-49620', bultos:21, usuario:'pedro.suarez',    motivo:'Faltante descarga'},
+    {mes:2,  carga:'C-50100', bultos:7,  usuario:'ana.torres',      motivo:'Error conteo entrada'},
+    {mes:2,  carga:'C-50280', bultos:24, usuario:'mario.garcia',    motivo:'Reclamo cliente'},
+    {mes:3,  carga:'C-51001', bultos:11, usuario:'laura.benitez',   motivo:'Error conteo entrada'},
+    {mes:3,  carga:'C-51200', bultos:19, usuario:'pedro.suarez',    motivo:'Daño en estiba'},
+    {mes:3,  carga:'C-51350', bultos:28, usuario:'mario.garcia',    motivo:'Sobrante en recuento'},
+    {mes:3,  carga:'C-51480', bultos:14, usuario:'ana.torres',      motivo:'Faltante descarga'},
+    {mes:3,  carga:'C-51600', bultos:10, usuario:'laura.benitez',   motivo:'Error etiquetado'},
+    {mes:3,  carga:'C-51750', bultos:13, usuario:'mario.garcia',    motivo:'Reclamo cliente'},
+    {mes:4,  carga:'C-52100', bultos:16, usuario:'pedro.suarez',    motivo:'Error conteo entrada'},
+    {mes:4,  carga:'C-52250', bultos:22, usuario:'mario.garcia',    motivo:'Daño en estiba'},
+    {mes:4,  carga:'C-52400', bultos:9,  usuario:'ana.torres',      motivo:'Error etiquetado'},
+    {mes:4,  carga:'C-52580', bultos:10, usuario:'laura.benitez',   motivo:'Sobrante en recuento'},
+    {mes:5,  carga:'C-53050', bultos:18, usuario:'mario.garcia',    motivo:'Error conteo entrada'},
+    {mes:5,  carga:'C-53200', bultos:25, usuario:'pedro.suarez',    motivo:'Reclamo cliente'},
+    {mes:5,  carga:'C-53380', bultos:14, usuario:'ana.torres',      motivo:'Faltante descarga'},
+    {mes:5,  carga:'C-53500', bultos:17, usuario:'laura.benitez',   motivo:'Daño en estiba'},
+    {mes:6,  carga:'C-54020', bultos:8,  usuario:'mario.garcia',    motivo:'Error conteo entrada'},
+    {mes:6,  carga:'C-54200', bultos:20, usuario:'ana.torres',      motivo:'Error etiquetado'},
+    {mes:6,  carga:'C-54380', bultos:17, usuario:'pedro.suarez',    motivo:'Sobrante en recuento'},
+    {mes:7,  carga:'C-55001', bultos:30, usuario:'mario.garcia',    motivo:'Error conteo entrada'},
+    {mes:7,  carga:'C-55180', bultos:22, usuario:'laura.benitez',   motivo:'Reclamo cliente'},
+    {mes:7,  carga:'C-55320', bultos:28, usuario:'pedro.suarez',    motivo:'Daño en estiba'},
+    {mes:8,  carga:'C-56010', bultos:19, usuario:'mario.garcia',    motivo:'Error conteo entrada'},
+    {mes:8,  carga:'C-56180', bultos:24, usuario:'ana.torres',      motivo:'Faltante descarga'},
+    {mes:8,  carga:'C-56350', bultos:20, usuario:'laura.benitez',   motivo:'Error etiquetado'},
+    {mes:9,  carga:'C-57001', bultos:14, usuario:'pedro.suarez',    motivo:'Sobrante en recuento'},
+    {mes:9,  carga:'C-57200', bultos:22, usuario:'mario.garcia',    motivo:'Error conteo entrada'},
+    {mes:9,  carga:'C-57380', bultos:15, usuario:'laura.benitez',   motivo:'Reclamo cliente'},
+    {mes:10, carga:'C-58020', bultos:28, usuario:'mario.garcia',    motivo:'Daño en estiba'},
+    {mes:10, carga:'C-58200', bultos:33, usuario:'pedro.suarez',    motivo:'Error conteo entrada'},
+    {mes:10, carga:'C-58380', bultos:17, usuario:'ana.torres',      motivo:'Error etiquetado'},
+    {mes:11, carga:'C-59001', bultos:12, usuario:'mario.garcia',    motivo:'Ajuste manual'},
+  ],
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   DATOS: ESTADÍSTICAS DE PERSONAL
+   ═══════════════════════════════════════════════════════════════ */
+const personalData = {
+  perfiles: [
+    'Administrador Principal','Administrador Calidad','Administrador Sala de Maquinas',
+    'Administrador Logística','Administrador Recursos Humanos',
+    'Operador Logistica Avanzado','Operador Logistica','Operador Calidad',
+    'Operador Sala de Maquinas','Operador Recursos Humanos','Operador Básico',
+    'Compras - Operador','Compras - Revisor','Compras - Autorizador',
+    'Operador Calidad Avanzado','Operador Administracion','Auditoria',
+    'Operador Logistica Especial','Logística - Avanzado','Cliente',
+    'Operador Logistica DF','Logística - Encargado',
+  ],
+  usuarios: [
+    {user:'alan.perez',          perfil:'Operador Logistica'},
+    {user:'alfredo.perichon',    perfil:'Operador Logistica'},
+    {user:'brandon.duarte',      perfil:'Operador Logistica'},
+    {user:'brandon.peña',        perfil:'Operador Logistica'},
+    {user:'carlos.aguirre',      perfil:'Operador Logistica'},
+    {user:'celina.tasinazzo',    perfil:'Operador Logistica'},
+    {user:'daniela.ojeda',       perfil:'Operador Logistica'},
+    {user:'diego.corvalan',      perfil:'Operador Logistica'},
+    {user:'diego.stoffel',       perfil:'Operador Logistica'},
+    {user:'gabriel.cristaldo',   perfil:'Operador Logistica'},
+    {user:'guillermo.aguirre',   perfil:'Operador Logistica'},
+    {user:'hector.sanabria',     perfil:'Operador Logistica'},
+    {user:'ignacio.rodriguez',   perfil:'Operador Logistica'},
+    {user:'ivan.casalicchio',    perfil:'Operador Logistica'},
+    {user:'javier.diaz',         perfil:'Operador Logistica'},
+    {user:'jeremias.moyano',     perfil:'Operador Logistica'},
+    {user:'jesus.centurion',     perfil:'Operador Logistica'},
+    {user:'agustin.barovero',    perfil:'Administrador Principal'},
+    {user:'mario.garcia',        perfil:'Administrador Logística'},
+    {user:'laura.benitez',       perfil:'Operador Calidad'},
+    {user:'pedro.suarez',        perfil:'Operador Logistica Avanzado'},
+    {user:'ana.torres',          perfil:'Administrador Calidad'},
+  ],
+  // Movimientos mensuales por usuario (base ~250 variados)
+  movimientos: (() => {
+    const meses = ['Abr 24','May 24','Jun 24','Jul 24','Ago 24','Sep 24','Oct 24','Nov 24','Dic 24','Ene 25','Feb 25','Mar 25'];
+    let s = 7;
+    const r = () => { s=(s*1664525+1013904223)&0xffffffff; return Math.abs(s)/0xffffffff; };
+    return meses.map(mes => {
+      const vals = {};
+      ['alan.perez','alfredo.perichon','brandon.duarte','brandon.peña','carlos.aguirre',
+       'celina.tasinazzo','daniela.ojeda','diego.corvalan','diego.stoffel','gabriel.cristaldo',
+       'guillermo.aguirre','hector.sanabria','ignacio.rodriguez','ivan.casalicchio',
+       'javier.diaz','jeremias.moyano','jesus.centurion'].forEach(u => {
+        vals[u] = Math.round(200 + r()*100);
+      });
+      return { mes, vals };
+    });
+  })(),
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   DATOS: USO DE EQUIPOS
+   ═══════════════════════════════════════════════════════════════ */
+const usoEquiposData = {
+  meses: (() => {
+    const ns = ['Abr 24','May 24','Jun 24','Jul 24','Ago 24','Sep 24','Oct 24','Nov 24','Dic 24','Ene 25','Feb 25','Mar 25'];
+    let s = 13;
+    const r = () => { s=(s*1664525+1013904223)&0xffffffff; return Math.abs(s)/0xffffffff; };
+    const rv = (a,b) => Math.round(a + r()*(b-a));
+    return ns.map(mes => ({
+      mes,
+      boxes:          rv(180,320),
+      troneras:       rv(80,160),
+      autoelevadores: rv(200,400),
+      camion:         rv(60,140),
+      limpieza:       rv(40,100),
+      // detalle boxes 1-27
+      boxDetalle: Array.from({length:27}, (_,i) => ({ id:`Box ${i+1}`, horas: rv(4,18) })),
+      // detalle troneras 1-8 + DF1-DF3
+      tronDetalle: [
+        ...Array.from({length:8}, (_,i) => ({ id:`Tronera ${i+1}`, horas: rv(3,14) })),
+        ...Array.from({length:3}, (_,i) => ({ id:`DF ${i+1}`, horas: rv(2,10) })),
+      ],
+      // AE ya los tenemos de dashboardEquipamientoData — simulamos por nombre
+      aeDetalle: ['AE-01','AE-02','AE-03','AE-04','AE-05','AE-06','AE-07','AE-08']
+                   .map(id => ({ id, horas: rv(20,80) })),
+      camionDetalle: [{ id:'CM-01', horas: rv(40,130) }],
+      limpiezaDetalle: [{ id:'RL-01', horas: rv(30,90) }],
+    }));
+  })(),
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   RENDER: AJUSTES DE STOCK
+   ═══════════════════════════════════════════════════════════════ */
+function renderIndicadorAjustes() {
+  setHeader('INDICADORES');
+  setExpandedMode(false);
+  showMetaPanel(true);
+  menuGrid.className = '';
+  menuGrid.innerHTML = '';
+
+  let mesFiltro = null; // null = todos
+  const wrap = document.createElement('div');
+  wrap.className = 'indicador-wrap';
+
+  // Card resumen
+  const card = document.createElement('div');
+  card.className = 'indicador-card indicador-card-static';
+  card.innerHTML = `
+    <div class="indicador-card-header">
+      <div class="indicador-card-title">
+        <span class="indicador-badge">AJS</span>
+        AJUSTES DE STOCK
+      </div>
+      <span class="indicador-hint">Desviaciones en cargas y bultos — últimos 12 meses</span>
+    </div>
+    <div class="inegr-totales">
+      <div class="inegr-total-item">
+        <span class="inegr-total-label">I-3 · Cargas con desvío</span>
+        <span class="inegr-total-val" style="color:#F97316">${ajustesData.cargas.reduce((s,v)=>s+v,0)}</span>
+      </div>
+      <div class="inegr-total-sep"></div>
+      <div class="inegr-total-item">
+        <span class="inegr-total-label">I-4 · Bultos en desvío</span>
+        <span class="inegr-total-val" style="color:#DC2626">${ajustesData.bultos.reduce((s,v)=>s+v,0)}</span>
+      </div>
+    </div>`;
+  wrap.appendChild(card);
+
+  // Gráficos cantidad
+  [
+    { id:'ajCargasChart', title:'📦 I-3 — Cargas con desvío por mes', vals: ajustesData.cargas, color:'#F97316' },
+    { id:'ajBultosChart', title:'🎁 I-4 — Bultos en desvío por mes',  vals: ajustesData.bultos, color:'#DC2626' },
+  ].forEach(cfg => {
+    const sec = document.createElement('div');
+    sec.className = 'indicador-mensual';
+    sec.innerHTML = `<div class="indicador-mensual-title">${cfg.title}</div><div class="inegr-chart-wrap"><canvas id="${cfg.id}"></canvas></div>`;
+    wrap.appendChild(sec);
+  });
+
+  // Gráficos porcentaje sobre total
+  const totalCargasMes = ingEgrData.map(m => m.estIn + m.estOut);
+  const totalBultosMes = ingEgrData.map(m => Math.round((m.kgIn + m.kgOut) / 25));
+  [
+    { id:'ajPctCargasChart', title:'📊 % Cargas con desvío / Total cargas del mes',
+      vals: ajustesData.cargas.map((v,i) => +((v/Math.max(totalCargasMes[i],1))*100).toFixed(1)), color:'#F97316', isPct:true },
+    { id:'ajPctBultosChart', title:'📊 % Bultos en desvío / Total bultos del mes',
+      vals: ajustesData.bultos.map((v,i) => +((v/Math.max(totalBultosMes[i],1))*100).toFixed(1)), color:'#DC2626', isPct:true },
+  ].forEach(cfg => {
+    const sec = document.createElement('div');
+    sec.className = 'indicador-mensual';
+    sec.innerHTML = `<div class="indicador-mensual-title">${cfg.title}</div><div class="inegr-chart-wrap"><canvas id="${cfg.id}"></canvas></div>`;
+    wrap.appendChild(sec);
+  });
+
+  // Selector de mes
+  const selSec = document.createElement('div');
+  selSec.className = 'indicador-mensual';
+  selSec.innerHTML = `
+    <div class="indicador-mensual-title">📅 Filtrar por mes — listado de ajustes realizados</div>
+    <div class="ajustes-mes-selector" id="ajMesSel">
+      <button class="ajustes-mes-btn active" data-mes="-1">Todos</button>
+      ${ajustesData.meses.map((m,i)=>`<button class="ajustes-mes-btn" data-mes="${i}">${m}</button>`).join('')}
+    </div>
+    <div class="clientes-grid" id="ajustesList" style="margin-top:10px">
+    </div>`;
+  wrap.appendChild(selSec);
+  menuGrid.appendChild(wrap);
+  syncBackBtn();
+
+  const renderList = (filtro) => {
+    const list = document.getElementById('ajustesList');
+    if (!list) return;
+    const items = filtro === -1
+      ? ajustesData.ajustesDetalle
+      : ajustesData.ajustesDetalle.filter(a => a.mes === filtro);
+    list.innerHTML = items.length === 0
+      ? '<div style="color:rgba(255,255,255,.4);padding:16px;text-align:center">Sin ajustes en este período</div>'
+      : items.map((a,i) => `
+        <div class="cliente-row">
+          <span class="cliente-num">${String(i+1).padStart(2,'0')}</span>
+          <span class="cliente-name">
+            <strong>${a.carga}</strong>
+            <span style="color:rgba(255,255,255,.5);font-size:.78rem;margin-left:8px">${ajustesData.meses[a.mes]}</span>
+          </span>
+          <span style="color:#F97316;font-weight:800;font-size:.85rem;white-space:nowrap">${a.bultos} bts</span>
+          <span style="color:rgba(255,255,255,.55);font-size:.78rem;white-space:nowrap">${a.usuario}</span>
+        </div>`).join('');
+  };
+
+  requestAnimationFrame(() => {
+    [
+      { id:'ajCargasChart',    vals: ajustesData.cargas, color:'#F97316', isPct:false },
+      { id:'ajBultosChart',    vals: ajustesData.bultos, color:'#DC2626', isPct:false },
+      { id:'ajPctCargasChart', vals: ajustesData.cargas.map((v,i)=>+((v/Math.max((ingEgrData[i].estIn+ingEgrData[i].estOut),1))*100).toFixed(1)), color:'#F97316', isPct:true },
+      { id:'ajPctBultosChart', vals: ajustesData.bultos.map((v,i)=>+((v/Math.max(Math.round((ingEgrData[i].kgIn+ingEgrData[i].kgOut)/25),1))*100).toFixed(1)), color:'#DC2626', isPct:true },
+    ].forEach(cfg => drawSimpleBar(cfg.id, ajustesData.meses, cfg.vals, cfg.color, cfg.isPct));
+    renderList(-1);
+  });
+
+  // Mes buttons
+  wrap.addEventListener('click', e => {
+    const btn = e.target.closest('.ajustes-mes-btn');
+    if (!btn) return;
+    wrap.querySelectorAll('.ajustes-mes-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderList(parseInt(btn.dataset.mes));
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RENDER: ESTADÍSTICAS DE PERSONAL
+   ═══════════════════════════════════════════════════════════════ */
+function renderIndicadorPersonal() {
+  setHeader('INDICADORES');
+  setExpandedMode(false);
+  showMetaPanel(true);
+  menuGrid.className = '';
+  menuGrid.innerHTML = '';
+
+  let perfilFiltro = 'Operador Logistica';
+  const wrap = document.createElement('div');
+  wrap.className = 'indicador-wrap';
+
+  // Header
+  const header = document.createElement('div');
+  header.className = 'indicador-card indicador-card-static';
+  header.innerHTML = `
+    <div class="indicador-card-header">
+      <div class="indicador-card-title">
+        <span class="indicador-badge">RRHH</span>
+        ESTADÍSTICAS DE PERSONAL
+      </div>
+      <span class="indicador-hint">${personalData.usuarios.length} usuarios en el sistema</span>
+    </div>`;
+  wrap.appendChild(header);
+
+  // Selector de perfil
+  const selSec = document.createElement('div');
+  selSec.className = 'indicador-mensual';
+  selSec.innerHTML = `
+    <div class="indicador-mensual-title">👤 Filtrar por perfil</div>
+    <div class="personal-perfil-wrap" id="perfilSel">
+      ${personalData.perfiles.map(p => `
+        <button class="ajustes-mes-btn personal-perfil-btn${p===perfilFiltro?' active':''}" data-p="${p}">${p}</button>
+      `).join('')}
+    </div>`;
+  wrap.appendChild(selSec);
+
+  // Gráfico movimientos
+  const movSec = document.createElement('div');
+  movSec.className = 'indicador-mensual';
+  movSec.innerHTML = `
+    <div class="indicador-mensual-title">📈 Movimientos mensuales — usuarios del perfil seleccionado</div>
+    <div class="inegr-chart-wrap" style="height:220px"><canvas id="personalMovChart"></canvas></div>`;
+  wrap.appendChild(movSec);
+
+  // Cards de usuarios del perfil
+  const usersSec = document.createElement('div');
+  usersSec.className = 'indicador-mensual';
+  usersSec.id = 'personalUsersSec';
+  wrap.appendChild(usersSec);
+
+  menuGrid.appendChild(wrap);
+  syncBackBtn();
+
+  const renderPersonalData = (perfil) => {
+    const usuarios = personalData.usuarios.filter(u => u.perfil === perfil);
+    const meses = personalData.movimientos.map(m => m.mes);
+    // Suma de movimientos de todos los usuarios del perfil por mes
+    const totalPorMes = personalData.movimientos.map(m => {
+      return usuarios.reduce((s,u) => s + (m.vals[u.user] || 0), 0);
+    });
+
+    requestAnimationFrame(() => {
+      drawSimpleBar('personalMovChart', meses, totalPorMes, '#A78BFA', false, 'mov');
+    });
+
+    const sec = document.getElementById('personalUsersSec');
+    if (!sec) return;
+    sec.innerHTML = `
+      <div class="indicador-mensual-title">👥 Detalle por usuario — ${perfil} (${usuarios.length})</div>
+      <div class="clientes-grid">
+        ${usuarios.map((u,i) => {
+          const totalMov = personalData.movimientos.reduce((s,m) => s+(m.vals[u.user]||0), 0);
+          const horas    = Math.round(totalMov * 0.18);
+          const cargas   = Math.round(totalMov * 0.62);
+          return `
+            <div class="cliente-row personal-user-row">
+              <span class="cliente-num">${String(i+1).padStart(2,'0')}</span>
+              <span class="cliente-name">${u.user}</span>
+              <span class="personal-stat" style="color:#A78BFA">${totalMov.toLocaleString('es-AR')} mov</span>
+              <span class="personal-stat" style="color:#36B0C9">${horas}h</span>
+              <span class="personal-stat" style="color:#00A887">${cargas} cargas</span>
+            </div>`;
+        }).join('')}
+      </div>`;
+  };
+
+  renderPersonalData(perfilFiltro);
+
+  wrap.addEventListener('click', e => {
+    const btn = e.target.closest('.personal-perfil-btn');
+    if (!btn) return;
+    wrap.querySelectorAll('.personal-perfil-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    perfilFiltro = btn.dataset.p;
+    renderPersonalData(perfilFiltro);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RENDER: USO DE EQUIPOS
+   ═══════════════════════════════════════════════════════════════ */
+function renderIndicadorUsoEquipos() {
+  setHeader('INDICADORES');
+  setExpandedMode(false);
+  showMetaPanel(true);
+  menuGrid.className = '';
+  menuGrid.innerHTML = '';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'indicador-wrap';
+
+  // Header
+  const header = document.createElement('div');
+  header.className = 'indicador-card indicador-card-static';
+  header.innerHTML = `
+    <div class="indicador-card-header">
+      <div class="indicador-card-title">
+        <span class="indicador-badge">EQP</span>
+        USO DE EQUIPOS
+      </div>
+      <span class="indicador-hint">Horas de uso acumuladas por tipo — últimos 12 meses</span>
+    </div>
+    <div class="inegr-totales">
+      ${[
+        {k:'boxes',color:'#36B0C9',label:'Boxes'},
+        {k:'troneras',color:'#A78BFA',label:'Troneras'},
+        {k:'autoelevadores',color:'#F97316',label:'Autoelevadores'},
+        {k:'camion',color:'#FACC15',label:'Camión'},
+        {k:'limpieza',color:'#00A887',label:'Limpieza'},
+      ].map(e => `
+        <div class="inegr-total-item">
+          <span class="inegr-total-label">${e.label}</span>
+          <span class="inegr-total-val" style="color:${e.color}">
+            ${usoEquiposData.meses.reduce((s,m)=>s+m[e.k],0)}h
+          </span>
+        </div>`).join('<div class="inegr-total-sep"></div>')}
+    </div>`;
+  wrap.appendChild(header);
+
+  // 5 gráficos resumen + botón de detalle
+  const equipos = [
+    {key:'boxes',         color:'#36B0C9', label:'📦 Boxes',          detalleKey:'boxDetalle'},
+    {key:'troneras',      color:'#A78BFA', label:'🔩 Troneras',        detalleKey:'tronDetalle'},
+    {key:'autoelevadores',color:'#F97316', label:'🏗 Autoelevadores',   detalleKey:'aeDetalle'},
+    {key:'camion',        color:'#FACC15', label:'🚚 Camión',           detalleKey:'camionDetalle'},
+    {key:'limpieza',      color:'#00A887', label:'🤖 Limpieza',         detalleKey:'limpiezaDetalle'},
+  ];
+
+  equipos.forEach(eq => {
+    const sec = document.createElement('div');
+    sec.className = 'indicador-mensual';
+    const vals = usoEquiposData.meses.map(m => m[eq.key]);
+    const meses = usoEquiposData.meses.map(m => m.mes);
+    sec.innerHTML = `
+      <div class="indicador-mensual-title" style="display:flex;align-items:center;justify-content:space-between">
+        ${eq.label} — horas de uso por mes
+        <button class="ajustes-mes-btn" style="font-size:.72rem;padding:5px 12px;min-width:0"
+          data-eq="${eq.key}" data-dk="${eq.detalleKey}">Ver detalle →</button>
+      </div>
+      <div class="inegr-chart-wrap"><canvas id="eqChart_${eq.key}"></canvas></div>`;
+    wrap.appendChild(sec);
+
+    sec.querySelector('[data-eq]').addEventListener('click', () => {
+      renderUsoDetalleEquipo(eq.key, eq.detalleKey, eq.label, eq.color);
+    });
+  });
+
+  menuGrid.appendChild(wrap);
+  syncBackBtn();
+
+  requestAnimationFrame(() => {
+    equipos.forEach(eq => {
+      drawSimpleBar(`eqChart_${eq.key}`, usoEquiposData.meses.map(m=>m.mes),
+        usoEquiposData.meses.map(m=>m[eq.key]), eq.color, false, 'h');
+    });
+  });
+}
+
+function renderUsoDetalleEquipo(equipoKey, detalleKey, label, color) {
+  setHeader('USO DE EQUIPOS');
+  menuGrid.className = '';
+  menuGrid.innerHTML = '';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'indicador-wrap';
+
+  // Selector de mes
+  const meses = usoEquiposData.meses.map(m => m.mes);
+  let mesIdx = usoEquiposData.meses.length - 1;
+
+  const selSec = document.createElement('div');
+  selSec.className = 'indicador-mensual';
+  selSec.innerHTML = `
+    <div class="indicador-mensual-title" style="display:flex;align-items:center;justify-content:space-between">
+      ${label} — detalle por unidad
+      <button class="ajustes-mes-btn" style="font-size:.72rem;padding:5px 12px;min-width:0"
+        id="backToEqMain">← Volver</button>
+    </div>
+    <div class="ajustes-mes-selector" id="eqMesSel">
+      ${meses.map((m,i) => `<button class="ajustes-mes-btn${i===mesIdx?' active':''}" data-i="${i}">${m}</button>`).join('')}
+    </div>
+    <div class="inegr-chart-wrap" style="height:240px;margin-top:12px"><canvas id="eqDetalleChart"></canvas></div>`;
+  wrap.appendChild(selSec);
+  menuGrid.appendChild(wrap);
+  syncBackBtn();
+
+  const drawDetalle = (idx) => {
+    const mesData = usoEquiposData.meses[idx];
+    const items   = mesData[detalleKey];
+    const labels  = items.map(x => x.id);
+    const vals    = items.map(x => x.horas);
+    drawHorizontalBar('eqDetalleChart', labels, vals, color);
+  };
+
+  requestAnimationFrame(() => drawDetalle(mesIdx));
+
+  document.getElementById('backToEqMain').addEventListener('click', () => {
+    historyStack.push({ title:'INDICADORES', children:[] });
+    renderIndicadorUsoEquipos();
+  });
+
+  selSec.addEventListener('click', e => {
+    const btn = e.target.closest('[data-i]');
+    if (!btn || btn.id === 'backToEqMain') return;
+    selSec.querySelectorAll('[data-i]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    mesIdx = parseInt(btn.dataset.i);
+    drawDetalle(mesIdx);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HELPERS DE GRÁFICOS
+   ═══════════════════════════════════════════════════════════════ */
+function drawSimpleBar(id, meses, vals, color, isPct, unit) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const wrap = canvas.parentElement;
+  canvas.width  = wrap.clientWidth || 700;
+  canvas.height = wrap.clientHeight || 200;
+  const W = canvas.width, H = canvas.height;
+  const PAD = { top:22, right:12, bottom:36, left: isPct ? 34 : 46 };
+  const chartW = W - PAD.left - PAD.right;
+  const chartH = H - PAD.top  - PAD.bottom;
+  const ctx = canvas.getContext('2d');
+  const n = meses.length;
+  const maxVal = Math.max(...vals, 1) * 1.15;
+  const barW = (chartW/n)*0.6;
+  const gap  = (chartW/n)*0.4;
+
+  ctx.clearRect(0, 0, W, H);
+
+  for (let i=0; i<=4; i++) {
+    const y = PAD.top + chartH - (i/4)*chartH;
+    ctx.strokeStyle = 'rgba(255,255,255,.07)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left+chartW, y); ctx.stroke();
+    const lv = (maxVal*i/4);
+    const lbl = isPct ? lv.toFixed(1)+'%' : (unit ? Math.round(lv)+unit : Math.round(lv).toLocaleString('es-AR'));
+    ctx.fillStyle = 'rgba(255,255,255,.42)';
+    ctx.font = '9px Segoe UI';
+    ctx.textAlign = 'right';
+    ctx.fillText(lbl, PAD.left-4, y+3);
+  }
+
+  vals.forEach((v, i) => {
+    const x   = PAD.left + i*(barW+gap) + gap/2;
+    const bH  = (v/maxVal)*chartH;
+    const y   = PAD.top + chartH - bH;
+    const isLast = i === n-1;
+    ctx.fillStyle = isLast ? color : color+'99';
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x, y, barW, bH, [3,3,0,0]);
+    else ctx.rect(x, y, barW, bH);
+    ctx.fill();
+    ctx.fillStyle = isLast ? '#fff' : 'rgba(255,255,255,.65)';
+    ctx.font = (isLast?'bold ':'')+'9px Segoe UI';
+    ctx.textAlign = 'center';
+    const vl = isPct ? v+'%' : (unit ? v+unit : v.toLocaleString('es-AR'));
+    ctx.fillText(vl, x+barW/2, y-4);
+    ctx.fillStyle = 'rgba(255,255,255,.45)';
+    ctx.font = '8px Segoe UI';
+    ctx.fillText(meses[i].split(' ')[0], x+barW/2, H-PAD.bottom+12);
+  });
+
+  const prom = vals.reduce((s,v)=>s+v,0)/vals.length;
+  const promY = PAD.top + chartH - (prom/maxVal)*chartH;
+  ctx.strokeStyle = 'rgba(255,255,255,.25)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(PAD.left, promY); ctx.lineTo(PAD.left+chartW, promY); ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function drawHorizontalBar(id, labels, vals, color) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const wrap = canvas.parentElement;
+  const n    = labels.length;
+  canvas.width  = wrap.clientWidth || 600;
+  canvas.height = Math.max(wrap.clientHeight || 240, n * 24 + 20);
+  const W = canvas.width, H = canvas.height;
+  const PAD = { top:10, right:16, bottom:10, left:90 };
+  const chartW = W - PAD.left - PAD.right;
+  const rowH   = (H - PAD.top - PAD.bottom) / n;
+  const barH   = rowH * 0.55;
+  const maxVal = Math.max(...vals, 1) * 1.12;
+  const ctx    = canvas.getContext('2d');
+
+  ctx.clearRect(0, 0, W, H);
+
+  vals.forEach((v, i) => {
+    const y    = PAD.top + i * rowH + (rowH - barH) / 2;
+    const bW   = (v / maxVal) * chartW;
+    ctx.fillStyle = color + '88';
+    if (ctx.roundRect) ctx.roundRect(PAD.left, y, bW, barH, [0,3,3,0]);
+    else ctx.rect(PAD.left, y, bW, barH);
+    ctx.fill();
+    // label izq
+    ctx.fillStyle = 'rgba(255,255,255,.7)';
+    ctx.font = '10px Segoe UI';
+    ctx.textAlign = 'right';
+    ctx.fillText(labels[i], PAD.left-6, y + barH/2 + 4);
+    // valor der
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 10px Segoe UI';
+    ctx.textAlign = 'left';
+    ctx.fillText(v+'h', PAD.left + bW + 6, y + barH/2 + 4);
+  });
+}
+
 
 function renderMapaBoxes() {
   setHeader('MAPA DE BOXES');
@@ -2205,6 +2844,9 @@ function renderNode(node) {
         if (item.title === 'POSICIONES INGRESADAS EGRESADAS') { historyStack.push(node); renderIndicadorIngEgr();             return; }
         if (item.title === 'MOVIMIENTOS' && node.title === 'INDICADORES') { historyStack.push(node); renderIndicadorMovimientos();      return; }
         if (item.title === 'CLIENTES QUE OPERARON')           { historyStack.push(node); renderIndicadorClientes();            return; }
+        if (item.title === 'AJUSTES DE STOCK')               { historyStack.push(node); renderIndicadorAjustes();             return; }
+        if (item.title === 'ESTADISTICAS DE PERSONAL')       { historyStack.push(node); renderIndicadorPersonal();             return; }
+        if (item.title === 'USO DE EQUIPOS')                 { historyStack.push(node); renderIndicadorUsoEquipos();           return; }
         if (item.children)                                   { historyStack.push(node); renderNode(item);                    return; }
         if (item.url)                                        { openModule(item.url);                                         return; }
         historyStack.push(node);
