@@ -1040,8 +1040,9 @@ function renderIndicadorCargasI2() {
   menuGrid.appendChild(wrap);
   syncBackBtn();
 
-  // Draw deposito pies after DOM is ready
+  // Draw all pies after DOM is ready
   requestAnimationFrame(() => {
+    drawCargasPie();
     drawDepPie('pieNacional', cargasI2Nacional, '#36B0C9');
     drawDepPie('pieFiscal',   cargasI2Fiscal,   '#A78BFA');
   });
