@@ -375,6 +375,23 @@ function getCustomTileHTML(item) {
         <div class="tile-title one-line" style="margin-top:6px;font-size:.68rem">QUE OPERARON</div>
       </div>`;
   }
+  // MOVIMIENTOS (dentro de INDICADORES): 6 tiempos promedio
+  if (item.title === 'MOVIMIENTOS') {
+    const mes = movData.meses[movData.meses.length - 1];
+    const veh = movData.vehiculos;
+    return `
+      <div class="tile-kpi-wrap tile-mov-wrap">
+        <div class="tile-kpi-top"><span class="tile-kpi-badge">MOV</span></div>
+        <div class="tile-mov-grid">
+          ${veh.map(v => `
+            <div class="tile-mov-item">
+              <span class="tile-mov-code">${v.code}</span>
+              <span class="tile-mov-val">${mes.promedios[v.id].prom}h</span>
+            </div>`).join('')}
+        </div>
+        <div class="tile-title one-line" style="margin-top:4px;font-size:.68rem">MOVIMIENTOS</div>
+      </div>`;
+  }
   return null; // usar HTML por defecto
 }
 
@@ -1615,6 +1632,206 @@ function drawIngEgrBar(cfg) {
   ctx.fillText(promLbl, PAD.left + 4, promY - 4);
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   INDICADOR: MOVIMIENTOS I-4/5/6/6B/7/8
+   ═══════════════════════════════════════════════════════════════ */
+
+const movData = {
+  vehiculos: [
+    { id:'todos',    code:'I-4',  label:'Prom. Todos los Vehículos' },
+    { id:'cont',     code:'I-5',  label:'Contenedores' },
+    { id:'semi',     code:'I-6',  label:'Semiremolques' },
+    { id:'semiSeca', code:'I-6B', label:'Semirrem. Cargas Secas' },
+    { id:'balan',    code:'I-7',  label:'Balancines' },
+    { id:'chasis',   code:'I-8',  label:'Chasis' },
+  ],
+  meses: (() => {
+    const nombres = ['Abr 24','May 24','Jun 24','Jul 24','Ago 24','Sep 24',
+                     'Oct 24','Nov 24','Dic 24','Ene 25','Feb 25','Mar 25'];
+    // Genera datos simulados consistentes para cargas/bultos/kg x entrada/salida x vehículo
+    const vIds = ['todos','cont','semi','semiSeca','balan','chasis'];
+    const seed0 = 42;
+    let seed = seed0;
+    const rnd = () => { seed=(seed*1664525+1013904223)&0xffffffff; return Math.abs(seed)/0xffffffff; };
+    const rv = (min,max) => +(min + rnd()*(max-min)).toFixed(1);
+
+    return nombres.map(mes => {
+      const promedios = {};
+      vIds.forEach(id => {
+        promedios[id] = {
+          // [unidad][tipo] = horas promedio
+          cargas:  { entrada: rv(1.5,6.5), salida: rv(1.2,5.8), prom: 0 },
+          bultos:  { entrada: rv(2.0,7.5), salida: rv(1.8,6.9), prom: 0 },
+          kg:      { entrada: rv(1.8,7.0), salida: rv(1.5,6.4), prom: 0 },
+        };
+        // prom = mean of the 6 values (entry+exit x 3 units)
+        ['cargas','bultos','kg'].forEach(u => {
+          promedios[id][u].prom = +((promedios[id][u].entrada + promedios[id][u].salida)/2).toFixed(1);
+        });
+        // top-level prom (for tile) = mean of cargas prom
+        promedios[id].prom = promedios[id].cargas.prom;
+      });
+      return { mes, promedios };
+    });
+  })(),
+};
+
+function renderIndicadorMovimientos() {
+  setHeader('INDICADORES');
+  setExpandedMode(false);
+  showMetaPanel(true);
+  menuGrid.className = '';
+  menuGrid.innerHTML = '';
+
+  // Estado reactivo
+  let unidad = 'cargas'; // cargas | bultos | kg
+
+  const wrap = document.createElement('div');
+  wrap.className = 'indicador-wrap';
+
+  // ── Header + selector de unidad ─────────────────────────────
+  const header = document.createElement('div');
+  header.className = 'indicador-card indicador-card-static';
+  header.innerHTML = `
+    <div class="indicador-card-header">
+      <div class="indicador-card-title">
+        <span class="indicador-badge">MOV</span>
+        MOVIMIENTOS — TIEMPOS DE OPERACIÓN
+      </div>
+      <span class="indicador-hint">Promedio mensual por tipo de vehículo (horas)</span>
+    </div>
+    <div class="mov-unidad-selector">
+      <button class="mov-unidad-btn active" data-u="cargas">📦 Cargas</button>
+      <button class="mov-unidad-btn" data-u="bultos">🎁 Bultos</button>
+      <button class="mov-unidad-btn" data-u="kg">⚖ Kg</button>
+    </div>`;
+  wrap.appendChild(header);
+
+  // ── 6 bloques de vehículo, cada uno con 3 gráficos ──────────
+  const chartsWrap = document.createElement('div');
+  chartsWrap.id = 'movChartsWrap';
+  chartsWrap.className = 'mov-charts-outer';
+  movData.vehiculos.forEach(v => {
+    const block = document.createElement('div');
+    block.className = 'indicador-mensual mov-vehiculo-block';
+    block.dataset.vid = v.id;
+    block.innerHTML = `
+      <div class="indicador-mensual-title mov-veh-title">
+        <span class="indicador-badge" style="font-size:.68rem">${v.code}</span>
+        ${v.label}
+      </div>
+      <div class="mov-three-charts">
+        <div class="mov-chart-col">
+          <div class="mov-chart-label mov-label-entrada">↓ Entradas</div>
+          <div class="inegr-chart-wrap"><canvas id="mov_${v.id}_entrada"></canvas></div>
+        </div>
+        <div class="mov-chart-col">
+          <div class="mov-chart-label mov-label-salida">↑ Salidas</div>
+          <div class="inegr-chart-wrap"><canvas id="mov_${v.id}_salida"></canvas></div>
+        </div>
+        <div class="mov-chart-col">
+          <div class="mov-chart-label mov-label-prom">⇄ Promedio</div>
+          <div class="inegr-chart-wrap"><canvas id="mov_${v.id}_prom"></canvas></div>
+        </div>
+      </div>`;
+    chartsWrap.appendChild(block);
+  });
+  wrap.appendChild(chartsWrap);
+  menuGrid.appendChild(wrap);
+  syncBackBtn();
+
+  const drawAll = () => {
+    movData.vehiculos.forEach(v => {
+      ['entrada','salida','prom'].forEach(tipo => {
+        drawMovBar(`mov_${v.id}_${tipo}`, v.id, tipo, unidad);
+      });
+    });
+  };
+
+  requestAnimationFrame(drawAll);
+
+  // Selector de unidad
+  header.querySelectorAll('.mov-unidad-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      header.querySelectorAll('.mov-unidad-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      unidad = btn.dataset.u;
+      drawAll();
+    });
+  });
+}
+
+function drawMovBar(canvasId, vId, tipo, unidad) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const wrap = canvas.parentElement;
+  canvas.width  = wrap.clientWidth || 280;
+  canvas.height = 160;
+  const W = canvas.width, H = canvas.height;
+  const PAD = { top:18, right:8, bottom:32, left:34 };
+  const chartW = W - PAD.left - PAD.right;
+  const chartH = H - PAD.top  - PAD.bottom;
+  const ctx = canvas.getContext('2d');
+  const meses = movData.meses;
+  const n = meses.length;
+  const barW = (chartW / n) * 0.6;
+  const gap  = (chartW / n) * 0.4;
+
+  const colores = { entrada:'#00A887', salida:'#DC2626', prom:'#36B0C9' };
+  const color   = colores[tipo];
+
+  const vals = meses.map(m => m.promedios[vId][unidad][tipo]);
+  const maxVal = Math.max(...vals, 1) * 1.18;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid
+  for (let i=0; i<=3; i++) {
+    const y = PAD.top + chartH - (i/3)*chartH;
+    ctx.strokeStyle = 'rgba(255,255,255,.07)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(PAD.left+chartW, y); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.38)';
+    ctx.font = '8px Segoe UI';
+    ctx.textAlign = 'right';
+    ctx.fillText(((maxVal*i/3)).toFixed(1)+'h', PAD.left-3, y+3);
+  }
+
+  vals.forEach((v, i) => {
+    const x   = PAD.left + i*(barW+gap) + gap/2;
+    const bH  = (v/maxVal)*chartH;
+    const y   = PAD.top + chartH - bH;
+    const isLast = i === n-1;
+
+    ctx.fillStyle = isLast ? color : color+'99';
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x, y, barW, bH, [2,2,0,0]);
+    else ctx.rect(x, y, barW, bH);
+    ctx.fill();
+
+    // Valor encima
+    ctx.fillStyle = isLast ? '#fff' : 'rgba(255,255,255,.62)';
+    ctx.font = (isLast ? 'bold ' : '') + '7px Segoe UI';
+    ctx.textAlign = 'center';
+    ctx.fillText(v+'h', x+barW/2, y-3);
+
+    // Mes
+    ctx.fillStyle = 'rgba(255,255,255,.45)';
+    ctx.font = '7px Segoe UI';
+    ctx.fillText(meses[i].mes.split(' ')[0], x+barW/2, H-PAD.bottom+11);
+  });
+
+  // Promedio line
+  const prom = vals.reduce((s,v)=>s+v,0)/vals.length;
+  const promY = PAD.top + chartH - (prom/maxVal)*chartH;
+  ctx.strokeStyle = 'rgba(255,255,255,.28)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(PAD.left, promY); ctx.lineTo(PAD.left+chartW, promY); ctx.stroke();
+  ctx.setLineDash([]);
+}
+
 function renderMapaBoxes() {
   setHeader('MAPA DE BOXES');
   setExpandedMode(true);
@@ -1986,6 +2203,7 @@ function renderNode(node) {
         if (item.title === 'CARGAS I-2')                     { historyStack.push(node); renderIndicadorCargasI2();            return; }
         if (item.title === 'ALMACENAMIENTO DE POSICIONES')   { historyStack.push(node); renderIndicadorPosiciones();          return; }
         if (item.title === 'POSICIONES INGRESADAS EGRESADAS') { historyStack.push(node); renderIndicadorIngEgr();             return; }
+        if (item.title === 'MOVIMIENTOS' && node.title === 'INDICADORES') { historyStack.push(node); renderIndicadorMovimientos();      return; }
         if (item.title === 'CLIENTES QUE OPERARON')           { historyStack.push(node); renderIndicadorClientes();            return; }
         if (item.children)                                   { historyStack.push(node); renderNode(item);                    return; }
         if (item.url)                                        { openModule(item.url);                                         return; }

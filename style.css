@@ -2034,3 +2034,115 @@ body{
   .inegr-total-item { min-width: 45%; }
   .clientes-grid { max-height: 360px; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   TILE MOVIMIENTOS — 6 tiempos promedio en el botón
+   ═══════════════════════════════════════════════════════════════ */
+.tile-mov-wrap {
+  gap: 3px !important;
+  padding: 6px 4px !important;
+}
+.tile-mov-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px 6px;
+  width: 100%;
+  padding: 0 4px;
+}
+.tile-mov-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: space-between;
+}
+.tile-mov-code {
+  font-size: .58rem;
+  font-weight: 900;
+  color: rgba(255,255,255,.45);
+  letter-spacing: .2px;
+  min-width: 22px;
+}
+.tile-mov-val {
+  font-size: .82rem;
+  font-weight: 900;
+  color: #36B0C9;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INDICADOR MOVIMIENTOS — layout interior
+   ═══════════════════════════════════════════════════════════════ */
+.mov-unidad-selector {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.mov-unidad-btn {
+  flex: 1;
+  min-width: 100px;
+  padding: 10px 14px;
+  border: 2px solid rgba(255,255,255,.14);
+  border-radius: 12px;
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.65);
+  font-weight: 800;
+  font-size: .84rem;
+  cursor: pointer;
+  transition: all .18s;
+}
+.mov-unidad-btn:hover {
+  background: rgba(255,255,255,.12);
+  color: #fff;
+}
+.mov-unidad-btn.active {
+  background: linear-gradient(135deg,#1A4E8A,#0E3060);
+  border-color: rgba(54,176,201,.6);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(54,176,201,.2);
+}
+
+.mov-charts-outer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mov-vehiculo-block { }
+
+.mov-veh-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mov-three-charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+.mov-chart-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mov-chart-label {
+  font-size: .7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  text-align: center;
+}
+.mov-label-entrada { color: #4ade80; }
+.mov-label-salida  { color: #f87171; }
+.mov-label-prom    { color: #60c8e0; }
+
+@media (max-width: 780px) {
+  .mov-three-charts {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .tile-mov-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
