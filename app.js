@@ -985,47 +985,49 @@ function renderIndicadorCargasI2() {
   depTitle.innerHTML = '<div class="indicador-mensual-title">🏭 Cargas por Depósito — Depósito Nacional vs Depósito Fiscal</div>';
   wrap.appendChild(depTitle);
 
-  // función helper: card con torta + tabla mensual para un set de datos
+  // Helper: build deposito card without nested template literals
   const buildDepCard = (datos, label, badgeColor, pieId) => {
-    const total = datos.reduce((s,m)=>s+m.total,0);
-    const cumpl = datos.reduce((s,m)=>s+m.cumplidas,0);
-    const pctG  = Math.round((cumpl/total)*100);
+    const total  = datos.reduce((s,m)=>s+m.total,0);
+    const cumpl  = datos.reduce((s,m)=>s+m.cumplidas,0);
+    const pctG   = Math.round((cumpl/total)*100);
     const colorG = pctG>=80?'#00A887':pctG>=60?'#F97316':'#DC2626';
+
+    const mesCards = datos.map(m => {
+      const p = Math.round((m.cumplidas/m.total)*100);
+      const c = p>=80?'#00A887':p>=60?'#F97316':'#DC2626';
+      return '<div class="ind-mes-card">'
+           + '<div class="ind-mes-label">'+m.mes+'</div>'
+           + '<div class="ind-mes-pct" style="color:'+c+'">'+p+'%</div>'
+           + '<div class="ind-mes-bar-wrap"><div class="ind-mes-bar-fill" style="width:'+p+'%;background:'+c+'"></div></div>'
+           + '<div class="ind-mes-detail">'+m.cumplidas+'/'+m.total+'</div>'
+           + '</div>';
+    }).join('');
 
     const col = document.createElement('div');
     col.className = 'cargas-dep-col';
-    col.innerHTML = `
-      <div class="indicador-card indicador-card-static cargas-dep-card">
-        <div class="indicador-card-header">
-          <div class="indicador-card-title">
-            <span class="indicador-badge" style="background:${badgeColor}20;color:${badgeColor};border-color:${badgeColor}40">I-2</span>
-            ${label}
-          </div>
-        </div>
-        <div class="indicador-card-body" style="gap:12px">
-          <canvas id="${pieId}" width="160" height="160"></canvas>
-          <div class="indicador-legend">
-            <div class="ind-leg-item"><span class="ind-leg-dot" style="background:#36B0C9"></span>Planif.<strong>${Math.round(total*0.3)}</strong></div>
-            <div class="ind-leg-item"><span class="ind-leg-dot" style="background:#00A887"></span>Cumpl.<strong>${cumpl}</strong></div>
-            <div class="ind-leg-item"><span class="ind-leg-dot" style="background:#F97316"></span>Pend.<strong>${Math.round(total*0.18)}</strong></div>
-            <div class="ind-leg-item"><span class="ind-leg-dot" style="background:#DC2626"></span>Post.<strong>${Math.round(total*0.06)}</strong></div>
-            <div class="ind-leg-sep"></div>
-            <div class="ind-leg-item ind-leg-pct"><span>Cumpl.</span><strong style="color:${colorG}">${pctG}%</strong></div>
-          </div>
-        </div>
-        <div class="indicador-mensual-grid cargas-dep-grid" style="margin-top:10px">
-          ${datos.map(m => {
-            const p = Math.round((m.cumplidas/m.total)*100);
-            const c = p>=80?'#00A887':p>=60?'#F97316':'#DC2626';
-            return \`<div class="ind-mes-card">
-              <div class="ind-mes-label">\${m.mes}</div>
-              <div class="ind-mes-pct" style="color:\${c}">\${p}%</div>
-              <div class="ind-mes-bar-wrap"><div class="ind-mes-bar-fill" style="width:\${p}%;background:\${c}"></div></div>
-              <div class="ind-mes-detail">\${m.cumplidas}/\${m.total}</div>
-            </div>\`;
-          }).join('')}
-        </div>
-      </div>`;
+    col.innerHTML =
+      '<div class="indicador-card indicador-card-static cargas-dep-card">'
+    + '  <div class="indicador-card-header">'
+    + '    <div class="indicador-card-title">'
+    + '      <span class="indicador-badge" style="background:'+badgeColor+'20;color:'+badgeColor+';border-color:'+badgeColor+'40">I-2</span>'
+    + '      '+label
+    + '    </div>'
+    + '  </div>'
+    + '  <div class="indicador-card-body" style="gap:12px">'
+    + '    <canvas id="'+pieId+'" width="160" height="160"></canvas>'
+    + '    <div class="indicador-legend">'
+    + '      <div class="ind-leg-item"><span class="ind-leg-dot" style="background:#36B0C9"></span>Planif.<strong>'+Math.round(total*0.3)+'</strong></div>'
+    + '      <div class="ind-leg-item"><span class="ind-leg-dot" style="background:#00A887"></span>Cumpl.<strong>'+cumpl+'</strong></div>'
+    + '      <div class="ind-leg-item"><span class="ind-leg-dot" style="background:#F97316"></span>Pend.<strong>'+Math.round(total*0.18)+'</strong></div>'
+    + '      <div class="ind-leg-item"><span class="ind-leg-dot" style="background:#DC2626"></span>Post.<strong>'+Math.round(total*0.06)+'</strong></div>'
+    + '      <div class="ind-leg-sep"></div>'
+    + '      <div class="ind-leg-item ind-leg-pct"><span>Cumpl.</span><strong style="color:'+colorG+'">'+pctG+'%</strong></div>'
+    + '    </div>'
+    + '  </div>'
+    + '  <div class="indicador-mensual-grid cargas-dep-grid" style="margin-top:10px">'
+    + mesCards
+    + '  </div>'
+    + '</div>';
     return col;
   };
 
