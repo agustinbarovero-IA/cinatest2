@@ -1,0 +1,473 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   LAYOUT DE CÁMARA — Estilos
+   Agregar al final de style.css
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Buscador global ─────────────────────────────────────────────────────── */
+.cam-buscador-wrap {
+  position: relative;
+  padding: 12px 16px 0;
+  z-index: 100;
+}
+.cam-buscador-inner {
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px;
+  padding: 0 12px;
+  gap: 8px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.cam-buscador-inner:focus-within {
+  border-color: rgba(54,176,201,.6);
+  box-shadow: 0 0 0 3px rgba(54,176,201,.1);
+}
+.cam-buscador-icon { font-size: .9rem; opacity: .5; }
+.cam-buscador-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: .88rem;
+  padding: 11px 0;
+  font-family: inherit;
+}
+.cam-buscador-input::placeholder { color: rgba(255,255,255,.35); }
+.cam-buscador-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,.1);
+  border: none;
+  border-radius: 50%;
+  color: rgba(255,255,255,.6);
+  width: 20px; height: 20px;
+  font-size: .65rem;
+  cursor: pointer;
+  transition: background .2s;
+}
+.cam-buscador-clear:hover { background: rgba(255,255,255,.2); }
+
+.cam-buscador-resultados {
+  position: absolute;
+  top: calc(100% - 4px);
+  left: 16px; right: 16px;
+  background: #1a2740;
+  border: 1px solid rgba(54,176,201,.3);
+  border-radius: 0 0 10px 10px;
+  max-height: 300px;
+  overflow-y: auto;
+  box-shadow: 0 12px 40px rgba(0,0,0,.5);
+  z-index: 200;
+}
+.cam-bus-loading, .cam-bus-empty {
+  padding: 16px;
+  text-align: center;
+  font-size: .8rem;
+  color: rgba(255,255,255,.45);
+}
+.cam-bus-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+  gap: 12px;
+  transition: background .15s;
+}
+.cam-bus-item:hover { background: rgba(54,176,201,.1); }
+.cam-bus-item:last-child { border-bottom: none; }
+.cam-bus-item-left { display: flex; flex-direction: column; gap: 2px; }
+.cam-bus-item-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.cam-bus-estiba-id { font-size: .85rem; font-weight: 700; color: #36B0C9; }
+.cam-bus-producto { font-size: .75rem; opacity: .7; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cam-bus-camara { font-size: .75rem; font-weight: 600; color: #FACC15; }
+.cam-bus-pos { font-size: .65rem; opacity: .5; }
+
+/* ─── Wrap principal ─────────────────────────────────────────────────────── */
+.cam-layout-wrap {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 120px);
+  overflow: hidden;
+}
+
+/* ─── Topbar ──────────────────────────────────────────────────────────────── */
+.cam-layout-topbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  flex-wrap: wrap;
+}
+.cam-layout-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+.cam-layout-nombre {
+  font-size: .95rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+}
+.cam-layout-temp {
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: .75rem;
+  font-weight: 700;
+  color: #fff;
+}
+.cam-layout-leyenda {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.cam-ley-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: .68rem;
+  color: rgba(255,255,255,.55);
+  font-weight: 600;
+  letter-spacing: .03em;
+}
+.cam-ley-dot {
+  width: 12px; height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* ─── Body: grilla + panel ───────────────────────────────────────────────── */
+.cam-layout-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  gap: 0;
+}
+
+/* ─── Grid wrap ──────────────────────────────────────────────────────────── */
+.cam-layout-grid-wrap {
+  flex: 1;
+  overflow: auto;
+  padding: 14px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.15) transparent;
+}
+.cam-layout-grid-wrap::-webkit-scrollbar { width: 6px; height: 6px; }
+.cam-layout-grid-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }
+
+.cam-layout-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  height: 200px;
+  color: rgba(255,255,255,.4);
+  font-size: .85rem;
+}
+.cam-spin {
+  width: 32px; height: 32px;
+  border: 3px solid rgba(255,255,255,.1);
+  border-top-color: #36B0C9;
+  border-radius: 50%;
+  animation: camSpin .7s linear infinite;
+}
+@keyframes camSpin { to { transform: rotate(360deg); } }
+
+.cam-layout-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: rgba(255,255,255,.4);
+  font-size: .85rem;
+  line-height: 1.7;
+}
+
+/* ─── Grilla real ────────────────────────────────────────────────────────── */
+.cam-grid-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: fit-content;
+}
+.cam-grid-labels-filas {
+  display: flex;
+  align-items: center;
+  padding-left: 44px; /* espacio para label calle */
+  gap: 4px;
+  margin-bottom: 4px;
+}
+.cam-grid-label-fila {
+  font-size: .6rem;
+  color: rgba(255,255,255,.3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  width: 38px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.cam-grid-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cam-grid-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.cam-grid-label-calle {
+  font-size: .6rem;
+  color: rgba(255,255,255,.3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  width: 40px;
+  flex-shrink: 0;
+  text-align: right;
+  padding-right: 4px;
+}
+.cam-grid-cells {
+  display: flex;
+  gap: 4px;
+}
+
+/* ─── Cuadrado de pila ───────────────────────────────────────────────────── */
+.cam-pila-square {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.04);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform .12s, box-shadow .12s, border-color .15s;
+  position: relative;
+  color: rgba(255,255,255,.9);
+  font-size: .65rem;
+  font-weight: 700;
+}
+.cam-pila-square:not(.libre):hover {
+  transform: scale(1.12);
+  box-shadow: 0 4px 16px rgba(0,0,0,.4);
+  z-index: 10;
+  border-color: rgba(255,255,255,.4);
+}
+.cam-pila-square.libre {
+  cursor: default;
+  opacity: .35;
+}
+.cam-pila-square.libre:hover { transform: none; }
+
+.cam-pila-square.selected {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px rgba(255,255,255,.4), 0 4px 20px rgba(0,0,0,.5);
+  transform: scale(1.1);
+  z-index: 20;
+}
+
+@keyframes highlightPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(54,176,201,.8); }
+  50%  { box-shadow: 0 0 0 8px rgba(54,176,201,0); }
+  100% { box-shadow: 0 0 0 0 rgba(54,176,201,0); }
+}
+.cam-pila-square.highlight-pulse {
+  animation: highlightPulse .6s ease 3;
+  border-color: #36B0C9;
+}
+
+.cam-pila-alt {
+  pointer-events: none;
+  line-height: 1;
+  text-shadow: 0 1px 3px rgba(0,0,0,.6);
+}
+
+/* ─── Panel de detalle ───────────────────────────────────────────────────── */
+.cam-pila-panel {
+  width: 300px;
+  flex-shrink: 0;
+  border-left: 1px solid rgba(255,255,255,.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: rgba(0,0,0,.2);
+  animation: slideInPanel .2s ease;
+}
+@keyframes slideInPanel {
+  from { transform: translateX(20px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+.cam-pila-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  flex-shrink: 0;
+}
+.cam-pila-panel-title {
+  font-size: .82rem;
+  font-weight: 700;
+  color: #36B0C9;
+  letter-spacing: .02em;
+}
+.cam-pila-panel-close {
+  background: rgba(255,255,255,.08);
+  border: none;
+  color: rgba(255,255,255,.5);
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: .7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s;
+}
+.cam-pila-panel-close:hover {
+  background: rgba(255,255,255,.15);
+  color: #fff;
+}
+.cam-pila-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.1) transparent;
+}
+
+.cam-pila-empty {
+  padding: 24px 12px;
+  text-align: center;
+  color: rgba(255,255,255,.35);
+  font-size: .8rem;
+}
+
+.cam-pila-nivel-group {
+  margin-bottom: 14px;
+}
+.cam-pila-nivel-label {
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: rgba(255,255,255,.3);
+  margin-bottom: 6px;
+  padding-left: 2px;
+}
+
+.cam-pila-estiba-card {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  transition: background .15s;
+}
+.cam-pila-estiba-card:hover {
+  background: rgba(255,255,255,.08);
+}
+.cam-pila-estiba-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+.cam-pila-estiba-id {
+  font-size: .88rem;
+  font-weight: 800;
+  color: #fff;
+}
+.cam-pila-estiba-cliente {
+  font-size: .65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid;
+  letter-spacing: .04em;
+}
+.cam-pila-estiba-prod {
+  font-size: .78rem;
+  color: rgba(255,255,255,.75);
+  margin-bottom: 3px;
+}
+.cam-pila-estiba-meta {
+  font-size: .68rem;
+  color: rgba(255,255,255,.45);
+}
+.cam-pila-estiba-fecha {
+  font-size: .65rem;
+  color: rgba(255,255,255,.35);
+  margin-top: 4px;
+}
+.cam-pila-estiba-vence {
+  font-size: .65rem;
+  color: rgba(250,204,21,.7);
+  margin-top: 2px;
+}
+.cam-pila-estiba-vence.vencida {
+  color: #EF4444;
+  font-weight: 700;
+}
+
+/* ─── Stats bar ──────────────────────────────────────────────────────────── */
+.cam-layout-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 8px 16px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  font-size: .72rem;
+  color: rgba(255,255,255,.4);
+  flex-shrink: 0;
+}
+.cam-layout-stats span {
+  font-weight: 600;
+}
+
+/* ─── Botón mapa en topbar del historial ─────────────────────────────────── */
+.btn-mapa-pilas {
+  background: rgba(54,176,201,.12);
+  border: 1px solid rgba(54,176,201,.3);
+  color: #36B0C9;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: .78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+  white-space: nowrap;
+}
+.btn-mapa-pilas:hover {
+  background: rgba(54,176,201,.22);
+  border-color: rgba(54,176,201,.5);
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .cam-layout-body { flex-direction: column; }
+  .cam-pila-panel {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid rgba(255,255,255,.08);
+    max-height: 260px;
+  }
+  .cam-layout-leyenda { display: none; }
+  .cam-pila-square { width: 32px; height: 32px; font-size: .58rem; }
+}

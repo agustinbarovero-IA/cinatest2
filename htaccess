@@ -1,0 +1,29 @@
+DirectoryIndex index.php
+
+# Redirigir raíz y rutas sin extensión a index.php si no hay sesión
+# (el propio index.php redirige a login.php si no hay sesión)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # No reescribir archivos o directorios reales
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Redirigir acceso a la raíz al index.php
+    RewriteRule ^$ index.php [L]
+</IfModule>
+
+# Seguridad: no listar directorios
+Options -Indexes
+
+# Proteger uploads — no ejecutar PHP dentro de /uploads/
+<IfModule mod_rewrite.c>
+    RewriteRule ^uploads/.*\.php$ - [F,L]
+</IfModule>
+
+# Headers de seguridad básicos
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+</IfModule>
